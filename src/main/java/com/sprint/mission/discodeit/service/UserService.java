@@ -11,6 +11,6 @@ public interface UserService {
 	public Optional<User> findById(UUID uuid);
 	public List<User> findByAll();
 
-	public User updateUser(UUID uuid);
+	public void updateUser(UUID uuid, String username, int age);
 	public void deleteUser(UUID uuid);
 }
