@@ -7,10 +7,9 @@ import java.util.UUID;
 import com.sprint.mission.discodeit.entity.User;
 
 public interface UserService {
-	public User createUser();
-	public Optional<User> findById(UUID uuid);
-	public List<User> findByAll();
-
-	public void updateUser(UUID uuid, String username, int age);
-	public void deleteUser(UUID uuid);
+	User createUser(String name, int age);
+	Optional<User> findById(UUID uuid);
+	List<User> findByAll();
+	void updateUser(UUID uuid, String username, int age);
+	void deleteUser(UUID uuid);
 }
