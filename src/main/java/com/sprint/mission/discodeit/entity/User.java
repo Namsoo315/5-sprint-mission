@@ -1,23 +1,25 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
-public class User {
-	private final UUID id;
+public class User{
+	private final UUID userId;
 	private String username;
 	private int age;
 	private final Long createdAt;
 	private Long updatedAt;
 
 	public User(String name, int age) {
-		this.id =UUID.randomUUID();
+		this.userId =UUID.randomUUID();
 		this.username = name;
 		this.age = age;
 		this.createdAt = System.currentTimeMillis();
+		this.updatedAt = createdAt;
 	}
 
 	public UUID getId() {
-		return id;
+		return userId;
 	}
 
 	public Long getCreatedAt() {
@@ -44,12 +46,13 @@ public class User {
 
 	@Override
 	public String toString() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		final StringBuilder sb = new StringBuilder("User[");
-		sb.append(" uuid=").append(id);
+		sb.append(" uuid=").append(userId);
 		sb.append(", username=").append(username);
 		sb.append(", age=").append(age);
-		sb.append(", createdAt=").append(createdAt);
-		sb.append(", updatedAt=").append(updatedAt);
+		sb.append(", createdAt=").append(dateFormat.format(createdAt));
+		sb.append(", updatedAt=").append(dateFormat.format(updatedAt));
 		sb.append(" ]");
 		return sb.toString();
 	}
