@@ -29,87 +29,21 @@ public class MainView {
 
 		int i = sc.nextInt();
 
-		switch (i) {
-			case 1:
-				userCRUDTest(userService);
-				break;
-			case 2:
-				channelCRUDTest(channelService);
-				break;
-			case 3:
-				messageCRUDTest(userService, channelService, messageService);
-				break;
+		try {
+			switch (i) {
+				case 1:
+					userCRUDTest(userService);
+					break;
+				case 2:
+					channelCRUDTest(channelService);
+					break;
+				case 3:
+					messageCRUDTest(userService, channelService, messageService);
+					break;
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("유효하지 않는 값입니다.");
 		}
-
-	}
-
-	private static void messageCRUDTest(UserService userService, ChannelService channelService,
-		MessageService messageService) {
-
-		//등록
-		System.out.println("===== Message 생성 =====");
-
-		// 원래는 findById해서 전부 찾아와야하지만 할게 많아 보여서 이렇게 함.
-		User user1 = userService.findByAll().stream().findFirst()
-			.orElseThrow(() -> new IllegalStateException("등록된 유저가 없습니다."));
-		User user2 = userService.createUser("나무나무나무", 15);
-		Channel channel = channelService.findByAllChannel().stream().findFirst()
-			.orElseThrow(() -> new IllegalStateException("등록된 채널이 없습니다."));
-
-		Message message = messageService.createMessage(user1.getId(), channel.getChannelId(), "첫번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "두번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "세번째 메시지");
-
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 첫번째 메시지");
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 두번째 메시지");
-
-		System.out.println(message.toString());
-		System.out.println();
-
-		//조회(단건)
-		System.out.println("===== Message 하나만 조회 =====");
-		Optional<Message> foundMessage = messageService.findByUserChannelAndContent(
-			user1.getId(), channel.getChannelId(), "첫번째 메시지"
-		);
-		foundMessage.ifPresent(m -> System.out.println("조회된 Message: " + m.toString()));
-		System.out.println();
-
-		//조회(다건)
-		System.out.println("===== Message 전부 조회 =====");
-		List<Message> allMessages = messageService.findByAllMessage();
-		allMessages.forEach(m -> System.out.println(m.toString()));
-		System.out.println();
-
-		//수정
-		System.out.println("===== Message 수정 =====");
-		String oldContent = "첫번째 메시지";
-		String newContent = "수정된 첫번째 메시지";
-		messageService.updateMessage(user1.getId(), channel.getChannelId(), oldContent, newContent);
-
-		//수정된 데이터 조회
-		System.out.println("===== Message 수정 조회=====");
-		Optional<Message> updatedMessage = messageService.findByUserChannelAndContent(
-			user1.getId(), channel.getChannelId(), newContent
-		);
-		updatedMessage.ifPresent(m -> System.out.println("수정된 Message : " + m.toString()));
-		System.out.println();
-
-		//수정 후 전체 데이터 조회도
-		System.out.println("===== Message 수정후 전체 조회=====");
-		List<Message> messages = messageService.findByAllMessage();
-		messages.forEach(m -> System.out.println(m.toString()));
-
-		//삭제
-		System.out.println("===== Message 삭제=====");
-		messageService.deleteMessage(user1.getId(), channel.getChannelId(), newContent);
-		System.out.println("삭제 완료: '" + newContent + "'");
-		System.out.println();
-
-		//조회를 통해 삭제되었는지 확인
-		System.out.println("===== Message 삭제 조회=====");
-		List<Message> afterDeleteMessages = messageService.findByAllMessage();
-		afterDeleteMessages.forEach(m -> System.out.println(m.toString()));
-		System.out.println();
 
 	}
 
@@ -214,5 +148,74 @@ public class MainView {
 		System.out.println("===== Channel 삭제 확인 =====");
 		channelService.findByAllChannel().forEach(ch -> System.out.println(ch.toString()));
 		System.out.println();
+	}
+
+	private static void messageCRUDTest(UserService userService, ChannelService channelService,
+		MessageService messageService) {
+
+		//등록
+		System.out.println("===== Message 생성 =====");
+
+		// 원래는 findById해서 전부 찾아와야하지만 할게 많아 보여서 이렇게 함.
+		User user1 = userService.findByAll().stream().findFirst()
+			.orElseThrow(() -> new IllegalStateException("등록된 유저가 없습니다."));
+		User user2 = userService.createUser("나무나무나무", 15);
+		Channel channel = channelService.findByAllChannel().stream().findFirst()
+			.orElseThrow(() -> new IllegalStateException("등록된 채널이 없습니다."));
+
+		Message message = messageService.createMessage(user1.getId(), channel.getChannelId(), "첫번째 메시지");
+		messageService.createMessage(user1.getId(), channel.getChannelId(), "두번째 메시지");
+		messageService.createMessage(user1.getId(), channel.getChannelId(), "세번째 메시지");
+
+		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 첫번째 메시지");
+		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 두번째 메시지");
+
+		System.out.println(message.toString());
+		System.out.println();
+
+		//조회(단건)
+		System.out.println("===== Message 하나만 조회 =====");
+		Optional<Message> foundMessage = messageService.findByMessage(
+			message.getMessageId(), user1.getId(), channel.getChannelId()
+		);
+		foundMessage.ifPresent(m -> System.out.println("조회된 Message: " + m.toString()));
+		System.out.println();
+
+		//조회(다건)
+		System.out.println("===== Message 전부 조회 =====");
+		List<Message> allMessages = messageService.findByAllMessage();
+		allMessages.forEach(m -> System.out.println(m.toString()));
+		System.out.println();
+
+		//수정
+		System.out.println("===== Message 수정 =====");
+		String newContent = "수정된 첫번째 메시지";
+		messageService.updateMessage(message.getMessageId(), user1.getId(), channel.getChannelId(), newContent);
+
+		//수정된 데이터 조회
+		System.out.println("===== Message 수정 조회=====");
+		Optional<Message> updatedMessage = messageService.findByMessage(
+			message.getMessageId(), user1.getId(), channel.getChannelId()
+		);
+		updatedMessage.ifPresent(m -> System.out.println("수정된 Message : " + m.toString()));
+		System.out.println();
+
+		//수정 후 전체 데이터 조회도
+		System.out.println("===== Message 수정후 전체 조회=====");
+		List<Message> messages = messageService.findByAllMessage();
+		messages.forEach(m -> System.out.println(m.toString()));
+
+		//삭제
+		System.out.println("===== Message 삭제=====");
+		messageService.deleteMessage(message.getMessageId(), user1.getId(), channel.getChannelId());
+		System.out.println("삭제 완료: '" + newContent + "'");
+		System.out.println();
+
+		//조회를 통해 삭제되었는지 확인
+		System.out.println("===== Message 삭제 조회=====");
+		List<Message> afterDeleteMessages = messageService.findByAllMessage();
+		afterDeleteMessages.forEach(m -> System.out.println(m.toString()));
+		System.out.println();
+
 	}
 }

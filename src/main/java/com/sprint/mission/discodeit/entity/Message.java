@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Message{
+	private UUID messageId;
 	private UUID userId;
 	private UUID channelId;
 	private String message;
@@ -12,11 +13,20 @@ public class Message{
 	private Long updatedAt;
 
 	public Message(UUID userId, UUID channelId, String message) {
+		this.messageId = UUID.randomUUID();
 		this.userId = userId;
 		this.channelId = channelId;
 		this.message = message;
 		this.createdAt = System.currentTimeMillis();
 		this.updatedAt = createdAt;
+	}
+
+	public UUID getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(UUID messageId) {
+		this.messageId = messageId;
 	}
 
 	public UUID getUserId() {
@@ -68,6 +78,7 @@ public class Message{
 	public String toString() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		final StringBuffer sb = new StringBuffer("Message{");
+		sb.append("messageId=").append(messageId);
 		sb.append("userId=").append(userId);
 		sb.append(", channelId=").append(channelId);
 		sb.append(", message='").append(message).append('\'');

@@ -16,18 +16,19 @@ import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFMessageService implements MessageService {
 	private final List<Message> list = new ArrayList<>();
-	private final ChannelService channelService;
 	private final UserService userService;
+	private final ChannelService channelService;
 
 	public JCFMessageService(UserService userService, ChannelService channelService) {
-		this.channelService = channelService;
 		this.userService = userService;
+		this.channelService = channelService;
 	}
 
 	@Override
 	public Message createMessage(UUID userId, UUID channelId, String content) {
 		Optional<User> user = userService.findById(userId);
 		Optional<Channel> channel = channelService.findById(channelId);
+
 		if (user.isEmpty()) {
 			throw new IllegalArgumentException("user id not found");
 		}
@@ -43,8 +44,8 @@ public class JCFMessageService implements MessageService {
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for(Message m : list) {
-			if(m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
+		for (Message m : list) {
+			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
 		}
@@ -53,11 +54,11 @@ public class JCFMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByUserChannelAndContent(UUID userId, UUID channelId, String content) {
+	public Optional<Message> findByMessage(UUID messageId, UUID userId, UUID channelId) {
 		return list.stream()
-			.filter(m -> m.getUserId().equals(userId)
-				&& m.getChannelId().equals(channelId)
-				&& m.getMessage().equals(content))
+			.filter(m -> m.getMessageId().equals(messageId)
+				&& m.getUserId().equals(userId)
+				&& m.getChannelId().equals(channelId))
 			.findFirst();
 	}
 
@@ -66,15 +67,15 @@ public class JCFMessageService implements MessageService {
 	}
 
 	@Override
-	public void updateMessage(UUID userId, UUID channelId, String oldContent, String newContent) {
-		findByUserChannelAndContent(userId, channelId, oldContent)
+	public void updateMessage(UUID messageId, UUID userId, UUID channelId, String newContent) {
+		findByMessage(messageId, userId, channelId)
 			.ifPresent(m -> m.update(newContent));
 	}
 
 	@Override
-	public void deleteMessage(UUID userId, UUID channelId, String content) {
-		list.removeIf(m -> m.getUserId().equals(userId)
-			&& m.getChannelId().equals(channelId)
-			&& m.getMessage().equals(content));
+	public void deleteMessage(UUID messageId, UUID userId, UUID channelId) {
+		list.removeIf(m -> m.getMessageId().equals(messageId)
+			&& m.getUserId().equals(userId)
+			&& m.getChannelId().equals(channelId));
 	}
 }
