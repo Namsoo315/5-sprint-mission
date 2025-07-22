@@ -79,7 +79,7 @@ public class Message{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		final StringBuffer sb = new StringBuffer("Message{");
 		sb.append("messageId=").append(messageId);
-		sb.append("userId=").append(userId);
+		sb.append(", userId=").append(userId);
 		sb.append(", channelId=").append(channelId);
 		sb.append(", message='").append(message).append('\'');
 		sb.append(", createdAt=").append(dateFormat.format(createdAt));

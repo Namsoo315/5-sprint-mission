@@ -15,7 +15,7 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFMessageService implements MessageService {
-	private final List<Message> list = new ArrayList<>();
+	private final Map<UUID, Message> map = new HashMap<>();
 	private final UserService userService;
 	private final ChannelService channelService;
 
@@ -37,14 +37,14 @@ public class JCFMessageService implements MessageService {
 		}
 
 		Message message = new Message(userId, channelId, content);
-		list.add(message);
+		map.put(message.getMessageId(), message);
 		return message;
 	}
 
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for (Message m : list) {
+		for (Message m : map.values()) {
 			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
@@ -54,28 +54,23 @@ public class JCFMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessage(UUID messageId, UUID userId, UUID channelId) {
-		return list.stream()
-			.filter(m -> m.getMessageId().equals(messageId)
-				&& m.getUserId().equals(userId)
-				&& m.getChannelId().equals(channelId))
-			.findFirst();
+	public Optional<Message> findByMessage(UUID messageId) {
+		return Optional.ofNullable(map.get(messageId));
 	}
 
 	public List<Message> findByAllMessage() {
-		return List.copyOf(list);
+		return List.copyOf(map.values());
 	}
 
 	@Override
-	public void updateMessage(UUID messageId, UUID userId, UUID channelId, String newContent) {
-		findByMessage(messageId, userId, channelId)
-			.ifPresent(m -> m.update(newContent));
+	public void updateMessage(UUID messageId, String newContent) {
+		map.get(messageId).setMessage(newContent);
+		System.out.println(messageId + " 업데이트 완료 : " + newContent );
 	}
 
 	@Override
-	public void deleteMessage(UUID messageId, UUID userId, UUID channelId) {
-		list.removeIf(m -> m.getMessageId().equals(messageId)
-			&& m.getUserId().equals(userId)
-			&& m.getChannelId().equals(channelId));
+	public void deleteMessage(UUID messageId) {
+		Message remove = map.remove(messageId);
+		System.out.println("메시지 ID : " + remove.getMessageId() + " 메시지 삭제 완료 : "+ remove.getMessage());
 	}
 }

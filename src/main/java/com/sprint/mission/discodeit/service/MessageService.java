@@ -11,12 +11,12 @@ public interface MessageService {
 
 	List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId);
 
-	Optional<Message> findByMessage(UUID messageId, UUID userId, UUID channelId);
+	Optional<Message> findByMessage(UUID messageId);
 
 	List<Message> findByAllMessage();
 
-	void updateMessage(UUID messageId, UUID userId, UUID channelId, String newContent);
+	void updateMessage(UUID messageId, String newContent);
 
-	void deleteMessage(UUID messageId, UUID userId, UUID channelId);
+	void deleteMessage(UUID messageId);
 
 }

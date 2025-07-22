@@ -175,9 +175,7 @@ public class MainView {
 
 		//조회(단건)
 		System.out.println("===== Message 하나만 조회 =====");
-		Optional<Message> foundMessage = messageService.findByMessage(
-			message.getMessageId(), user1.getId(), channel.getChannelId()
-		);
+		Optional<Message> foundMessage = messageService.findByMessage(message.getMessageId());
 		foundMessage.ifPresent(m -> System.out.println("조회된 Message: " + m.toString()));
 		System.out.println();
 
@@ -190,14 +188,13 @@ public class MainView {
 		//수정
 		System.out.println("===== Message 수정 =====");
 		String newContent = "수정된 첫번째 메시지";
-		messageService.updateMessage(message.getMessageId(), user1.getId(), channel.getChannelId(), newContent);
+		messageService.updateMessage(message.getMessageId(), newContent);
+		System.out.println();
 
 		//수정된 데이터 조회
 		System.out.println("===== Message 수정 조회=====");
-		Optional<Message> updatedMessage = messageService.findByMessage(
-			message.getMessageId(), user1.getId(), channel.getChannelId()
-		);
-		updatedMessage.ifPresent(m -> System.out.println("수정된 Message : " + m.toString()));
+		Optional<Message> updatedMessage = messageService.findByMessage(message.getMessageId());
+		updatedMessage.ifPresent(m -> System.out.println("수정된 Message : " + m));
 		System.out.println();
 
 		//수정 후 전체 데이터 조회도
@@ -207,8 +204,7 @@ public class MainView {
 
 		//삭제
 		System.out.println("===== Message 삭제=====");
-		messageService.deleteMessage(message.getMessageId(), user1.getId(), channel.getChannelId());
-		System.out.println("삭제 완료: '" + newContent + "'");
+		messageService.deleteMessage(message.getMessageId());
 		System.out.println();
 
 		//조회를 통해 삭제되었는지 확인
