@@ -13,54 +13,50 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 public class JCFChannelRepository implements ChannelRepository {
 	private final Map<UUID, Channel> map = new HashMap<>();
 
-	public JCFChannelRepository() {
-		Channel channel1 = new Channel("채널 1", "스터디 공부방입니다.");
-		map.put(channel1.getChannelId(), channel1);
-
-		Channel channel2 = new Channel("채널 2", "커뮤니티 노는방입니다.");
-		map.put(channel2.getChannelId(), channel2);
-	}
-
 	@Override
-	public Channel createChannel(String name, String description) {
-		Channel channel = new Channel(name, description);
+	public Channel save(Channel channel) {
+		boolean isNew = !existsById(channel.getChannelId());
+
 		map.put(channel.getChannelId(), channel);
 
+		if (isNew) {
+			System.out.println("생성 되었습니다.");
+		} else {
+			System.out.println("업데이트 되었습니다.");
+		}
 		return channel;
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID uuid) {
-		return Optional.ofNullable(map.get(uuid));
-	}
-
-	@Override
-	public List<Channel> findByChannelName(String name) {
-		List<Channel> list = new ArrayList<>();
-		for (Channel channel : map.values()) {
-			if (channel.getName().equals(name)) {
-				list.add(channel);
-			}
+	public Optional<Channel> findById(UUID id) {
+		if (existsById(id)) {
+			return Optional.of(map.get(id));
 		}
-		return list;
+
+		return Optional.empty();
 	}
 
 	@Override
-	public List<Channel> findByAllChannel() {
+	public List<Channel> findAll() {
 		return new ArrayList<>(map.values());
 	}
 
 	@Override
-	public void updateChannel(UUID uuid, String name, String description) {
-		for (Channel value : map.values()){
-			if ( value.getChannelId().equals(uuid)){
-				value.update(name, description);
-			}
-		}
+	public long count() {
+		return map.size();
 	}
 
 	@Override
-	public void deleteChannel(UUID uuid) {
-		map.remove(uuid);
+	public void delete(UUID id) {
+		if (!existsById(id)) {
+			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+		}
+		map.remove(id);
+		System.out.println(id + " 유저가 삭제 되었습니다.");
+	}
+
+	@Override
+	public boolean existsById(UUID id) {
+		return map.containsKey(id);
 	}
 }

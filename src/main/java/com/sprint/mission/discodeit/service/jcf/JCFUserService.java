@@ -8,47 +8,51 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFUserService implements UserService {
-	private final Map<UUID, User> map = new HashMap<>();
+	UserRepository repo;
 
-	public JCFUserService() {
-		User user1 = new User("남현수1", 10);
-		map.put(user1.getId(), user1);
-
-		User user2 = new User("남현수2", 20);
-		map.put(user2.getId(), user2);
-
-		User user3 = new User("남현수3", 30);
-		map.put(user3.getId(), user3);
+	public JCFUserService(UserRepository repo) {
+		this.repo = repo;
 	}
 
 	@Override
 	public User createUser(String name, int age) {
 		User user = new User(name, age);
-		map.put(user.getId(), user);
+		repo.save(user);
+
 		return user;
 	}
 
 	@Override
 	public Optional<User> findById(UUID uuid) {
-		return Optional.ofNullable(map.get(uuid));
+		return repo.findById(uuid);
 	}
 
 	@Override
 	public List<User> findByAll() {
-		return new ArrayList<>(map.values());
+		return new ArrayList<>(repo.findAll());
 	}
 
 	@Override
 	public void updateUser(UUID uuid, String name, int age) {
-		User user = map.get(uuid);
-		user.update(name, age);
+
+		User existsUser = repo.findById(uuid).orElse(null);
+
+		if (existsUser == null) {
+			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+		}
+
+		existsUser.setUsername(name);
+		existsUser.setAge(age);
+
+		repo.save(existsUser);
 	}
 
 	@Override
 	public void deleteUser(UUID uuid) {
-		map.remove(uuid);
+		repo.delete(uuid);
 	}
 }

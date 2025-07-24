@@ -8,6 +8,12 @@ import java.util.Scanner;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,16 +24,28 @@ import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 public class MainView {
 	public void mainMenu() {
 		Scanner sc = new Scanner(System.in);
-		UserService userService = new JCFUserService();
-		ChannelService channelService = new JCFChannelService();
-		MessageService messageService = new JCFMessageService(userService, channelService);
+		UserRepository userRepository = new JCFUserRepository();
+		UserService userService = new JCFUserService(userRepository);
 
-		System.out.println("보고싶은 CRUDTest");
+		ChannelRepository channelRepository = new JCFChannelRepository();
+		ChannelService channelService = new JCFChannelService(channelRepository);
+
+		MessageRepository messageRepository = new JCFMessageRepository();
+		MessageService messageService = new JCFMessageService(messageRepository, userService, channelService);
+
+		// Test Data Input
+		TestDataInput testDataInput = new TestDataInput();
+		testDataInput.testData(userService, channelService, messageService);
+		System.out.println();
 		System.out.println("===== 1. userCRUDTest =====");
 		System.out.println("===== 2. channelCRUDTest =====");
 		System.out.println("===== 3. messageCRUDTest =====");
 
+
+		System.out.print("보고싶은 CRUDTest : ");
 		int i = sc.nextInt();
+
+
 
 		try {
 			switch (i) {
@@ -159,17 +177,10 @@ public class MainView {
 		// 원래는 findById해서 전부 찾아와야하지만 할게 많아 보여서 이렇게 함.
 		User user1 = userService.findByAll().stream().findFirst()
 			.orElseThrow(() -> new IllegalStateException("등록된 유저가 없습니다."));
-		User user2 = userService.createUser("나무나무나무", 15);
 		Channel channel = channelService.findByAllChannel().stream().findFirst()
 			.orElseThrow(() -> new IllegalStateException("등록된 채널이 없습니다."));
 
 		Message message = messageService.createMessage(user1.getId(), channel.getChannelId(), "첫번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "두번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "세번째 메시지");
-
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 첫번째 메시지");
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 두번째 메시지");
-
 		System.out.println(message.toString());
 		System.out.println();
 
