@@ -11,12 +11,18 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
@@ -33,9 +39,19 @@ public class MainView {
 		MessageRepository messageRepository = new JCFMessageRepository();
 		MessageService messageService = new JCFMessageService(messageRepository, userService, channelService);
 
+		UserRepository fileuserRepository = new FileUserRepository();
+		UserService fileUserService = new FileUserService(fileuserRepository);
+
+		ChannelRepository fileChannelRepository = new FileChannelRepository();
+		ChannelService fileChannelService = new FileChannelService(fileChannelRepository);
+
+		MessageRepository fileMessageRepository = new FileMessageRepository();
+		MessageService fileMessageService = new FileMessageService(fileMessageRepository,
+			fileUserService, fileChannelService);
+
 		// Test Data Input
 		TestDataInput testDataInput = new TestDataInput();
-		testDataInput.testData(userService, channelService, messageService);
+		testDataInput.testData(fileUserService, fileChannelService, fileMessageService);
 		System.out.println();
 		System.out.println("===== 1. userCRUDTest =====");
 		System.out.println("===== 2. channelCRUDTest =====");
@@ -45,21 +61,20 @@ public class MainView {
 		System.out.print("보고싶은 CRUDTest : ");
 		int i = sc.nextInt();
 
-
-
 		try {
 			switch (i) {
 				case 1:
-					userCRUDTest(userService);
+					userCRUDTest(fileUserService);
 					break;
 				case 2:
-					channelCRUDTest(channelService);
+					channelCRUDTest(fileChannelService);
 					break;
 				case 3:
-					messageCRUDTest(userService, channelService, messageService);
+					messageCRUDTest(fileUserService, fileChannelService, fileMessageService);
 					break;
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IllegalStateException("유효하지 않는 값입니다.");
 		}
 
