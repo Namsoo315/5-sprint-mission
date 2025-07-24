@@ -10,16 +10,19 @@ import java.util.UUID;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFMessageService implements MessageService {
-	private final Map<UUID, Message> map = new HashMap<>();
+	private final MessageRepository repo;
 	private final UserService userService;
 	private final ChannelService channelService;
 
-	public JCFMessageService(UserService userService, ChannelService channelService) {
+	public JCFMessageService(MessageRepository repo, UserService userService,
+		ChannelService channelService) {
+		this.repo = repo;
 		this.userService = userService;
 		this.channelService = channelService;
 	}
@@ -30,21 +33,22 @@ public class JCFMessageService implements MessageService {
 		Optional<Channel> channel = channelService.findById(channelId);
 
 		if (user.isEmpty()) {
-			throw new IllegalArgumentException("user id not found");
+			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
 		if (channel.isEmpty()) {
-			throw new IllegalArgumentException("channel id not found");
+			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
 		Message message = new Message(userId, channelId, content);
-		map.put(message.getMessageId(), message);
+		repo.save(message);
+
 		return message;
 	}
 
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for (Message m : map.values()) {
+		for (Message m : repo.findAll()) {
 			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
@@ -55,22 +59,26 @@ public class JCFMessageService implements MessageService {
 
 	@Override
 	public Optional<Message> findByMessage(UUID messageId) {
-		return Optional.ofNullable(map.get(messageId));
+		return repo.findById(messageId);
 	}
 
 	public List<Message> findByAllMessage() {
-		return List.copyOf(map.values());
+		return repo.findAll();
 	}
 
 	@Override
 	public void updateMessage(UUID messageId, String newContent) {
-		map.get(messageId).setMessage(newContent);
-		System.out.println(messageId + " 업데이트 완료 : " + newContent );
+		Message message = repo.findById(messageId).orElse(null);
+
+		if(message == null) {
+			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
+		}
+		message.setMessage(newContent);
+		repo.save(message);
 	}
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		Message remove = map.remove(messageId);
-		System.out.println("메시지 ID : " + remove.getMessageId() + " 메시지 삭제 완료 : "+ remove.getMessage());
+		repo.delete(messageId);
 	}
 }
