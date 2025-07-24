@@ -7,70 +7,55 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
 
 public class JCFMessageRepository implements MessageRepository {
 	private final Map<UUID, Message> map = new HashMap<>();
-	private final UserRepository userRepository;
-	private final ChannelRepository channelRepository;
-
-	public JCFMessageRepository(UserRepository userRepository, ChannelRepository channelRepository) {
-		this.userRepository = userRepository;
-		this.channelRepository = channelRepository;
-	}
 
 	@Override
-	public Message createMessage(UUID userId, UUID channelId, String content) {
-		Optional<User> user = userRepository.findById(userId);
-		Optional<Channel> channel = channelRepository.findById(channelId);
-
-		if (user.isEmpty()) {
-			throw new IllegalArgumentException("user id not found");
-		}
-		if (channel.isEmpty()) {
-			throw new IllegalArgumentException("channel id not found");
-		}
-
-		Message message = new Message(userId, channelId, content);
+	public Message save(Message message) {
+		boolean isNew = !existsById(message.getChannelId());
 		map.put(message.getMessageId(), message);
+
+		if (isNew) {
+			System.out.println("생성 되었습니다.");
+		} else {
+			System.out.println("업데이트 되었습니다.");
+		}
 		return message;
 	}
 
 	@Override
-	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
-		List<Message> result = new ArrayList<>();
-		for (Message m : map.values()) {
-			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
-				result.add(m);
-			}
+	public Optional<Message> findById(UUID id) {
+		if (existsById(id)) {
+			return Optional.of(map.get(id));
 		}
 
-		return result;
+		return Optional.empty();
 	}
 
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
-		return Optional.ofNullable(map.get(messageId));
-	}
-
-	public List<Message> findByAllMessage() {
-		return List.copyOf(map.values());
+	public List<Message> findAll() {
+		return new ArrayList<>(map.values());
 	}
 
 	@Override
-	public void updateMessage(UUID messageId, String newContent) {
-		map.get(messageId).setMessage(newContent);
-		System.out.println(messageId + " 업데이트 완료 : " + newContent );
+	public long count() {
+		return map.size();
 	}
 
 	@Override
-	public void deleteMessage(UUID messageId) {
-		Message remove = map.remove(messageId);
-		System.out.println("메시지 ID : " + remove.getMessageId() + " 메시지 삭제 완료 : "+ remove.getMessage());
+	public void delete(UUID id) {
+		if (!existsById(id)) {
+			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+		}
+		map.remove(id);
+		System.out.println(id + " 유저가 삭제 되었습니다.");
+	}
+
+	@Override
+	public boolean existsById(UUID id) {
+		return map.containsKey(id);
 	}
 }

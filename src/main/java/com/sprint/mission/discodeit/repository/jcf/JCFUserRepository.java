@@ -10,45 +10,54 @@ import java.util.UUID;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
-public class JCFUserRepository implements UserRepository{
+public class JCFUserRepository implements UserRepository {
 	private final Map<UUID, User> map = new HashMap<>();
 
-	public JCFUserRepository() {
-		User user1 = new User("남현수1", 10);
-		map.put(user1.getId(), user1);
-
-		User user2 = new User("남현수2", 20);
-		map.put(user2.getId(), user2);
-
-		User user3 = new User("남현수3", 30);
-		map.put(user3.getId(), user3);
-	}
-
 	@Override
-	public User createUser(String name, int age) {
-		User user = new User(name, age);
+	public User save(User user) {
+		boolean isNew = !existsById(user.getId());
+
 		map.put(user.getId(), user);
+
+		if (isNew) {
+			System.out.println("생성 되었습니다.");
+		} else {
+			System.out.println("업데이트 되었습니다.");
+		}
+
 		return user;
 	}
 
 	@Override
-	public Optional<User> findById(UUID uuid) {
-		return Optional.ofNullable(map.get(uuid));
+	public Optional<User> findById(UUID id) {
+		if (existsById(id)) {
+			return Optional.of(map.get(id));
+		}
+
+		return Optional.empty();
 	}
 
 	@Override
-	public List<User> findByAll() {
+	public List<User> findAll() {
 		return new ArrayList<>(map.values());
 	}
 
 	@Override
-	public void updateUser(UUID uuid, String name, int age) {
-		User user = map.get(uuid);
-		user.update(name, age);
+	public long count() {
+		return map.size();
 	}
 
 	@Override
-	public void deleteUser(UUID uuid) {
-		map.remove(uuid);
+	public void delete(UUID id) {
+		if (!existsById(id)) {
+			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+		}
+		map.remove(id);
+		System.out.println(id + " 유저가 삭제 되었습니다.");
+	}
+
+	@Override
+	public boolean existsById(UUID id) {
+		return map.containsKey(id);
 	}
 }

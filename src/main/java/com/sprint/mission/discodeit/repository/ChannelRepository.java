@@ -7,15 +7,15 @@ import java.util.UUID;
 import com.sprint.mission.discodeit.entity.Channel;
 
 public interface ChannelRepository {
-	Channel createChannel(String name, String description);
+	Channel save(Channel channel);
 
-	Optional<Channel> findById(UUID uuid);
+	Optional<Channel> findById(UUID id);
 
-	List<Channel> findByChannelName(String name);
+	List<Channel> findAll();
 
-	List<Channel> findByAllChannel();
+	long count();
 
-	void updateChannel(UUID uuid, String name, String description);
+	void delete(UUID id);
 
-	void deleteChannel(UUID uuid);
+	boolean existsById(UUID id);
 }
