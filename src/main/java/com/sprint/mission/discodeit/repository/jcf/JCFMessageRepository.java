@@ -15,7 +15,7 @@ public class JCFMessageRepository implements MessageRepository {
 
 	@Override
 	public Message save(Message message) {
-		boolean isNew = !existsById(message.getChannelId());
+		boolean isNew = !existsById(message.getMessageId());
 		map.put(message.getMessageId(), message);
 
 		if (isNew) {
