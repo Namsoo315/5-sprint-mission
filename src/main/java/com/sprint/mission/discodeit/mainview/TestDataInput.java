@@ -21,4 +21,5 @@ public class TestDataInput {
 		messageService.createMessage(user2.getId(), channel2.getChannelId(), "user2의 두번째 메시지");
 		messageService.createMessage(user3.getId(), channel1.getChannelId(), "user3의 첫번째 메시지");
 	}
+
 }
