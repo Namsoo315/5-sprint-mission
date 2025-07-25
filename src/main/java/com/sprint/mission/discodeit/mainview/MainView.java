@@ -76,8 +76,28 @@ public class MainView {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IllegalStateException("유효하지 않는 값입니다.");
+		} finally {
+			//파일 계속 저장되고 삭제되는게 귀찮아서 잠시 만듬.
+			allDeleteFile(fileUserService, fileChannelService, fileMessageService);
+		}
+	}
+
+	private static void allDeleteFile(UserService userService, ChannelService channelService,
+		MessageService messageService) {
+		//전체 삭제
+		for (User user1 : userService.findByAll()) {
+			userService.deleteUser(user1.getId());
 		}
 
+		//전체 삭제
+		for (Channel channel1 : channelService.findByAllChannel()) {
+			channelService.deleteChannel(channel1.getChannelId());
+		}
+
+		//전체 삭제
+		for(Message m : messageService.findByAllMessage()) {
+			messageService.deleteMessage(m.getMessageId());
+		}
 	}
 
 	private static void userCRUDTest(UserService userService) {
@@ -128,6 +148,7 @@ public class MainView {
 		List<User> deleteUsers = userService.findByAll();
 		deleteUsers.forEach(u -> System.out.println(u.toString()));
 		System.out.println();
+
 
 	}
 
@@ -181,6 +202,7 @@ public class MainView {
 		System.out.println("===== Channel 삭제 확인 =====");
 		channelService.findByAllChannel().forEach(ch -> System.out.println(ch.toString()));
 		System.out.println();
+
 	}
 
 	private static void messageCRUDTest(UserService userService, ChannelService channelService,
