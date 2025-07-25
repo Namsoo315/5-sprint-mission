@@ -13,7 +13,7 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 public class JCFChannelService implements ChannelService {
-	ChannelRepository repo;
+	private final ChannelRepository repo;
 
 	public JCFChannelService(ChannelRepository repo) {
 		this.repo = repo;

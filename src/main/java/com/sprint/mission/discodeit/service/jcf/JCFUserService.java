@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFUserService implements UserService {
-	UserRepository repo;
+	private final UserRepository repo;
 
 	public JCFUserService(UserRepository repo) {
 		this.repo = repo;
