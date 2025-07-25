@@ -9,7 +9,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class FileUserService implements UserService {
-	UserRepository repo;
+	private final UserRepository repo;
 
 	public FileUserService(UserRepository repo) {
 		this.repo = repo;

@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 public class FileChannelService implements ChannelService {
-	ChannelRepository repo;
+	private final ChannelRepository repo;
 
 	public FileChannelService(ChannelRepository repo) {
 		this.repo = repo;
