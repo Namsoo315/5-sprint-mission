@@ -6,14 +6,11 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class FileUserService implements UserService {
-	private final UserRepository repo;
-
-	public FileUserService(UserRepository repo) {
-		this.repo = repo;
-	}
+	private final UserRepository repo = new FileUserRepository();
 
 	@Override
 	public User createUser(String name, int age) {

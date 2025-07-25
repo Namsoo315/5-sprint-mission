@@ -7,14 +7,11 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 public class FileChannelService implements ChannelService {
-	private final ChannelRepository repo;
-
-	public FileChannelService(ChannelRepository repo) {
-		this.repo = repo;
-	}
+	private final ChannelRepository repo = new FileChannelRepository();
 
 	@Override
 	public Channel createChannel(String name, String description) {

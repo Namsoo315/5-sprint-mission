@@ -7,20 +7,11 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.UserService;
 
 public class FileMessageService implements MessageService{
-	private final MessageRepository repo;
-	private final UserService userService;
-	private final ChannelService channelService;
-
-	public FileMessageService(MessageRepository repo, UserService userService, ChannelService channelService) {
-		this.repo = repo;
-		this.userService = userService;
-		this.channelService = channelService;
-	}
+	private final MessageRepository repo = new FileMessageRepository();
 
 	@Override
 	public Message createMessage(UUID userId, UUID channelId, String content) {
