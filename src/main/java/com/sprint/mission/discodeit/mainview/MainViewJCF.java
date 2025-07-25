@@ -67,13 +67,13 @@ public class MainViewJCF {
 		//등록
 		System.out.println("===== User 생성 =====");
 		User user = userService.createUser("남현수", 30);
-		System.out.println("User 생성 : " + user.getId() + " 이름 : " + user.getUsername());
+		System.out.println("User 생성 : " + user.getUserId() + " 이름 : " + user.getUsername());
 		System.out.println();
 
 		//조회(단건)
 		System.out.println("===== User 하나만 조회 =====");
-		Optional<User> byId = userService.findById(user.getId());
-		byId.ifPresent(u -> System.out.println("유저 하나 조회 : " + u.getId()));
+		Optional<User> byId = userService.findById(user.getUserId());
+		byId.ifPresent(u -> System.out.println("유저 하나 조회 : " + u.getUserId()));
 		System.out.println();
 
 		//조회(다건)
@@ -83,11 +83,11 @@ public class MainViewJCF {
 
 		//수정
 		System.out.println("===== User 수정 =====");
-		System.out.println("수정되는 UUID : " + user.getId());
+		System.out.println("수정되는 UUID : " + user.getUserId());
 		System.out.println();
 		String updateName = "수정된 이름";
 		int updateAge = 100;
-		userService.updateUser(user.getId(), updateName, updateAge);        //수정 시작
+		userService.updateUser(user.getUserId(), updateName, updateAge);        //수정 시작
 
 		//수정된 데이터 조회
 		System.out.println("===== User 수정 조회=====");
@@ -102,8 +102,8 @@ public class MainViewJCF {
 
 		//삭제
 		System.out.println("===== User 삭제=====");
-		System.out.println("삭제할 UUID : " + user.getId());
-		userService.deleteUser(user.getId());
+		System.out.println("삭제할 UUID : " + user.getUserId());
+		userService.deleteUser(user.getUserId());
 		System.out.println();
 
 		//조회를 통해 삭제되었는지 확인
@@ -180,7 +180,7 @@ public class MainViewJCF {
 		Channel channel = channelService.findByAllChannel().stream().findFirst()
 			.orElseThrow(() -> new IllegalStateException("등록된 채널이 없습니다."));
 
-		Message message = messageService.createMessage(user1.getId(), channel.getChannelId(), "첫번째 메시지");
+		Message message = messageService.createMessage(user1.getUserId(), channel.getChannelId(), "첫번째 메시지");
 		System.out.println(message.toString());
 		System.out.println();
 

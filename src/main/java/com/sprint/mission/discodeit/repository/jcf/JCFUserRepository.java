@@ -15,9 +15,9 @@ public class JCFUserRepository implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		boolean isNew = !existsById(user.getId());
+		boolean isNew = !existsById(user.getUserId());
 
-		map.put(user.getId(), user);
+		map.put(user.getUserId(), user);
 
 		if (isNew) {
 			System.out.println("생성 되었습니다.");
