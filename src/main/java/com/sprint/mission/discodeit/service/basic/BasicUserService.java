@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.service.jcf;
+package com.sprint.mission.discodeit.service.basic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,10 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
-public class JCFUserService implements UserService {
+public class BasicUserService implements UserService {
 	private final UserRepository repo;
 
-	public JCFUserService(UserRepository repo) {
+	public BasicUserService(UserRepository repo) {
 		this.repo = repo;
 	}
 

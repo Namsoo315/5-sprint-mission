@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,9 +35,9 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		boolean isNew = !existsById(user.getId());
+		boolean isNew = !existsById(user.getUserId());
 
-		Path path = Paths.get(DIRECTORY, user.getId() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, user.getUserId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(user);
