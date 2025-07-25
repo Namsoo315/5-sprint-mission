@@ -73,18 +73,22 @@ public class FileUserRepository implements UserRepository {
 	@Override
 	public List<User> findAll() {
 		List<User> users = new ArrayList<>();
-		Path path = Paths.get(DIRECTORY);
+		Path directory = Paths.get(DIRECTORY);
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			while (true) {
-				User user = (User)ois.readObject();
-				users.add(user);
-			}
-		} catch (EOFException e) {
-			// 파일의 끝
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		try {
+			Files.list(directory)
+				.filter(path -> path.toString().endsWith(EXTENSION))
+				.forEach(filePath -> {
+					try (FileInputStream fis = new FileInputStream(filePath.toFile());
+						 ObjectInputStream ois = new ObjectInputStream(fis);) {
+						User user = (User)ois.readObject();
+						users.add(user);
+					} catch (Exception e) {
+						throw new RuntimeException("파일 읽기 실패",e);
+					}
+				});
+		} catch (IOException e) {
+			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
 		return users;
 	}

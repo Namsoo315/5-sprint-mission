@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository.file;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,20 +76,23 @@ public class FileChannelRepository implements ChannelRepository {
 	@Override
 	public List<Channel> findAll() {
 		List<Channel> channels = new ArrayList<>();
-		Path path = Paths.get(DIRECTORY);
+		Path directory = Paths.get(DIRECTORY);
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			while (true) {
-				Channel channel = (Channel)ois.readObject();
-				channels.add(channel);
-			}
-		} catch (EOFException e) {
-			// 파일의 끝
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		try {
+			Files.list(directory)
+				.filter(path -> path.toString().endsWith(EXTENSION))
+				.forEach(filePath -> {
+					try (FileInputStream fis = new FileInputStream(filePath.toFile());
+						 ObjectInputStream ois = new ObjectInputStream(fis);) {
+						Channel channel = (Channel)ois.readObject();
+						channels.add(channel);
+					} catch (Exception e) {
+						throw new RuntimeException("파일 읽기 실패", e);
+					}
+				});
+		} catch (IOException e) {
+			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-
 		return channels;
 	}
 

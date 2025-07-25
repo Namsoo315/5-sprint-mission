@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
 public class FileMessageRepository implements MessageRepository {
@@ -64,7 +62,7 @@ public class FileMessageRepository implements MessageRepository {
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			message = (Message) ois.readObject();
+			message = (Message)ois.readObject();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -75,20 +73,23 @@ public class FileMessageRepository implements MessageRepository {
 	@Override
 	public List<Message> findAll() {
 		List<Message> messages = new ArrayList<>();
-		Path path = Paths.get(DIRECTORY);
+		Path directory = Paths.get(DIRECTORY);
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			while (true) {
-				Message message = (Message) ois.readObject();
-				messages.add(message);
-			}
-		} catch (EOFException e) {
-			// 파일의 끝
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		try {
+			Files.list(directory)
+				.filter(path -> path.toString().endsWith(EXTENSION))
+				.forEach(filePath -> {
+					try (FileInputStream fis = new FileInputStream(filePath.toFile());
+						 ObjectInputStream ois = new ObjectInputStream(fis);) {
+						Message message = (Message)ois.readObject();
+						messages.add(message);
+					} catch (Exception e) {
+						throw new RuntimeException("파일 읽기 실패", e);
+					}
+				});
+		} catch (IOException e) {
+			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-
 		return messages;
 	}
 
