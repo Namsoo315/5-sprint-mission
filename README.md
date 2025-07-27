@@ -101,6 +101,7 @@ return user;
 
     [JCF*Service mainMenu]
 <img width="731" height="129" alt="스크린샷 2025-07-27 오후 11 37 31" src="https://github.com/user-attachments/assets/a7037779-9bde-46f7-abd0-6e7349390b4d" />
+
     [File*Service mainMenu]
 <img width="528" height="98" alt="image" src="https://github.com/user-attachments/assets/ca31d23a-3123-4e89-8955-8df5bd3dd87a" />
 
