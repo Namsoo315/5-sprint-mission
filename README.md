@@ -96,4 +96,26 @@ return user;
 
 [x]  File*Repository 구현체를 활용하여 테스트해보세요.
 
-[ ] 이전에 작성했던 코드(JCF*Service 또는 File*Service)와 비교해 어떤 차이가 있는지 정리해보세요.
+[x] 이전에 작성했던 코드(JCF*Service 또는 File*Service)와 비교해 어떤 차이가 있는지 정리해보세요.
+ + 저장로직과 비즈니스 로직을 합친 JCF와 각자의 역할을 분리한 FileService는 전체적인 가독성을 늘리게 하였고 특히나 DI자체의 결합도를 낮췄다고 생각함.
+
+[JCF*Service mainMenu]
+   
+<img width="731" height="129" alt="스크린샷 2025-07-27 오후 11 37 31" src="https://github.com/user-attachments/assets/a7037779-9bde-46f7-abd0-6e7349390b4d" /> <br>
+
+<img width="669" height="196" alt="image" src="https://github.com/user-attachments/assets/f86f8109-053f-47fb-ba4c-19d5dd902df5" />
+
+- - -
+
+[File*Service mainMenu]
+   
+<img width="528" height="98" alt="image" src="https://github.com/user-attachments/assets/ca31d23a-3123-4e89-8955-8df5bd3dd87a" /> <br>
+
+<img width="629" height="52" alt="스크린샷 2025-07-28 오전 12 00 05" src="https://github.com/user-attachments/assets/214ee551-0fe5-415d-9868-4e374e372d54" />
+
+
+
+- 각자의 역할을 구분하였기 떄문에 직접 참조할 필요가 없이 각자의 로직에서만 변경점을 변경하면 되기 떄문에 좀 더 결합도를 낮추게 되었다
+- 하지만 이게 좋은 코드냐 라고 하면 그렇게 좋은 코드는 아니라고 생각한다.
+- 스프링이후로 넘어가면 new 를 사용하지 않고 컴포넌트로 활용을 할 수 있기 때문에 더 결합도를 낮출 수 있게 될꺼라 생가함.
+   
