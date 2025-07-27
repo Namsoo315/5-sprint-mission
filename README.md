@@ -99,10 +99,11 @@ return user;
 [x] 이전에 작성했던 코드(JCF*Service 또는 File*Service)와 비교해 어떤 차이가 있는지 정리해보세요.
  + 저장로직과 비즈니스 로직을 합친 JCF와 각자의 역할을 분리한 FileService는 전체적인 가독성을 늘리게 하였고 특히나 DI자체의 결합도를 낮췄다고 생각함.
 
-    [JCF*Service mainMenu]
+   [JCF*Service mainMenu]
 <img width="731" height="129" alt="스크린샷 2025-07-27 오후 11 37 31" src="https://github.com/user-attachments/assets/a7037779-9bde-46f7-abd0-6e7349390b4d" />
 
-    [File*Service mainMenu]
+
+   [File*Service mainMenu]
 <img width="528" height="98" alt="image" src="https://github.com/user-attachments/assets/ca31d23a-3123-4e89-8955-8df5bd3dd87a" />
 
 각자의 역할을 구분하였기 떄문에 직접 참조할 필요가 없이 각자의 로직에서만 변경점을 변경하면 되기 떄문에 좀 더 결합도를 낮추게 되었다
