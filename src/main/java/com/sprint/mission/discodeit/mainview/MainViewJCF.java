@@ -121,6 +121,7 @@ public class MainViewJCF {
 		Channel channel = channelService.createChannel("새로운 방", "새로운 방입니다.");
 		System.out.println(channel.toString());
 		System.out.println();
+		System.out.println();
 
 		//조회(단건)
 		System.out.println("===== Channel 조회 (단건) =====");        //정확히 단건은 아니지만 List사용을 해보고싶었음.
