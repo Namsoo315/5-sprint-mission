@@ -11,13 +11,12 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service("channelService")
+@RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
 	private final ChannelRepository repo;
-
-	public BasicChannelService(ChannelRepository repo) {
-		this.repo = repo;
-	}
 
 	@Override
 	public Channel createChannel(String name, String description) {

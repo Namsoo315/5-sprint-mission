@@ -11,13 +11,12 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service("userService")
+@RequiredArgsConstructor
 public class BasicUserService implements UserService {
 	private final UserRepository repo;
-
-	public BasicUserService(UserRepository repo) {
-		this.repo = repo;
-	}
 
 	@Override
 	public User createUser(String name, int age) {
