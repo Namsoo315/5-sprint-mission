@@ -5,17 +5,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
 ;
 
 public interface ChannelService {
 	Channel createChannel(String name, String description);
 
-	Optional<Channel> findById(UUID uuid);
+	Optional<Channel> findByChannelId(UUID uuid);
 
 	List<Channel> findByChannelName(String name);
 
-	List<Channel> findByAllChannel();
+	List<Channel> findAll();
 
 	void updateChannel(UUID uuid, String name, String description);
 

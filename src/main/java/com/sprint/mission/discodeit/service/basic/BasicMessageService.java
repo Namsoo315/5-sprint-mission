@@ -45,11 +45,11 @@ public class BasicMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
+	public Optional<Message> findByMessageId(UUID messageId) {
 		return repo.findById(messageId);
 	}
 
-	public List<Message> findByAllMessage() {
+	public List<Message> findAll() {
 		return repo.findAll();
 	}
 

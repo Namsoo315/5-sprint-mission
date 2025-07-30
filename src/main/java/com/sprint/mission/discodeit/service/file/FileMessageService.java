@@ -33,12 +33,12 @@ public class FileMessageService implements MessageService{
 		return list;
 	}
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
+	public Optional<Message> findByMessageId(UUID messageId) {
 		return repo.findById(messageId);
 	}
 
 	@Override
-	public List<Message> findByAllMessage() {
+	public List<Message> findAll() {
 		return repo.findAll();
 	}
 

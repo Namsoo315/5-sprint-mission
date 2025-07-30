@@ -28,7 +28,7 @@ public class JCFChannelService implements ChannelService {
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID uuid) {
+	public Optional<Channel> findByChannelId(UUID uuid) {
 		return repo.findById(uuid);
 	}
 
@@ -44,7 +44,7 @@ public class JCFChannelService implements ChannelService {
 	}
 
 	@Override
-	public List<Channel> findByAllChannel() {
+	public List<Channel> findAll() {
 		return new ArrayList<>(repo.findAll());
 	}
 

@@ -1,9 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,8 +27,8 @@ public class JCFMessageService implements MessageService {
 
 	@Override
 	public Message createMessage(UUID userId, UUID channelId, String content) {
-		Optional<User> user = userService.findById(userId);
-		Optional<Channel> channel = channelService.findById(channelId);
+		Optional<User> user = userService.findByUserId(userId);
+		Optional<Channel> channel = channelService.findByChannelId(channelId);
 
 		if (user.isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
@@ -58,11 +56,11 @@ public class JCFMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
+	public Optional<Message> findByMessageId(UUID messageId) {
 		return repo.findById(messageId);
 	}
 
-	public List<Message> findByAllMessage() {
+	public List<Message> findAll() {
 		return repo.findAll();
 	}
 

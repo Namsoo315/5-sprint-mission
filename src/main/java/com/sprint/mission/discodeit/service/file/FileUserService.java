@@ -20,12 +20,12 @@ public class FileUserService implements UserService {
 	}
 
 	@Override
-	public Optional<User> findById(UUID uuid) {
+	public Optional<User> findByUserId(UUID uuid) {
 		return repo.findById(uuid);
 	}
 
 	@Override
-	public List<User> findByAll() {
+	public List<User> findAll() {
 		return repo.findAll();
 	}
 

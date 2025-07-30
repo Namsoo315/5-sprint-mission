@@ -9,9 +9,9 @@ import com.sprint.mission.discodeit.entity.User;
 public interface UserService {
 	User createUser(String name, int age);
 
-	Optional<User> findById(UUID uuid);
+	Optional<User> findByUserId(UUID uuid);
 
-	List<User> findByAll();
+	List<User> findAll();
 
 	void updateUser(UUID uuid, String username, int age);
 

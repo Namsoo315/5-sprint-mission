@@ -11,9 +11,9 @@ public interface MessageService {
 
 	List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId);
 
-	Optional<Message> findByMessage(UUID messageId);
+	Optional<Message> findByMessageId(UUID messageId);
 
-	List<Message> findByAllMessage();
+	List<Message> findAll();
 
 	void updateMessage(UUID messageId, String newContent);
 
