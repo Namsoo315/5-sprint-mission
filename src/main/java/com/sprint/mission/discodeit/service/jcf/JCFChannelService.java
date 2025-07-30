@@ -55,9 +55,7 @@ public class JCFChannelService implements ChannelService {
 		if(channel == null) {
 			throw new IllegalArgumentException("유효한 ID 가 없습니다.");
 		}
-
-		channel.setName(name);
-		channel.setDescription(description);
+		channel.update(name, description);
 		repo.save(channel);
 	}
 

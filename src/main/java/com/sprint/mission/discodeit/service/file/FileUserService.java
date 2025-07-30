@@ -37,8 +37,7 @@ public class FileUserService implements UserService {
 			throw new IllegalArgumentException("아이디가 존재하지 않습니다.");
 		}
 
-		user.setAge(age);
-		user.setUsername(username);
+		user.update(username, age);
 		repo.save(user);
 	}
 

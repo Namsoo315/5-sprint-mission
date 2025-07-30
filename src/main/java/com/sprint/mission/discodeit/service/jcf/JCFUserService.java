@@ -35,18 +35,17 @@ public class JCFUserService implements UserService {
 	}
 
 	@Override
-	public void updateUser(UUID uuid, String name, int age) {
+	public void updateUser(UUID uuid, String username, int age) {
 
-		User existsUser = repo.findById(uuid).orElse(null);
+		User user = repo.findById(uuid).orElse(null);
 
-		if (existsUser == null) {
+		if (user == null) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
 
-		existsUser.setUsername(name);
-		existsUser.setAge(age);
+		user.update(username, age);
 
-		repo.save(existsUser);
+		repo.save(user);
 	}
 
 	@Override

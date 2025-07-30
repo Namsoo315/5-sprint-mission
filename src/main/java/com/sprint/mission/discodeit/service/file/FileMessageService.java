@@ -50,7 +50,7 @@ public class FileMessageService implements MessageService{
 			throw new IllegalArgumentException("메시지가 존재하지 않습니다.");
 		}
 
-		message.setMessage(newContent);
+		message.update(newContent);
 		repo.save(message);
 	}
 
