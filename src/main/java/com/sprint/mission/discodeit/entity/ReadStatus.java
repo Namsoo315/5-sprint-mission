@@ -1,0 +1,34 @@
+package com.sprint.mission.discodeit.entity;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import lombok.Getter;
+
+@Getter
+public class ReadStatus {
+	private final UUID ReadStatusId;
+	private final UUID userId;
+	private final UUID channelId;
+	private Instant createdAt;
+	private Instant updatedAt;
+
+	public ReadStatus(UUID readStatusId, UUID userId, UUID channelId) {
+		ReadStatusId = readStatusId;
+		this.userId = userId;
+		this.channelId = channelId;
+		this.createdAt = Instant.now();
+		this.updatedAt = createdAt;
+	}
+
+	@Override
+	public String toString() {
+		return "ReadStatus{" +
+			"ReadStatusId=" + ReadStatusId +
+			", userId=" + userId +
+			", channelId=" + channelId +
+			", createdAt=" + createdAt +
+			", updatedAt=" + updatedAt +
+			'}';
+	}
+}

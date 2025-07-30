@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
+import lombok.RequiredArgsConstructor;
+
+@Service("messageService")
+@RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 	private final MessageRepository repo;
-
-	public BasicMessageService(MessageRepository repo) {
-		this.repo = repo;
-	}
 
 	@Override
 	public Message createMessage(UUID userId, UUID channelId, String content) {
