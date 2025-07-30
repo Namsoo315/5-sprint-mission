@@ -10,10 +10,10 @@ public class Channel implements Serializable {
 
 	@Serial
 	private final long serialVersionUID = 1L;
-	private UUID channelId;
+	private final UUID channelId;
 	private String name;
 	private String description;
-	private Long createdAt;
+	private final Long createdAt;
 	private Long updatedAt;
 
 	public Channel(String name, String description) {
@@ -23,48 +23,20 @@ public class Channel implements Serializable {
 		this.createdAt = System.currentTimeMillis();
 		this.updatedAt = createdAt;
 	}
-	public long getSerialVersionUID() {
-		return serialVersionUID;
-	}
-
 	public UUID getChannelId() {
 		return channelId;
-	}
-
-	public void setChannelId(UUID channelId) {
-		this.channelId = channelId;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public Long getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(Long createdAt) {
-		this.createdAt = createdAt;
-	}
-
 	public Long getUpdatedAt() {
 		return updatedAt;
-	}
-
-	public void setUpdatedAt(Long updatedAt) {
-		this.updatedAt = updatedAt;
 	}
 
 	public void update(String name, String description){

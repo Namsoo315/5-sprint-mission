@@ -46,18 +46,6 @@ public class User implements Serializable {
 		return age;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setAge(int age) {
-		this.age = age;
-	}
-
-	public void setUpdatedAt(Long updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
 	public void update(String username, int age){
 		this.username = username;
 		this.age = age;

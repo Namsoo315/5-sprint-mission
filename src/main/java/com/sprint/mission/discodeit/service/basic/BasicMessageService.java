@@ -45,11 +45,11 @@ public class BasicMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
+	public Optional<Message> findByMessageId(UUID messageId) {
 		return repo.findById(messageId);
 	}
 
-	public List<Message> findByAllMessage() {
+	public List<Message> findAll() {
 		return repo.findAll();
 	}
 
@@ -60,7 +60,7 @@ public class BasicMessageService implements MessageService {
 		if(message == null) {
 			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
 		}
-		message.setMessage(newContent);
+		message.update(newContent);
 		repo.save(message);
 	}
 

@@ -33,12 +33,12 @@ public class FileMessageService implements MessageService{
 		return list;
 	}
 	@Override
-	public Optional<Message> findByMessage(UUID messageId) {
+	public Optional<Message> findByMessageId(UUID messageId) {
 		return repo.findById(messageId);
 	}
 
 	@Override
-	public List<Message> findByAllMessage() {
+	public List<Message> findAll() {
 		return repo.findAll();
 	}
 
@@ -50,7 +50,7 @@ public class FileMessageService implements MessageService{
 			throw new IllegalArgumentException("메시지가 존재하지 않습니다.");
 		}
 
-		message.setMessage(newContent);
+		message.update(newContent);
 		repo.save(message);
 	}
 

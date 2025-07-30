@@ -25,7 +25,7 @@ public class BasicChannelService implements ChannelService {
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID uuid) {
+	public Optional<Channel> findByChannelId(UUID uuid) {
 		return repo.findById(uuid);
 	}
 
@@ -41,7 +41,7 @@ public class BasicChannelService implements ChannelService {
 	}
 
 	@Override
-	public List<Channel> findByAllChannel() {
+	public List<Channel> findAll() {
 		return new ArrayList<>(repo.findAll());
 	}
 
@@ -52,9 +52,7 @@ public class BasicChannelService implements ChannelService {
 		if(channel == null) {
 			throw new IllegalArgumentException("유효한 ID 가 없습니다.");
 		}
-
-		channel.setName(name);
-		channel.setDescription(description);
+		channel.update(name, description);
 		repo.save(channel);
 	}
 

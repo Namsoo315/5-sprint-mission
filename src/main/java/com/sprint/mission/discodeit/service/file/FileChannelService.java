@@ -22,7 +22,7 @@ public class FileChannelService implements ChannelService {
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID uuid) {
+	public Optional<Channel> findByChannelId(UUID uuid) {
 		return repo.findById(uuid);
 	}
 
@@ -40,7 +40,7 @@ public class FileChannelService implements ChannelService {
 	}
 
 	@Override
-	public List<Channel> findByAllChannel() {
+	public List<Channel> findAll() {
 		return repo.findAll();
 	}
 
@@ -51,9 +51,7 @@ public class FileChannelService implements ChannelService {
 		if(channel == null) {
 			throw new IllegalArgumentException("채널이 존재하지 않습니다.");
 		}
-
-		channel.setName(name);
-		channel.setDescription(description);
+		channel.update(name, description);
 		repo.save(channel);
 	}
 

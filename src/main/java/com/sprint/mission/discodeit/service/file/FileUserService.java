@@ -20,12 +20,12 @@ public class FileUserService implements UserService {
 	}
 
 	@Override
-	public Optional<User> findById(UUID uuid) {
+	public Optional<User> findByUserId(UUID uuid) {
 		return repo.findById(uuid);
 	}
 
 	@Override
-	public List<User> findByAll() {
+	public List<User> findAll() {
 		return repo.findAll();
 	}
 
@@ -37,8 +37,7 @@ public class FileUserService implements UserService {
 			throw new IllegalArgumentException("아이디가 존재하지 않습니다.");
 		}
 
-		user.setAge(age);
-		user.setUsername(username);
+		user.update(username, age);
 		repo.save(user);
 	}
 
