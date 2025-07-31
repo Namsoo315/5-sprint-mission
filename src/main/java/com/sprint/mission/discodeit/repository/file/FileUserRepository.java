@@ -73,6 +73,20 @@ public class FileUserRepository implements UserRepository {
 	}
 
 	@Override
+	public Optional<User> findByUsername(String username) {
+		return findAll().stream()
+			.filter(user -> username.equals(user.getUsername()))
+			.findFirst();
+	}
+
+	@Override
+	public Optional<User> findByEmail(String email) {
+		return findAll().stream()
+			.filter(user -> email.equals(user.getEmail()))
+			.findFirst();
+	}
+
+	@Override
 	public List<User> findAll() {
 		List<User> users = new ArrayList<>();
 		Path directory = Paths.get(DIRECTORY);
