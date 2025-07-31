@@ -11,6 +11,10 @@ public interface UserRepository {
 
 	Optional<User> findById(UUID id);
 
+	Optional<User> findByUsername(String username);
+
+	Optional<User> findByEmail(String email);
+
 	List<User> findAll();
 
 	long count();

@@ -13,8 +13,8 @@ public class UserStatus {
 	private Instant createdAt;
 	private Instant updatedAt;
 
-	public UserStatus(UUID userStatusId, UUID userId) {
-		UserStatusId = userStatusId;
+	public UserStatus(UUID userId) {
+		this.UserStatusId = UUID.randomUUID();
 		this.userId = userId;
 		this.status = false;
 		this.createdAt = Instant.now();
