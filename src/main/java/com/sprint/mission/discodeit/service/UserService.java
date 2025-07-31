@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.dto.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.UserFindRequest;
-import com.sprint.mission.discodeit.dto.UserFindResponse;
-import com.sprint.mission.discodeit.dto.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserFindRequest;
+import com.sprint.mission.discodeit.dto.user.UserFindResponse;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 
 public interface UserService {
@@ -15,7 +15,7 @@ public interface UserService {
 
 	Optional<UserFindResponse> findByUserId(UserFindRequest request);
 
-	List<UserFindResponse> findAll();
+	List<UserFindResponse> findAllByUserId(UUID userId);
 
 	void updateUser(UserUpdateRequest request);
 
