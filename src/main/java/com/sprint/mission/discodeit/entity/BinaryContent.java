@@ -11,15 +11,13 @@ import lombok.Getter;
 public class BinaryContent {
 	private final UUID BinaryContentId;
 	private final UUID userId;
-	private final List<UUID> messageIds;
 	private final byte[] binaryContent;
 	private final Instant createdAt;
 	// 수정 불가능 하기 때문에 updatedAt은 삭제
 
-	public BinaryContent(UUID binaryContentId, UUID userId, List<UUID> messageIds, byte[] binaryContent) {
-		BinaryContentId = binaryContentId;
+	public BinaryContent(UUID userId, byte[] binaryContent) {
+		BinaryContentId = UUID.randomUUID();
 		this.userId = userId;
-		this.messageIds = messageIds;
 		this.binaryContent = binaryContent;
 		this.createdAt = Instant.now();
 	}
@@ -29,7 +27,6 @@ public class BinaryContent {
 		return "BinaryContent{" +
 			"BinaryContentId=" + BinaryContentId +
 			", userId=" + userId +
-			", messageIds=" + messageIds +
 			", binaryContent=" + Arrays.toString(binaryContent) +
 			", createdAt=" + createdAt +
 			'}';
