@@ -15,7 +15,7 @@ public interface UserService {
 
 	Optional<UserFindResponse> findByUserId(UserFindRequest request);
 
-	List<UserFindResponse> findAllByUserId(UUID userId);
+	List<UserFindResponse> findAll();
 
 	void updateUser(UserUpdateRequest request);
 
