@@ -4,8 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import com.sprint.mission.discodeit.dto.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -36,7 +38,7 @@ public class DiscodeitApplication {
 
 	static Channel setupChannel(ChannelService channelService) {
 		// ChannelType.PUBLIC Enum 타입으로 정하지 않아서 그냥 뺐음.
-		Channel channel = channelService.createChannel("공지", "공지 채널입니다.");
+		Channel channel = channelService.createPublicChannel(new PublicChannelCreateRequest(ChannelType.PUBLIC,"공지", "공지 채널입니다."));
 		return channel;
 	}
 
