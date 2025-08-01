@@ -4,18 +4,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.Message;
 
 public interface MessageService {
-	Message createMessage(UUID userId, UUID channelId, String content);
+	Message createMessage(MessageCreateRequest request);
 
 	List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId);
 
 	Optional<Message> findByMessageId(UUID messageId);
 
-	List<Message> findAll();
+	List<Message> findAllByChannelId(UUID channelId);
 
-	void updateMessage(UUID messageId, String newContent);
+	void updateMessage(MessageUpdateRequest request);
 
 	void deleteMessage(UUID messageId);
 

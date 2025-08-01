@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
@@ -42,7 +43,8 @@ public class DiscodeitApplication {
 
 	static void messageCreateTest(MessageService messageService, Channel channel, User author) {
 		//"안녕하세요.", channel.getId(), author.getId()	createMessage로 userId, channelId, content를 받기 때문에 변경.
-		Message message = messageService.createMessage(author.getUserId(), channel.getChannelId(), "안녕하세요");
+		// author.getUserId(), channel.getChannelId(), "안녕하세요"
+		Message message = messageService.createMessage(new MessageCreateRequest());
 		System.out.println("메시지 생성: " + message.getMessageId());
 		System.out.println(message);
 	}

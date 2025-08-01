@@ -117,6 +117,11 @@ public class FileBiRepository implements BinaryRepository {
 	}
 
 	@Override
+	public void deleteByMessageId(UUID messageId) {
+
+	}
+
+	@Override
 	public boolean existsById(UUID binaryContentId) {
 		return Files.exists(Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION));
 	}

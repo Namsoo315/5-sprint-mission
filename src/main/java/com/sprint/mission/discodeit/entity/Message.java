@@ -16,15 +16,17 @@ public class Message implements Serializable {
 	private final UUID messageId;
 	private final UUID userId;
 	private final UUID channelId;
+	private final List<UUID> attachmentIds;
 	private String message;
 	private final Instant createdAt;
 	private Instant updatedAt;
 
-	public Message(UUID userId, UUID channelId, String message) {
+	public Message(UUID userId, UUID channelId, String message, List<UUID> attachmentIds) {
 		this.messageId = UUID.randomUUID();
 		this.userId = userId;
 		this.channelId = channelId;
 		this.message = message;
+		this.attachmentIds = attachmentIds;
 		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
 	}

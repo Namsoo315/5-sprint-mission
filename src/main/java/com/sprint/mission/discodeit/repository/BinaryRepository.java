@@ -19,5 +19,7 @@ public interface BinaryRepository {
 
 	void deleteByUserId(UUID userId);
 
+	void deleteByMessageId(UUID messageId);
+
 	boolean existsById(UUID binaryId);
 }
