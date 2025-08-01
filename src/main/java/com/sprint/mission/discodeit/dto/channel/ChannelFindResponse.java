@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,5 @@ public class ChannelFindResponse {
 	private String name;
 	private String description;
 	private Instant lastMessageTime;
-	private List<UUID> participantsUserIds;
+	private List<ReadStatus> participantsUserIds;
 }
