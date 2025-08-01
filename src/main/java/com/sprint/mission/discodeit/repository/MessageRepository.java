@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,9 +14,13 @@ public interface MessageRepository {
 
 	List<Message> findAll();
 
+	Instant LatestMessageByChannelId(UUID channelId);
+
 	long count();
 
 	void delete(UUID id);
+
+	void deleteByChannelId(UUID channelId);
 
 	boolean existsById(UUID id);
 }

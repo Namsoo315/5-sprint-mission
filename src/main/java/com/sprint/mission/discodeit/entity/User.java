@@ -11,7 +11,7 @@ import lombok.Getter;
 public class User implements Serializable {
 
 	@Serial
-	private final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	private final UUID userId;
 	private String username;
 	private String email;
@@ -28,7 +28,7 @@ public class User implements Serializable {
 		this.updatedAt = createdAt;
 	}
 
-	public void update(String username,String email, String age){
+	public void update(String username, String email, String age) {
 		this.username = username;
 		this.email = email;
 		this.password = age;

@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.dto.channel;
 
-import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PrivateChannelCreateRequest {
-	private List<UUID> participantsUserIds;
+public class ChannelUpdateRequest {
+	private UUID channelId;
+	private String name;
+	private String description;
 }

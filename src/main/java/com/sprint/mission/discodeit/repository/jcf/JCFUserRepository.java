@@ -39,11 +39,12 @@ public class JCFUserRepository implements UserRepository {
 
 	@Override
 	public Optional<User> findByUsername(String username) {
-		return Optional.empty();
-	}
+		for (User user : map.values()) {
+			if (user.getUsername().equals(username)) {
+				return Optional.of(user);
+			}
+		}
 
-	@Override
-	public Optional<User> findByEmail(String email) {
 		return Optional.empty();
 	}
 

@@ -1,12 +1,18 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 import lombok.Getter;
 
 @Getter
-public class UserStatus {
+public class UserStatus implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
 	private final UUID UserStatusId;
 	private final UUID userId;
 	private boolean status;	// Online = true, Offline = false;

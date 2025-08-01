@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 public class Message implements Serializable {
 	@Serial
-	private final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	private final UUID messageId;
 	private final UUID userId;
 	private final UUID channelId;

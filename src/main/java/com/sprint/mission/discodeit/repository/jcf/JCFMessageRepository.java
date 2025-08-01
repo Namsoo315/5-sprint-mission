@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +29,9 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public Optional<Message> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<Message> findById(UUID messageId) {
+		if (existsById(messageId)) {
+			return Optional.of(map.get(messageId));
 		}
 
 		return Optional.empty();
@@ -41,17 +43,31 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
+	public Instant LatestMessageByChannelId(UUID channelId) {
+		return this.findAll().stream()
+			.filter(message -> message.getChannelId().equals(channelId))
+			.max(Comparator.comparing(Message::getCreatedAt))
+			.map(Message::getCreatedAt)
+			.orElse(null);
+	}
+
+	@Override
 	public long count() {
 		return map.size();
 	}
 
 	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public void delete(UUID messageId) {
+		if (!existsById(messageId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(messageId);
+		System.out.println(messageId + " 가 삭제 되었습니다.");
+	}
+
+	@Override
+	public void deleteByChannelId(UUID channelId) {
+		
 	}
 
 	@Override

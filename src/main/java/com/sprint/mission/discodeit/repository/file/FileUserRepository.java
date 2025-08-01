@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Repository;
 
@@ -74,15 +75,8 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public Optional<User> findByUsername(String username) {
-		return findAll().stream()
-			.filter(user -> username.equals(user.getUsername()))
-			.findFirst();
-	}
-
-	@Override
-	public Optional<User> findByEmail(String email) {
-		return findAll().stream()
-			.filter(user -> email.equals(user.getEmail()))
+		return this.findAll().stream()
+			.filter(user -> user.getUsername().equals(username))
 			.findFirst();
 	}
 
@@ -91,21 +85,25 @@ public class FileUserRepository implements UserRepository {
 		List<User> users = new ArrayList<>();
 		Path directory = Paths.get(DIRECTORY);
 
-		try {
-			Files.list(directory)
-				.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(directory)) {
+			paths.filter(path -> path.toString().endsWith(EXTENSION))
 				.forEach(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
-						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						User user = (User)ois.readObject();
-						users.add(user);
+						 ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+						Object obj = ois.readObject();
+						if (obj instanceof User user) {
+							users.add(user);
+						}
+
 					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패",e);
+						throw new IllegalArgumentException("파일 읽기 실패", e);
 					}
 				});
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
+
 		return users;
 	}
 
