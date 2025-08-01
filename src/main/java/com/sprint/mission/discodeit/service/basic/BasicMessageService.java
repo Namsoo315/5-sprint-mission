@@ -7,8 +7,15 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.repository.BinaryRepository;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,20 +23,26 @@ import lombok.RequiredArgsConstructor;
 @Service("messageService")
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
-	private final MessageRepository repo;
+	private final MessageRepository messageRepository;
+	private final ChannelRepository	channelRepository;
+	private final UserRepository userRepository;
+	private final BinaryRepository binaryRepository;
 
 	@Override
-	public Message createMessage(UUID userId, UUID channelId, String content) {
+	public Message createMessage(MessageCreateRequest request) {
 
-		if (userId == null) {
+		if (request.getUserId() == null) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelId == null) {
+		if (request.getChannelId() == null) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
-
-		Message message = new Message(userId, channelId, content);
-		repo.save(message);
+		Message message = new Message(request.getUserId(),
+			request.getChannelId(),
+			request.getMessage(),
+			request.getAttachmentIds() != null ? request.getAttachmentIds() : new ArrayList<>()	// 삼항 연산자 AttachmentIds가 있을 경우에만.
+		);
+		messageRepository.save(message);
 
 		return message;
 	}
@@ -37,7 +50,7 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for (Message m : repo.findAll()) {
+		for (Message m : messageRepository.findAll()) {
 			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
@@ -47,27 +60,34 @@ public class BasicMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessageId(UUID messageId) {
-		return repo.findById(messageId);
+	public Optional<Message> findByMessageId(UUID messageId) {return messageRepository.findById(messageId);
 	}
 
-	public List<Message> findAll() {
-		return repo.findAll();
+	public List<Message> findAllByChannelId(UUID channelId) {
+		List<Message> result = new ArrayList<>();
+		for (Message m : messageRepository.findAll()) {
+			if(m.getChannelId().equals(channelId)) {
+				result.add(m);
+			}
+		}
+		return result;
 	}
 
 	@Override
-	public void updateMessage(UUID messageId, String newContent) {
-		Message message = repo.findById(messageId).orElse(null);
+	public void updateMessage(MessageUpdateRequest request) {
+		Message message = messageRepository.findById(request.getMessageId()).orElse(null);
 
 		if(message == null) {
 			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
 		}
-		message.update(newContent);
-		repo.save(message);
+		// update를 하는거면 첨부파일 업데이트 해야하나? (본인은 안해도 된다고 생각함.)
+		message.update(request.getNewContent());
+		messageRepository.save(message);
 	}
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		repo.delete(messageId);
+		messageRepository.delete(messageId);
+		binaryRepository.deleteByMessageId(messageId);
 	}
 }
