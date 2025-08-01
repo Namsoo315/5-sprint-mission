@@ -13,15 +13,15 @@ import lombok.Getter;
 public class Channel implements Serializable {
 
 	@Serial
-	private final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	private final UUID channelId;
-	private final ChannelType type;
 	private String name;
 	private String description;
+	private final ChannelType type;
 	private final Instant createdAt;
 	private Instant updatedAt;
 
-	public Channel(ChannelType type,String name, String description) {
+	public Channel(ChannelType type, String name, String description) {
 		this.channelId = UUID.randomUUID();
 		this.type = type;
 		this.name = name;
@@ -30,7 +30,7 @@ public class Channel implements Serializable {
 		this.updatedAt = createdAt;
 	}
 
-	public void update(String name, String description){
+	public void update(String name, String description) {
 		this.name = name;
 		this.description = description;
 		this.updatedAt = Instant.now();
