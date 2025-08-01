@@ -8,27 +8,24 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.repository.BinaryRepository;
 
-@Repository("messageRepository")
-public class FileMessageRepository implements MessageRepository {
+@Repository("binaryContentRepository")
+public class FileBiRepository implements BinaryRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;
 
-	public FileMessageRepository() {
-		this.DIRECTORY = "MESSAGE";
+	public FileBiRepository() {
+		this.DIRECTORY = "BINARY";
 		this.EXTENSION = ".ser";
-
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -40,13 +37,13 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public Message save(Message message) {
-		boolean isNew = !existsById(message.getMessageId());
+	public BinaryContent save(BinaryContent binaryContent) {
+		boolean isNew = !existsById(binaryContent.getBinaryContentId());
 
-		Path path = Paths.get(DIRECTORY, message.getMessageId() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, binaryContent.getBinaryContentId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(message);
+			oos.writeObject(binaryContent);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -57,27 +54,27 @@ public class FileMessageRepository implements MessageRepository {
 			System.out.println("업데이트 되었습니다.");
 		}
 
-		return message;
+		return binaryContent;
 	}
 
 	@Override
-	public Optional<Message> findById(UUID id) {
-		Message message = null;
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public Optional<BinaryContent> findById(UUID binaryContentId) {
+		BinaryContent binaryContent = null;
+		Path path = Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			message = (Message)ois.readObject();
+			binaryContent = (BinaryContent)ois.readObject();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
-		return Optional.ofNullable(message);
+		return Optional.ofNullable(binaryContent);
 	}
 
 	@Override
-	public List<Message> findAll() {
-		List<Message> messages = new ArrayList<>();
+	public List<BinaryContent> findAll() {
+		List<BinaryContent> binaryContents = new ArrayList<>();
 		Path directory = Paths.get(DIRECTORY);
 
 		try {
@@ -86,25 +83,16 @@ public class FileMessageRepository implements MessageRepository {
 				.forEach(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						Message message = (Message)ois.readObject();
-						messages.add(message);
+						BinaryContent binaryContent = (BinaryContent)ois.readObject();
+						binaryContents.add(binaryContent);
 					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패", e);
+						throw new RuntimeException("파일 읽기 실패",e);
 					}
 				});
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return messages;
-	}
-
-	@Override
-	public Instant LatestMessageByChannelId(UUID channelId) {
-		return this.findAll().stream()
-			.filter(message -> message.getChannelId().equals(channelId))
-			.max(Comparator.comparing(Message::getCreatedAt))
-			.map(Message::getCreatedAt)
-			.orElse(null);
+		return binaryContents;
 	}
 
 	@Override
@@ -113,8 +101,8 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public void delete(UUID binaryContentId) {
+		Path path = Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION);
 
 		try {
 			Files.deleteIfExists(path);
@@ -124,12 +112,13 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public void deleteByChannelId(UUID channelId) {
-
+	public void deleteByUserId(UUID userId) {
+		// 기능 추가해야함.
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID binaryContentId) {
+		return Files.exists(Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION));
 	}
+
 }

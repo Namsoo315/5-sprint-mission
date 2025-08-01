@@ -20,10 +20,4 @@ public class UserFindResponse {
 	private String email;
 	private boolean status;
 
-	public UserFindResponse(User user, UserStatus status) {
-		this.userId = user.getUserId();
-		this.username = user.getUsername();
-		this.email = user.getEmail();
-		this.status = status != null && status.isOnline();
-	}
 }
