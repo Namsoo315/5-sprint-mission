@@ -32,14 +32,12 @@ public class DiscodeitApplication {
 
 	static User setupUser(UserService userService) {
 		//"woody", "woody@codeit.com", "woody1234" 원래 이렇게 넣어야 하지만 name이랑 age만 받아서 이런식을 처리함.
-		User user = userService.createUser(new UserCreateRequest("woody", "woody@test.com","1234"));
-		return user;
+		return userService.createUser(new UserCreateRequest("woody", "woody@test.com","1234"));
 	}
 
 	static Channel setupChannel(ChannelService channelService) {
 		// ChannelType.PUBLIC Enum 타입으로 정하지 않아서 그냥 뺐음.
-		Channel channel = channelService.createPublicChannel(new PublicChannelCreateRequest(ChannelType.PUBLIC,"공지", "공지 채널입니다."));
-		return channel;
+		return channelService.createPublicChannel(new PublicChannelCreateRequest("woody", "woody"));
 	}
 
 	static void messageCreateTest(MessageService messageService, Channel channel, User author) {
