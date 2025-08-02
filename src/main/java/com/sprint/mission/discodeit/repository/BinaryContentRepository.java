@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
 
-public interface BinaryRepository {
+public interface BinaryContentRepository {
 	BinaryContent save(BinaryContent binaryContent);
 
 	Optional<BinaryContent> findById(UUID binaryId);

@@ -16,10 +16,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.repository.BinaryRepository;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
 @Repository("binaryContentRepository")
-public class FileBiRepository implements BinaryRepository {
+public class FileBiRepository implements BinaryContentRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;
 
