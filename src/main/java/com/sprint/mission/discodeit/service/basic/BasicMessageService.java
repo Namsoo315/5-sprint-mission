@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.repository.BinaryRepository;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -26,17 +24,18 @@ public class BasicMessageService implements MessageService {
 	private final MessageRepository messageRepository;
 	private final ChannelRepository	channelRepository;
 	private final UserRepository userRepository;
-	private final BinaryRepository binaryRepository;
+	private final BinaryContentRepository binaryContentRepository;
 
 	@Override
 	public Message createMessage(MessageCreateRequest request) {
 
-		if (request.getUserId() == null) {
+		if (userRepository.findById(request.getUserId()).isPresent()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (request.getChannelId() == null) {
+		if (channelRepository.findById(request.getChannelId()).isPresent()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
+
 		Message message = new Message(request.getUserId(),
 			request.getChannelId(),
 			request.getMessage(),
@@ -88,6 +87,6 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public void deleteMessage(UUID messageId) {
 		messageRepository.delete(messageId);
-		binaryRepository.deleteByMessageId(messageId);
+		binaryContentRepository.deleteByMessageId(messageId);
 	}
 }
