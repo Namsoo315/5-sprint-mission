@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.service.jcf;
+package com.sprint.mission.discodeit.service.basic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,10 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
-public class JCFUserService implements UserService {
+public class BasicUserService implements UserService {
 	private final UserRepository repo;
 
-	public JCFUserService(UserRepository repo) {
+	public BasicUserService(UserRepository repo) {
 		this.repo = repo;
 	}
 
@@ -35,7 +35,7 @@ public class JCFUserService implements UserService {
 	}
 
 	@Override
-	public void updateUser(UUID uuid, String username, int age) {
+	public void updateUser(UUID uuid, String name, int age) {
 
 		User user = repo.findById(uuid).orElse(null);
 
@@ -43,7 +43,7 @@ public class JCFUserService implements UserService {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
 
-		user.update(username, age);
+		user.update(name, age);
 
 		repo.save(user);
 	}

@@ -1,26 +1,21 @@
-package com.sprint.mission.discodeit.service.jcf;
+package com.sprint.mission.discodeit.service.file;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
-public class JCFUserService implements UserService {
-	private final UserRepository repo;
-
-	public JCFUserService(UserRepository repo) {
-		this.repo = repo;
-	}
+public class FileUserService implements UserService {
+	private final UserRepository repo = new FileUserRepository();
 
 	@Override
 	public User createUser(String name, int age) {
 		User user = new User(name, age);
 		repo.save(user);
-
 		return user;
 	}
 
@@ -31,20 +26,18 @@ public class JCFUserService implements UserService {
 
 	@Override
 	public List<User> findAll() {
-		return new ArrayList<>(repo.findAll());
+		return repo.findAll();
 	}
 
 	@Override
 	public void updateUser(UUID uuid, String username, int age) {
-
 		User user = repo.findById(uuid).orElse(null);
 
 		if (user == null) {
-			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+			throw new IllegalArgumentException("아이디가 존재하지 않습니다.");
 		}
 
 		user.update(username, age);
-
 		repo.save(user);
 	}
 

@@ -1,9 +1,13 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 
-public class User{
+public class User implements Serializable {
+	@Serial
+	private final long serialVersionUID = 1L;
 	private final UUID userId;
 	private String username;
 	private int age;
@@ -18,7 +22,11 @@ public class User{
 		this.updatedAt = createdAt;
 	}
 
-	public UUID getId() {
+	public long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public UUID getUserId() {
 		return userId;
 	}
 

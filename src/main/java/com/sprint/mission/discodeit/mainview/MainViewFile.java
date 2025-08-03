@@ -11,67 +11,94 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 
-public class MainView {
+public class MainViewFile {
 	public void mainMenu() {
 		Scanner sc = new Scanner(System.in);
-		UserService userService = new JCFUserService();
-		ChannelService channelService = new JCFChannelService();
-		MessageService messageService = new JCFMessageService(userService, channelService);
 
-		System.out.println("보고싶은 CRUDTest");
+		UserService fileUserService = new FileUserService();
+		ChannelService fileChannelService = new FileChannelService();
+		MessageService fileMessageService = new FileMessageService();
+
+		// Test Data Input
+		TestDataInput testDataInput = new TestDataInput();
+		testDataInput.testData(fileUserService, fileChannelService, fileMessageService);
+		System.out.println();
 		System.out.println("===== 1. userCRUDTest =====");
 		System.out.println("===== 2. channelCRUDTest =====");
 		System.out.println("===== 3. messageCRUDTest =====");
 
+
+		System.out.print("보고싶은 CRUDTest : ");
 		int i = sc.nextInt();
 
 		try {
 			switch (i) {
 				case 1:
-					userCRUDTest(userService);
+					userCRUDTest(fileUserService);
 					break;
 				case 2:
-					channelCRUDTest(channelService);
+					channelCRUDTest(fileChannelService);
 					break;
 				case 3:
-					messageCRUDTest(userService, channelService, messageService);
+					messageCRUDTest(fileUserService, fileChannelService, fileMessageService);
 					break;
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IllegalStateException("유효하지 않는 값입니다.");
+		} finally {
+			//파일 계속 저장되고 삭제되는게 귀찮아서 잠시 만듬.
+			allDeleteFile(fileUserService, fileChannelService, fileMessageService);
+		}
+	}
+
+	private static void allDeleteFile(UserService userService, ChannelService channelService,
+		MessageService messageService) {
+		//전체 삭제
+		for (User user1 : userService.findAll()) {
+			userService.deleteUser(user1.getUserId());
 		}
 
+		//전체 삭제
+		for (Channel channel1 : channelService.findAll()) {
+			channelService.deleteChannel(channel1.getChannelId());
+		}
+
+		//전체 삭제
+		for(Message m : messageService.findAll()) {
+			messageService.deleteMessage(m.getMessageId());
+		}
 	}
 
 	private static void userCRUDTest(UserService userService) {
 		//등록
 		System.out.println("===== User 생성 =====");
 		User user = userService.createUser("남현수", 30);
-		System.out.println("User 생성 : " + user.getId() + " 이름 : " + user.getUsername());
+		System.out.println("User 생성 : " + user.getUserId() + " 이름 : " + user.getUsername());
 		System.out.println();
 
 		//조회(단건)
 		System.out.println("===== User 하나만 조회 =====");
-		Optional<User> byId = userService.findById(user.getId());
-		byId.ifPresent(u -> System.out.println("유저 하나 조회 : " + u.getId()));
+		Optional<User> byId = userService.findByUserId(user.getUserId());
+		byId.ifPresent(u -> System.out.println("유저 하나 조회 : " + u.getUserId()));
 		System.out.println();
 
 		//조회(다건)
 		System.out.println("===== User 전부 조회 =====");
-		userService.findByAll().forEach(u -> System.out.println(u.toString()));
+		userService.findAll().forEach(u -> System.out.println(u.toString()));
 		System.out.println();
 
 		//수정
 		System.out.println("===== User 수정 =====");
-		System.out.println("수정되는 UUID : " + user.getId());
+		System.out.println("수정되는 UUID : " + user.getUserId());
 		System.out.println();
 		String updateName = "수정된 이름";
 		int updateAge = 100;
-		userService.updateUser(user.getId(), updateName, updateAge);        //수정 시작
+		userService.updateUser(user.getUserId(), updateName, updateAge);        //수정 시작
 
 		//수정된 데이터 조회
 		System.out.println("===== User 수정 조회=====");
@@ -80,21 +107,22 @@ public class MainView {
 
 		//수정 후 전체 데이터 조회도
 		System.out.println("===== User 수정후 전체 조회=====");
-		List<User> modifyUsers = userService.findByAll();
+		List<User> modifyUsers = userService.findAll();
 		modifyUsers.forEach(u -> System.out.println(u.toString()));
 		System.out.println();
 
 		//삭제
 		System.out.println("===== User 삭제=====");
-		System.out.println("삭제할 UUID : " + user.getId());
-		userService.deleteUser(user.getId());
+		System.out.println("삭제할 UUID : " + user.getUserId());
+		userService.deleteUser(user.getUserId());
 		System.out.println();
 
 		//조회를 통해 삭제되었는지 확인
 		System.out.println("===== User 삭제 조회=====");
-		List<User> deleteUsers = userService.findByAll();
+		List<User> deleteUsers = userService.findAll();
 		deleteUsers.forEach(u -> System.out.println(u.toString()));
 		System.out.println();
+
 
 	}
 
@@ -113,7 +141,7 @@ public class MainView {
 
 		//조회(다건)
 		System.out.println("===== Channel 전부 조회 =====");
-		List<Channel> byAllChannel = channelService.findByAllChannel();
+		List<Channel> byAllChannel = channelService.findAll();
 		byAllChannel
 			.stream()
 			.sorted(Comparator.comparing(Channel::getName)).
@@ -135,7 +163,7 @@ public class MainView {
 
 		//수정 후 전체 데이터 조회도
 		System.out.println("===== Channel 전체 데이터 조회 =====");
-		channelService.findByAllChannel().forEach(ch -> System.out.println(ch.toString()));
+		channelService.findAll().forEach(ch -> System.out.println(ch.toString()));
 		System.out.println();
 
 		//삭제
@@ -146,8 +174,9 @@ public class MainView {
 
 		//조회를 통해 삭제되었는지 확인
 		System.out.println("===== Channel 삭제 확인 =====");
-		channelService.findByAllChannel().forEach(ch -> System.out.println(ch.toString()));
+		channelService.findAll().forEach(ch -> System.out.println(ch.toString()));
 		System.out.println();
+
 	}
 
 	private static void messageCRUDTest(UserService userService, ChannelService channelService,
@@ -156,32 +185,22 @@ public class MainView {
 		//등록
 		System.out.println("===== Message 생성 =====");
 
-		// 원래는 findById해서 전부 찾아와야하지만 할게 많아 보여서 이렇게 함.
-		User user1 = userService.findByAll().stream().findFirst()
-			.orElseThrow(() -> new IllegalStateException("등록된 유저가 없습니다."));
-		User user2 = userService.createUser("나무나무나무", 15);
-		Channel channel = channelService.findByAllChannel().stream().findFirst()
-			.orElseThrow(() -> new IllegalStateException("등록된 채널이 없습니다."));
+		User user1 = userService.createUser("Message Test용 User", 15);
+		Channel channel1 = channelService.createChannel("Message Test용 Channel", "메시지 테스트 용입니다.");
 
-		Message message = messageService.createMessage(user1.getId(), channel.getChannelId(), "첫번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "두번째 메시지");
-		messageService.createMessage(user1.getId(), channel.getChannelId(), "세번째 메시지");
-
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 첫번째 메시지");
-		messageService.createMessage(user2.getId(), channel.getChannelId(), "user2의 두번째 메시지");
-
+		Message message = messageService.createMessage(user1.getUserId(), channel1.getChannelId(), "첫번째 메시지");
 		System.out.println(message.toString());
 		System.out.println();
 
 		//조회(단건)
 		System.out.println("===== Message 하나만 조회 =====");
-		Optional<Message> foundMessage = messageService.findByMessage(message.getMessageId());
+		Optional<Message> foundMessage = messageService.findByMessageId(message.getMessageId());
 		foundMessage.ifPresent(m -> System.out.println("조회된 Message: " + m.toString()));
 		System.out.println();
 
 		//조회(다건)
 		System.out.println("===== Message 전부 조회 =====");
-		List<Message> allMessages = messageService.findByAllMessage();
+		List<Message> allMessages = messageService.findAll();
 		allMessages.forEach(m -> System.out.println(m.toString()));
 		System.out.println();
 
@@ -193,13 +212,13 @@ public class MainView {
 
 		//수정된 데이터 조회
 		System.out.println("===== Message 수정 조회=====");
-		Optional<Message> updatedMessage = messageService.findByMessage(message.getMessageId());
+		Optional<Message> updatedMessage = messageService.findByMessageId(message.getMessageId());
 		updatedMessage.ifPresent(m -> System.out.println("수정된 Message : " + m));
 		System.out.println();
 
 		//수정 후 전체 데이터 조회도
 		System.out.println("===== Message 수정후 전체 조회=====");
-		List<Message> messages = messageService.findByAllMessage();
+		List<Message> messages = messageService.findAll();
 		messages.forEach(m -> System.out.println(m.toString()));
 
 		//삭제
@@ -209,7 +228,7 @@ public class MainView {
 
 		//조회를 통해 삭제되었는지 확인
 		System.out.println("===== Message 삭제 조회=====");
-		List<Message> afterDeleteMessages = messageService.findByAllMessage();
+		List<Message> afterDeleteMessages = messageService.findAll();
 		afterDeleteMessages.forEach(m -> System.out.println(m.toString()));
 		System.out.println();
 

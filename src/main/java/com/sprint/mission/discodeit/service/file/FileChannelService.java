@@ -1,23 +1,17 @@
-package com.sprint.mission.discodeit.service.jcf;
+package com.sprint.mission.discodeit.service.file;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-public class JCFChannelService implements ChannelService {
-	private final ChannelRepository repo;
-
-	public JCFChannelService(ChannelRepository repo) {
-		this.repo = repo;
-	}
+public class FileChannelService implements ChannelService {
+	private final ChannelRepository repo = new FileChannelRepository();
 
 	@Override
 	public Channel createChannel(String name, String description) {
@@ -35,17 +29,19 @@ public class JCFChannelService implements ChannelService {
 	@Override
 	public List<Channel> findByChannelName(String name) {
 		List<Channel> list = new ArrayList<>();
-		for (Channel channel : repo.findAll()) {
-			if (channel.getName().equals(name)) {
+
+		for (Channel channel : repo.findAll()){
+			if (channel.getName().equals(name)){
 				list.add(channel);
 			}
 		}
+
 		return list;
 	}
 
 	@Override
 	public List<Channel> findAll() {
-		return new ArrayList<>(repo.findAll());
+		return repo.findAll();
 	}
 
 	@Override
@@ -53,7 +49,7 @@ public class JCFChannelService implements ChannelService {
 		Channel channel = repo.findById(uuid).orElse(null);
 
 		if(channel == null) {
-			throw new IllegalArgumentException("유효한 ID 가 없습니다.");
+			throw new IllegalArgumentException("채널이 존재하지 않습니다.");
 		}
 		channel.update(name, description);
 		repo.save(channel);

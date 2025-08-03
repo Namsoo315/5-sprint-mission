@@ -5,14 +5,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
 ;
 
 public interface ChannelService {
-	public Channel createChannel(String name, String description);
-	public Optional<Channel> findById(UUID uuid);
-	public List<Channel> findByChannelName(String name);
-	public List<Channel> findByAllChannel();
-	public void updateChannel(UUID uuid, String name, String description);
-	public void deleteChannel(UUID uuid);
+	Channel createChannel(String name, String description);
+
+	Optional<Channel> findByChannelId(UUID uuid);
+
+	List<Channel> findByChannelName(String name);
+
+	List<Channel> findAll();
+
+	void updateChannel(UUID uuid, String name, String description);
+
+	void deleteChannel(UUID uuid);
 }

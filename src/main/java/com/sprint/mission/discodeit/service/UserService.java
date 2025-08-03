@@ -8,8 +8,12 @@ import com.sprint.mission.discodeit.entity.User;
 
 public interface UserService {
 	User createUser(String name, int age);
-	Optional<User> findById(UUID uuid);
-	List<User> findByAll();
+
+	Optional<User> findByUserId(UUID uuid);
+
+	List<User> findAll();
+
 	void updateUser(UUID uuid, String username, int age);
+
 	void deleteUser(UUID uuid);
 }

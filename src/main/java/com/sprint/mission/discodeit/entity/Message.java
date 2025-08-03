@@ -1,15 +1,19 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
-public class Message{
+public class Message implements Serializable {
+	@Serial
+	private final long serialVersionUID = 1L;
 	private UUID messageId;
-	private UUID userId;
-	private UUID channelId;
+	private final UUID userId;
+	private final UUID channelId;
 	private String message;
-	private Long createdAt;
+	private final Long createdAt;
 	private Long updatedAt;
 
 	public Message(UUID userId, UUID channelId, String message) {
@@ -21,52 +25,30 @@ public class Message{
 		this.updatedAt = createdAt;
 	}
 
-	public UUID getMessageId() {
-		return messageId;
+	public long getSerialVersionUID() {
+		return serialVersionUID;
 	}
 
-	public void setMessageId(UUID messageId) {
-		this.messageId = messageId;
+	public UUID getMessageId() {
+		return messageId;
 	}
 
 	public UUID getUserId() {
 		return userId;
 	}
 
-	public void setUserId(UUID userId) {
-		this.userId = userId;
-	}
-
 	public UUID getChannelId() {
 		return channelId;
-	}
-
-	public void setChannelId(UUID channelId) {
-		this.channelId = channelId;
 	}
 
 	public String getMessage() {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public Long getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Long createdAt) {
-		this.createdAt = createdAt;
-	}
+	public Long getCreatedAt() {return createdAt;}
 
 	public Long getUpdatedAt() {
 		return updatedAt;
-	}
-
-	public void setUpdatedAt(Long updatedAt) {
-		this.updatedAt = updatedAt;
 	}
 
 	public void update(String message) {
