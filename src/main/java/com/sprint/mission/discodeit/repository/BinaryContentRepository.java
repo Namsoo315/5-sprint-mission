@@ -13,13 +13,15 @@ public interface BinaryContentRepository {
 
 	List<BinaryContent> findAll();
 
+	List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds);
+
 	long count();
 
 	void delete(UUID binaryId);
 
 	void deleteByUserId(UUID userId);
 
-	void deleteByMessageId(UUID messageId);
+	void deleteByAttachmentIds(List<UUID> attachmentIds);
 
 	boolean existsById(UUID binaryId);
 }

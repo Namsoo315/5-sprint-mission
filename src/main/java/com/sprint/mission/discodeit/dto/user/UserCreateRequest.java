@@ -18,7 +18,7 @@ public class UserCreateRequest {
 	private String username;
 	private String email;
 	private String password;
-	private BinaryContent content;
+	private BinaryContent binaryContent;
 
 	public UserCreateRequest(String username, String email, String password) {
 		this.username = username;
@@ -33,7 +33,7 @@ public class UserCreateRequest {
 			", username='" + username + '\'' +
 			", email='" + email + '\'' +
 			", age=" + password +
-			", content=" + content +
+			", content=" + binaryContent +
 			'}';
 	}
 }

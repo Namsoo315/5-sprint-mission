@@ -13,18 +13,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
+import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 
-import com.sprint.mission.discodeit.entity.ReadStatus;
-import com.sprint.mission.discodeit.repository.ReadStatusRepository;
-
-@Repository("readStatusRepository")
-public class FileRSRepository implements ReadStatusRepository {
+public class FileUserStatusRepository implements UserStatusRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;
 
-	public FileRSRepository() {
-		this.DIRECTORY = "READSTATUS";
+	public FileUserStatusRepository() {
+		this.DIRECTORY = "USERSTATUS";
 		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
@@ -37,13 +34,13 @@ public class FileRSRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public ReadStatus save(ReadStatus readStatus) {
-		boolean isNew = !existsById(readStatus.getReadStatusId());
+	public UserStatus save(UserStatus userStatus) {
+		boolean isNew = !existsById(userStatus.getUserStatusId());
 
-		Path path = Paths.get(DIRECTORY, readStatus.getReadStatusId() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, userStatus.getUserStatusId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(readStatus);
+			oos.writeObject(userStatus);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -54,27 +51,35 @@ public class FileRSRepository implements ReadStatusRepository {
 			System.out.println("업데이트 되었습니다.");
 		}
 
-		return readStatus;
+		return userStatus;
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID readStatusId) {
-		ReadStatus readStatus = null;
-		Path path = Paths.get(DIRECTORY, readStatusId.toString() + EXTENSION);
+	public Optional<UserStatus> findById(UUID userStatusId) {
+		UserStatus userStatus = null;
+		Path path = Paths.get(DIRECTORY, userStatusId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			readStatus = (ReadStatus)ois.readObject();
+			userStatus = (UserStatus)ois.readObject();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
-		return Optional.ofNullable(readStatus);
+		return Optional.ofNullable(userStatus);
 	}
 
 	@Override
-	public List<ReadStatus> findAll() {
-		List<ReadStatus> readStatuses = new ArrayList<>();
+	public Optional<UserStatus> findByUserId(UUID userId) {
+		List<UserStatus> userStatuses = new ArrayList<>();
+		Path directory = Paths.get(DIRECTORY);
+		// 로직 추가 필요.
+		return Optional.empty();
+	}
+
+	@Override
+	public List<UserStatus> findAll() {
+		List<UserStatus> userStatuses = new ArrayList<>();
 		Path directory = Paths.get(DIRECTORY);
 
 		try {
@@ -83,8 +88,8 @@ public class FileRSRepository implements ReadStatusRepository {
 				.forEach(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						ReadStatus readStatus = (ReadStatus)ois.readObject();
-						readStatuses.add(readStatus);
+						UserStatus userStatus = (UserStatus)ois.readObject();
+						userStatuses.add(userStatus);
 					} catch (Exception e) {
 						throw new RuntimeException("파일 읽기 실패",e);
 					}
@@ -92,17 +97,7 @@ public class FileRSRepository implements ReadStatusRepository {
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return readStatuses;
-	}
-
-	@Override
-	public List<ReadStatus> findAllByUserId(UUID userId) {
-		return this.findAll().stream().filter(status -> status.getUserId().equals(userId)).toList();
-	}
-
-	@Override
-	public List<ReadStatus> findAllByChannelId(UUID channelId) {
-		return this.findAll().stream().filter(status -> status.getChannelId().equals(channelId)).toList();
+		return userStatuses;
 	}
 
 	@Override
@@ -111,8 +106,8 @@ public class FileRSRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public void delete(UUID userStatusId) {
+		Path path = Paths.get(DIRECTORY, userStatusId.toString() + EXTENSION);
 
 		try {
 			Files.deleteIfExists(path);
@@ -122,12 +117,12 @@ public class FileRSRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public void deleteByChannelId(UUID channelId) {
-
+	public void deleteByUserId(UUID userId) {
+		// 기능 추가해야함.
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID userStatusId) {
+		return Files.exists(Paths.get(DIRECTORY, userStatusId.toString() + EXTENSION));
 	}
 }

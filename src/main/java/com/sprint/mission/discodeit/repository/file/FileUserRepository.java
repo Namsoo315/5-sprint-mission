@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
-@Repository("userRepository")
+
 public class FileUserRepository implements UserRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;

@@ -9,9 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
+@Repository("messageRepository")
 public class JCFMessageRepository implements MessageRepository {
 	private final Map<UUID, Message> map = new HashMap<>();
 

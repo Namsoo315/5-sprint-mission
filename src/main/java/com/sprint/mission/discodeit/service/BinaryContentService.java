@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.dto.binary.BICreateRequest;
+import com.sprint.mission.discodeit.dto.binary.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 
 public interface BinaryContentService {
-	BinaryContent createBinaryContent(BICreateRequest request);
+	BinaryContent createBinaryContent(BinaryContentCreateRequest request);
 	Optional<BinaryContent> findById(UUID binaryContentId);
-	List<BinaryContent> findAllByIdIn(UUID[] binaryContentIds);		//Id 목록?
+	List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds);
 	void delete(UUID binaryContentId);
 }

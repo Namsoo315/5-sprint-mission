@@ -19,7 +19,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
-@Repository("channelRepository")
+
 public class FileChannelRepository implements ChannelRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;

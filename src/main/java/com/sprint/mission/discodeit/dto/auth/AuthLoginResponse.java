@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.dto;
+package com.sprint.mission.discodeit.dto.auth;
 
 import com.sprint.mission.discodeit.entity.User;
 

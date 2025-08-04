@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.sprint.mission.discodeit.dto.AuthLoginRequest;
-import com.sprint.mission.discodeit.dto.AuthLoginResponse;
+import com.sprint.mission.discodeit.dto.auth.AuthLoginRequest;
+import com.sprint.mission.discodeit.dto.auth.AuthLoginResponse;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.AuthService;
