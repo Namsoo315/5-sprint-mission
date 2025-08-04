@@ -15,8 +15,6 @@ public interface BinaryContentRepository {
 
 	List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds);
 
-	long count();
-
 	void delete(UUID binaryId);
 
 	void deleteByUserId(UUID userId);
