@@ -10,17 +10,15 @@ import com.sprint.mission.discodeit.entity.Message;
 public interface MessageRepository {
 	Message save(Message message);
 
-	Optional<Message> findById(UUID id);
+	Optional<Message> findById(UUID messageId);
 
 	List<Message> findAll();
 
 	Instant LatestMessageByChannelId(UUID channelId);
 
-	long count();
-
 	void delete(UUID id);
 
 	void deleteByChannelId(UUID channelId);
 
-	boolean existsById(UUID id);
+	boolean existsById(UUID messageId);
 }

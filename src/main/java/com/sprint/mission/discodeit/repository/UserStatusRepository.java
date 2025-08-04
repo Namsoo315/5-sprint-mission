@@ -16,8 +16,6 @@ public interface UserStatusRepository {
 
 	List<UserStatus> findAll();
 
-	long count();
-
 	void delete(UUID userStatusId);
 
 	void deleteByUserId(UUID userId);

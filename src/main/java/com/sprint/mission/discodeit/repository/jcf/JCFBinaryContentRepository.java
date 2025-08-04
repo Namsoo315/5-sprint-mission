@@ -58,11 +58,6 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID binaryId) {
 		if(!existsById(binaryId)) {
 			throw new IllegalArgumentException("일치하는 ID 가 없습니다.");

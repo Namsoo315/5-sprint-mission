@@ -14,21 +14,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Repository;
 
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
-
 public class FileMessageRepository implements MessageRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private final String DIRECTORY = "FileData/MESSAGE";
+	;
+	private final String EXTENSION = ".ser";
+	;
 
 	public FileMessageRepository() {
-		this.DIRECTORY = "MESSAGE";
-		this.EXTENSION = ".ser";
-
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -41,8 +41,6 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public Message save(Message message) {
-		boolean isNew = !existsById(message.getMessageId());
-
 		Path path = Paths.get(DIRECTORY, message.getMessageId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -50,20 +48,13 @@ public class FileMessageRepository implements MessageRepository {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return message;
 	}
 
 	@Override
-	public Optional<Message> findById(UUID id) {
+	public Optional<Message> findById(UUID messageId) {
 		Message message = null;
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, messageId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -77,25 +68,19 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public List<Message> findAll() {
-		List<Message> messages = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try {
-			Files.list(directory)
-				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						Message message = (Message)ois.readObject();
-						messages.add(message);
+						return (Message)ois.readObject();
 					} catch (Exception e) {
 						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return messages;
 	}
 
 	@Override
@@ -105,11 +90,6 @@ public class FileMessageRepository implements MessageRepository {
 			.max(Comparator.comparing(Message::getCreatedAt))
 			.map(Message::getCreatedAt)
 			.orElse(null);
-	}
-
-	@Override
-	public long count() {
-		return 0;
 	}
 
 	@Override
@@ -125,11 +105,15 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public void deleteByChannelId(UUID channelId) {
+		List<Message> list = this.findAll().stream().filter(messages -> messages.getChannelId().equals(channelId)).toList();
 
+		for(Message messages : list) {
+			this.delete(messages.getMessageId());
+		}
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID messageId) {
+		return Files.exists(Paths.get(DIRECTORY, messageId.toString() + EXTENSION));
 	}
 }

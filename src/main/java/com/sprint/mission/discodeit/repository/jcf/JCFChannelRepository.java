@@ -48,11 +48,6 @@ public class JCFChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
-	}
-
-	@Override
 	public void delete(UUID channelId) {
 		if (!existsById(channelId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");

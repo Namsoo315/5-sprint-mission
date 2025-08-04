@@ -55,11 +55,6 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
-	}
-
-	@Override
 	public void delete(UUID messageId) {
 		if (!existsById(messageId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
@@ -74,7 +69,7 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public boolean existsById(UUID messageId) {
+		return map.containsKey(messageId);
 	}
 }

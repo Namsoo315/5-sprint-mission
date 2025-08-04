@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 
 public class FileUserStatusRepository implements UserStatusRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private final String DIRECTORY = "FileData/USERSTATUS";
+	private final String EXTENSION = ".ser";
 
 	public FileUserStatusRepository() {
-		this.DIRECTORY = "USERSTATUS";
-		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -35,20 +35,12 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public UserStatus save(UserStatus userStatus) {
-		boolean isNew = !existsById(userStatus.getUserStatusId());
-
 		Path path = Paths.get(DIRECTORY, userStatus.getUserStatusId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(userStatus);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
 		}
 
 		return userStatus;
@@ -71,38 +63,26 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public Optional<UserStatus> findByUserId(UUID userId) {
-		List<UserStatus> userStatuses = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-		// 로직 추가 필요.
-		return Optional.empty();
+		return this.findAll().stream()
+			.filter(userStatus -> userStatus.getUserId().equals(userId))
+			.findFirst();
 	}
 
 	@Override
 	public List<UserStatus> findAll() {
-		List<UserStatus> userStatuses = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try {
-			Files.list(directory)
-				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						UserStatus userStatus = (UserStatus)ois.readObject();
-						userStatuses.add(userStatus);
+						return (UserStatus)ois.readObject();
 					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패",e);
+						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return userStatuses;
-	}
-
-	@Override
-	public long count() {
-		return 0;
 	}
 
 	@Override
@@ -118,7 +98,11 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public void deleteByUserId(UUID userId) {
-		// 기능 추가해야함.
+		List<UserStatus> list = this.findAll().stream().filter(status -> status.getUserId().equals(userId)).toList();
+
+		for(UserStatus status : list) {
+			this.delete(status.getUserStatusId());
+		}
 	}
 
 	@Override
