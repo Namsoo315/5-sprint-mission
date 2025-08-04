@@ -7,11 +7,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
+@Repository("channelRepository")
 public class JCFChannelRepository implements ChannelRepository {
 	private final Map<UUID, Channel> map = new HashMap<>();
 
@@ -31,9 +34,9 @@ public class JCFChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<Channel> findById(UUID channelId) {
+		if (existsById(channelId)) {
+			return Optional.of(map.get(channelId));
 		}
 
 		return Optional.empty();
@@ -50,16 +53,15 @@ public class JCFChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public void delete(UUID channelId) {
+		if (!existsById(channelId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(channelId);
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public boolean existsById(UUID channelId) {
+		return map.containsKey(channelId);
 	}
 }

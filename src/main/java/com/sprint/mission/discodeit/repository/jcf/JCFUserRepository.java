@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
+@Repository("userRepository")
 public class JCFUserRepository implements UserRepository {
 	private final Map<UUID, User> map = new HashMap<>();
 

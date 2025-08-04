@@ -11,9 +11,12 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 
 @SpringBootApplication
 public class DiscodeitApplication {
@@ -24,6 +27,7 @@ public class DiscodeitApplication {
 		UserService userService = context.getBean("userService", UserService.class);
 		ChannelService channelService = context.getBean("channelService", ChannelService.class);
 		MessageService messageService = context.getBean("messageService", MessageService.class);
+
 		// 셋업
 		User user = setupUser(userService);
 		Channel channel = setupChannel(channelService);

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
-@Repository("messageRepository")
+
 public class FileMessageRepository implements MessageRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;

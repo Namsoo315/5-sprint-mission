@@ -15,9 +15,11 @@ public class Channel implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private final UUID channelId;
+
 	private String name;
 	private String description;
 	private final ChannelType type;
+
 	private final Instant createdAt;
 	private Instant updatedAt;
 
@@ -38,13 +40,13 @@ public class Channel implements Serializable {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("Channel{");
-		sb.append("channelId=").append(channelId);
-		sb.append(", name='").append(name).append('\'');
-		sb.append(", description='").append(description).append('\'');
-		sb.append(", createdAt=").append(createdAt).append('\'');
-		sb.append(", updatedAt=").append(updatedAt);
-		sb.append('}');
-		return sb.toString();
+		return "Channel{" +
+			"channelId=" + channelId +
+			", name='" + name + '\'' +
+			", description='" + description + '\'' +
+			", type=" + type +
+			", createdAt=" + createdAt +
+			", updatedAt=" + updatedAt +
+			'}';
 	}
 }

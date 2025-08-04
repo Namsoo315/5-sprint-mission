@@ -12,19 +12,27 @@ public class ReadStatus implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
 	private final UUID ReadStatusId;
 	private final UUID userId;
 	private final UUID channelId;
-	private Instant createdAt;
+
+	private boolean isRead;
+
+	private final Instant createdAt;
 	private Instant updatedAt;
 
 	public ReadStatus(UUID userId, UUID channelId) {
 		ReadStatusId = UUID.randomUUID();
 		this.userId = userId;
 		this.channelId = channelId;
+		this.isRead = false;
 		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
+	}
+
+	public void update() {
+		this.isRead = true;
+		this.updatedAt = Instant.now();
 	}
 
 	@Override

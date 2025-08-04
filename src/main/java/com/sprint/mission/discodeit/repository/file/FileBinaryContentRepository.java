@@ -13,17 +13,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
-
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-@Repository("binaryContentRepository")
-public class FileBiRepository implements BinaryContentRepository {
+
+public class FileBinaryContentRepository implements BinaryContentRepository {
 	private final String DIRECTORY;
 	private final String EXTENSION;
 
-	public FileBiRepository() {
+	public FileBinaryContentRepository() {
 		this.DIRECTORY = "BINARY";
 		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
@@ -96,6 +94,11 @@ public class FileBiRepository implements BinaryContentRepository {
 	}
 
 	@Override
+	public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
+		return List.of();
+	}
+
+	@Override
 	public long count() {
 		return 0;
 	}
@@ -117,7 +120,7 @@ public class FileBiRepository implements BinaryContentRepository {
 	}
 
 	@Override
-	public void deleteByMessageId(UUID messageId) {
+	public void deleteByAttachmentIds(List<UUID> attachmentIds) {
 
 	}
 

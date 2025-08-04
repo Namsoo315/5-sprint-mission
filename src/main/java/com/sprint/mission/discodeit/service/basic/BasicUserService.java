@@ -41,14 +41,15 @@ public class BasicUserService implements UserService {
 			throw new RuntimeException("같은 이메일이 존재합니다.");
 		}
 
-		User register = new User(request.getUsername(), request.getEmail(), request.getPassword());
+		User register = new User(request.getUsername(), request.getEmail(), request.getPassword(), request.getBinaryContent().getProfileId());
 		userRepository.save(register);
 
 		UserStatus status = new UserStatus(register.getUserId());
 		userStatusRepository.save(status);
 
-		if (request.getContent() != null) {
-			BinaryContent content = request.getContent();
+		// 선택적으로 프로필 이미지를 같이 등록함.
+		if (request.getBinaryContent() != null) {
+			BinaryContent content = request.getBinaryContent();
 			binaryContentRepository.save(content);
 		}
 
@@ -72,13 +73,14 @@ public class BasicUserService implements UserService {
 
 	@Override
 	public List<UserFindResponse> findAll() {
-		// 좋은 코드 아닌 것 같음.
 		List<User> users = userRepository.findAll();
 		List<UserFindResponse> responses = new ArrayList<>();
 
+		// 사용자의 온라인 상태 정보를 같이 포함하는 로직.
 		for (User user : users) {
 			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(()
 				-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
+
 			responses.add(UserFindResponse.builder()
 				.userId(user.getUserId())
 				.username(user.getUsername())
@@ -96,11 +98,12 @@ public class BasicUserService implements UserService {
 		User user = userRepository.findById(request.getUserId())
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
-		user.update(request.getUsername(), request.getEmail(), request.getPassword());
+		user.update(request.getUsername(), request.getEmail(), request.getPassword(), request.getBinaryContent().getProfileId());
 		userRepository.save(user);
 
-		if (request.getContent() != null) {
-			BinaryContent content = request.getContent();
+		// 선택적으로 프로필 이미지 대체 하기.?
+		if (request.getBinaryContent() != null) {
+			BinaryContent content = request.getBinaryContent();
 			binaryContentRepository.save(content);
 		}
 	}

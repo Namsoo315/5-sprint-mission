@@ -16,8 +16,10 @@ public class Message implements Serializable {
 	private final UUID messageId;
 	private final UUID userId;
 	private final UUID channelId;
-	private final List<UUID> attachmentIds;
+	private final List<UUID> attachmentIds;		// binaryContent
+
 	private String message;
+
 	private final Instant createdAt;
 	private Instant updatedAt;
 
@@ -38,14 +40,14 @@ public class Message implements Serializable {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("Message{");
-		sb.append("messageId=").append(messageId).append('\'');
-		sb.append(", userId=").append(userId).append('\'');
-		sb.append(", channelId=").append(channelId).append('\'');
-		sb.append(", message='").append(message).append('\'');
-		sb.append(", createdAt=").append(createdAt).append('\'');
-		sb.append(", updatedAt=").append(updatedAt);
-		sb.append('}');
-		return sb.toString();
+		return "Message{" +
+			"messageId=" + messageId +
+			", userId=" + userId +
+			", channelId=" + channelId +
+			", attachmentIds=" + attachmentIds +
+			", message='" + message + '\'' +
+			", createdAt=" + createdAt +
+			", updatedAt=" + updatedAt +
+			'}';
 	}
 }
