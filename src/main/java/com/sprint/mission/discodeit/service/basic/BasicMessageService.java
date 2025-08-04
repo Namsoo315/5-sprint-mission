@@ -79,7 +79,7 @@ public class BasicMessageService implements MessageService {
 		if(message == null) {
 			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
 		}
-		// update를 하는거면 첨부파일 업데이트 해야하나? (본인은 안해도 된다고 생각함.)
+
 		message.update(request.getNewContent());
 		messageRepository.save(message);
 	}
@@ -87,6 +87,8 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public void deleteMessage(UUID messageId) {
 		messageRepository.delete(messageId);
-		binaryContentRepository.deleteByMessageId(messageId);
+		Message message = messageRepository.findById(messageId).orElseThrow(
+			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+		binaryContentRepository.deleteByAttachmentIds(message.getAttachmentIds());
 	}
 }
