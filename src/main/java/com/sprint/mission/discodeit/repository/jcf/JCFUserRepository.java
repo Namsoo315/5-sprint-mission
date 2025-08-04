@@ -32,9 +32,9 @@ public class JCFUserRepository implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<User> findById(UUID userId) {
+		if (existsById(userId)) {
+			return Optional.of(map.get(userId));
 		}
 
 		return Optional.empty();
@@ -57,21 +57,16 @@ public class JCFUserRepository implements UserRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
-	}
-
-	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public void delete(UUID userId) {
+		if (!existsById(userId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(userId);
+		System.out.println(userId + " 유저가 삭제 되었습니다.");
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public boolean existsById(UUID userId) {
+		return map.containsKey(userId);
 	}
 }

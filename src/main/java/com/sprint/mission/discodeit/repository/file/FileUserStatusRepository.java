@@ -19,7 +19,7 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 
 public class FileUserStatusRepository implements UserStatusRepository {
-	private final String DIRECTORY = "USERSTATUS";
+	private final String DIRECTORY = "FileData/USERSTATUS";
 	private final String EXTENSION = ".ser";
 
 	public FileUserStatusRepository() {
@@ -35,20 +35,12 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public UserStatus save(UserStatus userStatus) {
-		boolean isNew = !existsById(userStatus.getUserStatusId());
-
 		Path path = Paths.get(DIRECTORY, userStatus.getUserStatusId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(userStatus);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
 		}
 
 		return userStatus;
@@ -71,10 +63,9 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public Optional<UserStatus> findByUserId(UUID userId) {
-		List<UserStatus> userStatuses = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-		// 로직 추가 필요.
-		return Optional.empty();
+		return this.findAll().stream()
+			.filter(userStatus -> userStatus.getUserId().equals(userId))
+			.findFirst();
 	}
 
 	@Override
@@ -95,11 +86,6 @@ public class FileUserStatusRepository implements UserStatusRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID userStatusId) {
 		Path path = Paths.get(DIRECTORY, userStatusId.toString() + EXTENSION);
 
@@ -112,7 +98,11 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public void deleteByUserId(UUID userId) {
-		// 기능 추가해야함.
+		List<UserStatus> list = this.findAll().stream().filter(status -> status.getUserId().equals(userId)).toList();
+
+		for(UserStatus status : list) {
+			this.delete(status.getUserStatusId());
+		}
 	}
 
 	@Override

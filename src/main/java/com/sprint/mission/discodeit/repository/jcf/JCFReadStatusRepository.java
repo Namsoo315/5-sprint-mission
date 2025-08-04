@@ -66,11 +66,6 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID readStatusId) {
 		map.remove(readStatusId);
 	}

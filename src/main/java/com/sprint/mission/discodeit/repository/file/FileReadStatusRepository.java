@@ -15,10 +15,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
 public class FileReadStatusRepository implements ReadStatusRepository {
-	private final String DIRECTORY = "READSTATUS";
+	private final String DIRECTORY = "FileData/READSTATUS";
 	private final String EXTENSION = ".ser";
 
 	public FileReadStatusRepository() {
@@ -34,20 +35,12 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public ReadStatus save(ReadStatus readStatus) {
-		boolean isNew = !existsById(readStatus.getReadStatusId());
-
 		Path path = Paths.get(DIRECTORY, readStatus.getReadStatusId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(readStatus);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
 		}
 
 		return readStatus;
@@ -96,11 +89,6 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID id) {
 		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
 
@@ -113,7 +101,11 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public void deleteByChannelId(UUID channelId) {
+		List<ReadStatus> list = this.findAll().stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).toList();
 
+		for(ReadStatus readStatus : list) {
+			this.delete(readStatus.getReadStatusId());
+		}
 	}
 
 	@Override

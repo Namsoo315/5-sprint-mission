@@ -22,7 +22,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 
 
 public class FileUserRepository implements UserRepository {
-	private final String DIRECTORY = "USER";
+	private final String DIRECTORY = "FileData/USER";
 	private final String EXTENSION = ".ser";
 
 	public FileUserRepository() {
@@ -38,8 +38,6 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		boolean isNew = !existsById(user.getUserId());
-
 		Path path = Paths.get(DIRECTORY, user.getUserId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -48,19 +46,13 @@ public class FileUserRepository implements UserRepository {
 			throw new RuntimeException(e);
 		}
 
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return user;
 	}
 
 	@Override
-	public Optional<User> findById(UUID id) {
+	public Optional<User> findById(UUID userId) {
 		User user = null;
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -97,13 +89,8 @@ public class FileUserRepository implements UserRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public void delete(UUID userId) {
+		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
 
 		try {
 			Files.deleteIfExists(path);
@@ -113,7 +100,7 @@ public class FileUserRepository implements UserRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID userId) {
+		return Files.exists(Paths.get(DIRECTORY, userId.toString() + EXTENSION));
 	}
 }

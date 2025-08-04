@@ -21,7 +21,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
 public class FileChannelRepository implements ChannelRepository {
-	private static final String DIRECTORY = "CHANNEL";
+	private static final String DIRECTORY = "FileData/CHANNEL";
 	private static final String EXTENSION = ".ser";
 
 	public FileChannelRepository() {
@@ -37,8 +37,6 @@ public class FileChannelRepository implements ChannelRepository {
 
 	@Override
 	public Channel save(Channel channel) {
-		boolean isNew = !existsById(channel.getChannelId());
-
 		Path path = Paths.get(DIRECTORY, channel.getChannelId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -47,20 +45,14 @@ public class FileChannelRepository implements ChannelRepository {
 			throw new RuntimeException(e);
 		}
 
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return channel;
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID id) {
+	public Optional<Channel> findById(UUID channelId) {
 		Channel channel = null;
 
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, channelId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -91,13 +83,8 @@ public class FileChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public void delete(UUID channelId) {
+		Path path = Paths.get(DIRECTORY, channelId.toString() + EXTENSION);
 
 		try {
 			Files.deleteIfExists(path);
@@ -107,7 +94,7 @@ public class FileChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID channelId) {
+		return Files.exists(Paths.get(DIRECTORY, channelId.toString() + EXTENSION));
 	}
 }

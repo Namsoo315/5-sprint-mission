@@ -19,10 +19,11 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Repository;
 
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
 public class FileMessageRepository implements MessageRepository {
-	private final String DIRECTORY = "MESSAGE";
+	private final String DIRECTORY = "FileData/MESSAGE";
 	;
 	private final String EXTENSION = ".ser";
 	;
@@ -40,8 +41,6 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public Message save(Message message) {
-		boolean isNew = !existsById(message.getMessageId());
-
 		Path path = Paths.get(DIRECTORY, message.getMessageId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -49,20 +48,13 @@ public class FileMessageRepository implements MessageRepository {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return message;
 	}
 
 	@Override
-	public Optional<Message> findById(UUID id) {
+	public Optional<Message> findById(UUID messageId) {
 		Message message = null;
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, messageId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -101,11 +93,6 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID id) {
 		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
 
@@ -118,11 +105,15 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public void deleteByChannelId(UUID channelId) {
-		//로직 추가 필요.
+		List<Message> list = this.findAll().stream().filter(messages -> messages.getChannelId().equals(channelId)).toList();
+
+		for(Message messages : list) {
+			this.delete(messages.getMessageId());
+		}
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID messageId) {
+		return Files.exists(Paths.get(DIRECTORY, messageId.toString() + EXTENSION));
 	}
 }

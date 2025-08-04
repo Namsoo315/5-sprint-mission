@@ -18,7 +18,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
 public class FileBinaryContentRepository implements BinaryContentRepository {
-	private static final String DIRECTORY = "BINARY";
+	private static final String DIRECTORY = "FileData/BINARY";
 	private static final String EXTENSION = ".ser";
 
 	public FileBinaryContentRepository() {
@@ -34,8 +34,6 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public BinaryContent save(BinaryContent binaryContent) {
-		boolean isNew = !existsById(binaryContent.getBinaryContentId());
-
 		Path path = Paths.get(DIRECTORY, binaryContent.getBinaryContentId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -43,13 +41,6 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return binaryContent;
 	}
 
@@ -88,11 +79,6 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 	@Override
 	public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
 		return List.of();
-	}
-
-	@Override
-	public long count() {
-		return 0;
 	}
 
 	@Override

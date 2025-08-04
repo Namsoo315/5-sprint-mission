@@ -55,11 +55,6 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
 	public void delete(UUID userStatusId) {
 		map.remove(userStatusId);
 	}
