@@ -16,17 +16,16 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
 
 public class FileUserRepository implements UserRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private final String DIRECTORY = "USER";
+	private final String EXTENSION = ".ser";
 
 	public FileUserRepository() {
-		this.DIRECTORY = "USER";
-		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -82,29 +81,19 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public List<User> findAll() {
-		List<User> users = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try (Stream<Path> paths = Files.list(directory)) {
-			paths.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
-						 ObjectInputStream ois = new ObjectInputStream(fis)) {
-
-						Object obj = ois.readObject();
-						if (obj instanceof User user) {
-							users.add(user);
-						}
-
+						 ObjectInputStream ois = new ObjectInputStream(fis);) {
+						return (User)ois.readObject();
 					} catch (Exception e) {
-						throw new IllegalArgumentException("파일 읽기 실패", e);
+						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-
-		return users;
 	}
 
 	@Override

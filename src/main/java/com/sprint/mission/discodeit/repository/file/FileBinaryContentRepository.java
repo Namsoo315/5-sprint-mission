@@ -12,18 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-
 public class FileBinaryContentRepository implements BinaryContentRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private static final String DIRECTORY = "BINARY";
+	private static final String EXTENSION = ".ser";
 
 	public FileBinaryContentRepository() {
-		this.DIRECTORY = "BINARY";
-		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -72,25 +70,19 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public List<BinaryContent> findAll() {
-		List<BinaryContent> binaryContents = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try {
-			Files.list(directory)
-				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						BinaryContent binaryContent = (BinaryContent)ois.readObject();
-						binaryContents.add(binaryContent);
+						return (BinaryContent)ois.readObject();
 					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패",e);
+						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return binaryContents;
 	}
 
 	@Override
