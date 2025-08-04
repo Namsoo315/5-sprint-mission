@@ -15,8 +15,10 @@ public class UserStatus implements Serializable {
 
 	private final UUID UserStatusId;
 	private final UUID userId;
+
 	private boolean status;	// Online = true, Offline = false;
-	private Instant createdAt;
+
+	private final Instant createdAt;
 	private Instant updatedAt;
 
 	public UserStatus(UUID userId) {
@@ -27,8 +29,8 @@ public class UserStatus implements Serializable {
 		this.updatedAt = createdAt;
 	}
 
-	public void updateStatus (boolean status) {
-		this.status = true;
+	public void updateStatus () {
+		this.status = isOnline();
 		this.updatedAt = Instant.now();
 	}
 
