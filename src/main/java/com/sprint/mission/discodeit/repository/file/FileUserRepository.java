@@ -12,17 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
 public class FileUserRepository implements UserRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private static final String DIRECTORY = "USER";
+	private static final String EXTENSION = ".ser";
 
 	public FileUserRepository() {
-		this.DIRECTORY = "USER";
-		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -71,25 +70,20 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public List<User> findAll() {
-		List<User> users = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try {
-			Files.list(directory)
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))){
+			return paths
 				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						User user = (User)ois.readObject();
-						users.add(user);
+						return (User) ois.readObject();
 					} catch (Exception e) {
 						throw new RuntimeException("파일 읽기 실패",e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return users;
 	}
 
 	@Override

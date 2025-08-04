@@ -10,34 +10,34 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class BasicUserService implements UserService {
-	private final UserRepository repo;
+	private final UserRepository userRepository;
 
-	public BasicUserService(UserRepository repo) {
-		this.repo = repo;
+	public BasicUserService(UserRepository userRepository) {
+		this.userRepository = userRepository;
 	}
 
 	@Override
 	public User createUser(String name, int age) {
 		User user = new User(name, age);
-		repo.save(user);
+		userRepository.save(user);
 
 		return user;
 	}
 
 	@Override
 	public Optional<User> findByUserId(UUID uuid) {
-		return repo.findById(uuid);
+		return userRepository.findById(uuid);
 	}
 
 	@Override
 	public List<User> findAll() {
-		return new ArrayList<>(repo.findAll());
+		return new ArrayList<>(userRepository.findAll());
 	}
 
 	@Override
 	public void updateUser(UUID uuid, String name, int age) {
 
-		User user = repo.findById(uuid).orElse(null);
+		User user = userRepository.findById(uuid).orElse(null);
 
 		if (user == null) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
@@ -45,11 +45,11 @@ public class BasicUserService implements UserService {
 
 		user.update(name, age);
 
-		repo.save(user);
+		userRepository.save(user);
 	}
 
 	@Override
 	public void deleteUser(UUID uuid) {
-		repo.delete(uuid);
+		userRepository.delete(uuid);
 	}
 }

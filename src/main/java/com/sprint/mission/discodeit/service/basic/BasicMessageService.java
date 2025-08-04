@@ -10,10 +10,10 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
 public class BasicMessageService implements MessageService {
-	private final MessageRepository repo;
+	private final MessageRepository messageRepository;
 
-	public BasicMessageService(MessageRepository repo) {
-		this.repo = repo;
+	public BasicMessageService(MessageRepository messageRepository) {
+		this.messageRepository = messageRepository;
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class BasicMessageService implements MessageService {
 		}
 
 		Message message = new Message(userId, channelId, content);
-		repo.save(message);
+		messageRepository.save(message);
 
 		return message;
 	}
@@ -35,7 +35,7 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for (Message m : repo.findAll()) {
+		for (Message m : messageRepository.findAll()) {
 			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
@@ -46,26 +46,26 @@ public class BasicMessageService implements MessageService {
 
 	@Override
 	public Optional<Message> findByMessageId(UUID messageId) {
-		return repo.findById(messageId);
+		return messageRepository.findById(messageId);
 	}
 
 	public List<Message> findAll() {
-		return repo.findAll();
+		return messageRepository.findAll();
 	}
 
 	@Override
 	public void updateMessage(UUID messageId, String newContent) {
-		Message message = repo.findById(messageId).orElse(null);
+		Message message = messageRepository.findById(messageId).orElse(null);
 
 		if(message == null) {
 			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
 		}
 		message.update(newContent);
-		repo.save(message);
+		messageRepository.save(message);
 	}
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		repo.delete(messageId);
+		messageRepository.delete(messageId);
 	}
 }

@@ -21,8 +21,8 @@ public class JavaApplication {
 		MainViewJCF mainViewJCF = new MainViewJCF();
 		MainViewFile mainViewFile = new MainViewFile();
 		MainViewBasic mainViewBasic = new MainViewBasic();
-		mainViewJCF.mainMenu();		//JCF 테스트 용
-		// mainViewFile.mainMenu(); 	//File 테스트 용
+		// mainViewJCF.mainMenu();		//JCF 테스트 용
+		mainViewFile.mainMenu(); 	//File 테스트 용
 		// mainViewBasic.mainMenuBasic();
 
 	}

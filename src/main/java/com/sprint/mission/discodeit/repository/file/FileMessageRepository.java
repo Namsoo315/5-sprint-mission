@@ -12,18 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
 public class FileMessageRepository implements MessageRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private static final String DIRECTORY = "MESSAGE";
+	private static final String EXTENSION = ".ser";
 
 	public FileMessageRepository() {
-		this.DIRECTORY = "MESSAGE";
-		this.EXTENSION = ".ser";
-
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -72,25 +70,21 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public List<Message> findAll() {
-		List<Message> messages = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
-
-		try {
-			Files.list(directory)
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths
 				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						Message message = (Message)ois.readObject();
-						messages.add(message);
+						return (Message)ois.readObject();
+
 					} catch (Exception e) {
 						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return messages;
 	}
 
 	@Override

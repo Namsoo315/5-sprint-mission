@@ -14,13 +14,13 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 public class JCFMessageService implements MessageService {
-	private final MessageRepository repo;
+	private final MessageRepository messageRepository;
 	private final UserService userService;
 	private final ChannelService channelService;
 
-	public JCFMessageService(MessageRepository repo, UserService userService,
+	public JCFMessageService(MessageRepository messageRepository, UserService userService,
 		ChannelService channelService) {
-		this.repo = repo;
+		this.messageRepository = messageRepository;
 		this.userService = userService;
 		this.channelService = channelService;
 	}
@@ -38,7 +38,7 @@ public class JCFMessageService implements MessageService {
 		}
 
 		Message message = new Message(userId, channelId, content);
-		repo.save(message);
+		messageRepository.save(message);
 
 		return message;
 	}
@@ -46,7 +46,7 @@ public class JCFMessageService implements MessageService {
 	@Override
 	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
 		List<Message> result = new ArrayList<>();
-		for (Message m : repo.findAll()) {
+		for (Message m : messageRepository.findAll()) {
 			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
 				result.add(m);
 			}
@@ -57,26 +57,26 @@ public class JCFMessageService implements MessageService {
 
 	@Override
 	public Optional<Message> findByMessageId(UUID messageId) {
-		return repo.findById(messageId);
+		return messageRepository.findById(messageId);
 	}
 
 	public List<Message> findAll() {
-		return repo.findAll();
+		return messageRepository.findAll();
 	}
 
 	@Override
 	public void updateMessage(UUID messageId, String newContent) {
-		Message message = repo.findById(messageId).orElse(null);
+		Message message = messageRepository.findById(messageId).orElse(null);
 
 		if(message == null) {
 			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
 		}
 		message.update(newContent);
-		repo.save(message);
+		messageRepository.save(message);
 	}
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		repo.delete(messageId);
+		messageRepository.delete(messageId);
 	}
 }
