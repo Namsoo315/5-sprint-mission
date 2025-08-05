@@ -20,9 +20,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
 	@Override
 	public BinaryContent createBinaryContent(BinaryContentCreateRequest request) {
-		BinaryContent binaryContent = new BinaryContent(request.getBinaryContentId(), request.getAttachmentIds(),
-			request.getFileName(),
-			request.getContentType(), request.getSize(), request.getBinaryContent());
+		BinaryContent binaryContent = new BinaryContent(request.getFileName(), request.getContentType(), request.getSize(), request.getBinaryContent());
 		binaryContentRepository.save(binaryContent);
 
 		return binaryContent;
@@ -34,8 +32,8 @@ public class BasicBinaryContentService implements BinaryContentService {
 	}
 
 	@Override
-	public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
-		return binaryContentRepository.findAllByIdIn(binaryContentIds);
+	public List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds) {
+		return binaryContentRepository.findAllByIdIn(attachmentIds);
 	}
 
 	@Override

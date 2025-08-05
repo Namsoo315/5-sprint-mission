@@ -24,9 +24,9 @@ public class JCFMessageRepository implements MessageRepository {
 		map.put(message.getMessageId(), message);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("message가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("message가 업데이트 되었습니다.");
 		}
 		return message;
 	}
@@ -43,6 +43,17 @@ public class JCFMessageRepository implements MessageRepository {
 	@Override
 	public List<Message> findAll() {
 		return new ArrayList<>(map.values());
+	}
+
+	@Override
+	public List<Message> findAllByChannelId(UUID channelId) {
+		for (Message message : map.values()) {
+			if (message.getChannelId().equals(channelId)) {
+				return List.of(message);
+			}
+		}
+
+		return new ArrayList<>();
 	}
 
 	@Override

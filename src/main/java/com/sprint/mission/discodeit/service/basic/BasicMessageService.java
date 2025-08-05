@@ -7,8 +7,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.sprint.mission.discodeit.dto.message.AttachmentDTO;
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -29,56 +31,45 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public Message createMessage(MessageCreateRequest request) {
 
-		if (userRepository.findById(request.getUserId()).isPresent()) {
+		// 1. 호환성 체크
+		if (userRepository.findById(request.getUserId()).isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelRepository.findById(request.getChannelId()).isPresent()) {
+		if (channelRepository.findById(request.getChannelId()).isEmpty()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
-		Message message = new Message(request.getUserId(),
-			request.getChannelId(),
-			request.getMessage(),
-			request.getAttachmentIds() != null ? request.getAttachmentIds() : new ArrayList<>()	// 삼항 연산자 AttachmentIds가 있을 경우에만.
-		);
+		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
+		List<UUID> attachmentIds = new ArrayList<>();
+
+		if (request.getAttachments() != null) {
+			for (AttachmentDTO dto : request.getAttachments()){
+				BinaryContent binaryContent = new BinaryContent(dto.getFileName(), dto.getContentType(),
+					dto.getSize(), dto.getBinaryContent());
+				binaryContentRepository.save(binaryContent);
+			}
+		}
+
+		// 2. 메시지 생성
+		Message message = new Message(request.getUserId(), request.getChannelId(), request.getMessage(), attachmentIds);
 		messageRepository.save(message);
 
 		return message;
 	}
 
 	@Override
-	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
-		List<Message> result = new ArrayList<>();
-		for (Message m : messageRepository.findAll()) {
-			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
-				result.add(m);
-			}
-		}
-
-		return result;
-	}
-
-	@Override
-	public Optional<Message> findByMessageId(UUID messageId) {return messageRepository.findById(messageId);
+	public Optional<Message> findByMessageId(UUID messageId) {
+		return messageRepository.findById(messageId);
 	}
 
 	public List<Message> findAllByChannelId(UUID channelId) {
-		List<Message> result = new ArrayList<>();
-		for (Message m : messageRepository.findAll()) {
-			if(m.getChannelId().equals(channelId)) {
-				result.add(m);
-			}
-		}
-		return result;
+		return messageRepository.findAllByChannelId(channelId);
 	}
 
 	@Override
 	public void updateMessage(MessageUpdateRequest request) {
-		Message message = messageRepository.findById(request.getMessageId()).orElse(null);
-
-		if(message == null) {
-			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
-		}
+		Message message = messageRepository.findById(request.getMessageId()).orElseThrow(
+			() -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
 
 		message.update(request.getNewContent());
 		messageRepository.save(message);
@@ -87,8 +78,10 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public void deleteMessage(UUID messageId) {
 		messageRepository.delete(messageId);
+
 		Message message = messageRepository.findById(messageId).orElseThrow(
 			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
-		binaryContentRepository.deleteByAttachmentIds(message.getAttachmentIds());
+
+		binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
 	}
 }

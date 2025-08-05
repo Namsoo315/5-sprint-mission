@@ -23,9 +23,9 @@ public class JCFUserRepository implements UserRepository {
 		map.put(user.getUserId(), user);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("user가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("user가 업데이트 되었습니다.");
 		}
 
 		return user;
@@ -44,6 +44,17 @@ public class JCFUserRepository implements UserRepository {
 	public Optional<User> findByUsername(String username) {
 		for (User user : map.values()) {
 			if (user.getUsername().equals(username)) {
+				return Optional.of(user);
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<User> findByEmail(String email) {
+		for (User user : map.values()) {
+			if (user.getEmail().equals(email)) {
 				return Optional.of(user);
 			}
 		}

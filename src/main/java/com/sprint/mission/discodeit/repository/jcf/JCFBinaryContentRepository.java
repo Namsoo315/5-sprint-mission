@@ -23,9 +23,9 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 		map.put(binaryContent.getBinaryContentId(), binaryContent);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("binaryContent가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("binaryContent가 업데이트 되었습니다.");
 		}
 		return binaryContent;
 	}
@@ -46,42 +46,30 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
-		for (BinaryContent binaryContent : map.values()) {
-			for(UUID attachmentId : binaryContent.getAttachmentIds()) {
-				if(binaryContent.getAttachmentIds().contains(attachmentId)) {
-					return List.of(binaryContent);
-				}
-			}
+		List<BinaryContent> result = new ArrayList<>();
+
+		for (UUID binaryContentId : binaryContentIds) {
+			result.add(map.get(binaryContentId));
 		}
 
-		return new ArrayList<>();
+		return result;
 	}
 
 	@Override
 	public void delete(UUID binaryId) {
-		if(!existsById(binaryId)) {
+		if (!existsById(binaryId)) {
 			throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
 		}
 		map.remove(binaryId);
 	}
 
 	@Override
-	public void deleteByUserId(UUID userId) {
-		for(BinaryContent binaryContent : map.values()) {
-			if(binaryContent.getProfileId().equals(userId)) {
-				map.remove(binaryContent.getBinaryContentId());
+	public void deleteByAttachmentId(List<UUID> attachmentIds) {
+		for(UUID binaryId : attachmentIds) {
+			if (!existsById(binaryId)) {
+				throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
 			}
-		}
-	}
-
-	@Override
-	public void deleteByAttachmentIds(List<UUID> attachmentIds) {
-		for(BinaryContent binaryContent : map.values()) {
-			for(UUID attachmentId : attachmentIds) {
-				if(binaryContent.getAttachmentIds().contains(attachmentId)) {
-					map.remove(binaryContent.getBinaryContentId());
-				}
-			}
+			map.remove(binaryId);
 		}
 	}
 

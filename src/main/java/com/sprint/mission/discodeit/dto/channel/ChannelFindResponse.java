@@ -22,5 +22,5 @@ public class ChannelFindResponse {
 	private String name;
 	private String description;
 	private Instant lastMessageTime;
-	private List<ReadStatus> participantsUserIds;
+	private List<UUID> participantsUserIds;
 }

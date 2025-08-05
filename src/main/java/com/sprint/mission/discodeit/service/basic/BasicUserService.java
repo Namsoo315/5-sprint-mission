@@ -30,39 +30,45 @@ public class BasicUserService implements UserService {
 
 	@Override
 	public User createUser(UserCreateRequest request) {
-		User user = userRepository.findById(request.getUserId()).orElseThrow(() ->
-			new IllegalArgumentException("user을 찾을 수 없습니다."));
 
-		if (user.getUsername().equals(request.getUsername())) {
+		UUID profileId = null;
+		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
+		if (request.getBinaryContent() != null) {
+			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
+				request.getSize(), request.getBinaryContent());
+			binaryContentRepository.save(content);
+			profileId = content.getBinaryContentId();
+		}
+
+		// 2. username, email 호환성 확인
+		if (userRepository.findByUsername(request.getUsername()).isPresent()) {
 			throw new RuntimeException("같은 아이디가 존재합니다.");
 		}
 
-		if (user.getEmail().equals(request.getEmail())) {
+		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
 			throw new RuntimeException("같은 이메일이 존재합니다.");
 		}
 
-		User register = new User(request.getUsername(), request.getEmail(), request.getPassword(), request.getBinaryContent().getProfileId());
-		userRepository.save(register);
+		// 3. user, userStatus 같이 생성.
+		User user = new User(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
+		userRepository.save(user);
 
-		UserStatus status = new UserStatus(register.getUserId());
+		UserStatus status = new UserStatus(user.getUserId());
 		userStatusRepository.save(status);
-
-		// 선택적으로 프로필 이미지를 같이 등록함.
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = request.getBinaryContent();
-			binaryContentRepository.save(content);
-		}
 
 		return user;
 	}
 
 	@Override
 	public Optional<UserFindResponse> findByUserId(UserFindRequest request) {
+
+		// 1. 호환성 체크	user, userStatus Id 체크
 		User user = userRepository.findById(request.getUserId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 		UserStatus userStatus = userStatusRepository.findByUserId(request.getUserId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
+		// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
 		return Optional.of(UserFindResponse.builder()
 			.userId(user.getUserId())
 			.username(user.getUsername())
@@ -76,11 +82,16 @@ public class BasicUserService implements UserService {
 		List<User> users = userRepository.findAll();
 		List<UserFindResponse> responses = new ArrayList<>();
 
-		// 사용자의 온라인 상태 정보를 같이 포함하는 로직.
 		for (User user : users) {
-			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(()
-				-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
+			// 1. 호환성 체크	user, userStatus Id 체크
+			userRepository.findById(user.getUserId()).orElseThrow(
+				() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(
+				() -> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
+
+			// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
 			responses.add(UserFindResponse.builder()
 				.userId(user.getUserId())
 				.username(user.getUsername())
@@ -95,23 +106,35 @@ public class BasicUserService implements UserService {
 	@Override
 	public void updateUser(UserUpdateRequest request) {
 
+		UUID profileId = null;
+		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
+		if (request.getBinaryContent() != null) {
+			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
+				request.getSize(), request.getBinaryContent());
+			binaryContentRepository.save(content);
+			profileId = content.getBinaryContentId();
+		}
+
+		// 2. User 호환성 체크
 		User user = userRepository.findById(request.getUserId())
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
-		user.update(request.getUsername(), request.getEmail(), request.getPassword(), request.getBinaryContent().getProfileId());
+		// 3. Update 작업 수행.
+		user.update(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
 		userRepository.save(user);
 
-		// 선택적으로 프로필 이미지 대체 하기.?
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = request.getBinaryContent();
-			binaryContentRepository.save(content);
-		}
 	}
 
 	@Override
 	public void deleteUser(UUID userId) {
+
+		// 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent
 		userRepository.delete(userId);
 		userStatusRepository.deleteByUserId(userId);
-		binaryContentRepository.deleteByUserId(userId);
+		
+		// 2. user 안에 있는 profileId -> BinaryContentId 삭제
+		User user = userRepository.findById(userId).orElseThrow(
+			() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+		binaryContentRepository.delete(user.getProfileId());
 	}
 }

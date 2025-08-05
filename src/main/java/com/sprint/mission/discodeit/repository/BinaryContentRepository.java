@@ -17,9 +17,7 @@ public interface BinaryContentRepository {
 
 	void delete(UUID binaryId);
 
-	void deleteByUserId(UUID userId);
-
-	void deleteByAttachmentIds(List<UUID> attachmentIds);
+	void deleteByAttachmentId(List<UUID> attachmentIds);
 
 	boolean existsById(UUID binaryId);
 }

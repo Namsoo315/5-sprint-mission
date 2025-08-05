@@ -16,9 +16,6 @@ public class BinaryContent implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final UUID BinaryContentId;
 
-	private final UUID profileId;    // UserId
-	private final List<UUID> attachmentIds;    // Message attachmentId -> 첨부파일 Id?
-
 	private final Instant createdAt;
 
 	private final String fileName;
@@ -27,10 +24,8 @@ public class BinaryContent implements Serializable {
 	private final byte[] binaryContent;
 	// 수정 불가능 하기 때문에 updatedAt은 삭제
 
-	public BinaryContent(UUID profileId, List<UUID> attachmentIds, String fileName, String contentType, Long size, byte[] binaryContent) {
+	public BinaryContent(String fileName, String contentType, Long size, byte[] binaryContent) {
 		this.BinaryContentId = UUID.randomUUID();
-		this.profileId = profileId;
-		this.attachmentIds = attachmentIds;
 		this.createdAt = Instant.now();
 		this.fileName = fileName;
 		this.contentType = contentType;
