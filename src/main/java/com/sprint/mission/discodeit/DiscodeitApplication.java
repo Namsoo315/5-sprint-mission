@@ -4,9 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import com.sprint.mission.discodeit.dto.binary.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
@@ -31,13 +33,13 @@ public class DiscodeitApplication {
 		// 셋업
 		User user = setupUser(userService);
 		Channel channel = setupChannel(channelService);
+
 		// 테스트
-		messageCreateTest(messageService, channel, user);
+		messageCreateTest(messageService, user, channel);
 	}
 
 	static User setupUser(UserService userService) {
-		//"woody", "woody@codeit.com", "woody1234" 원래 이렇게 넣어야 하지만 name이랑 age만 받아서 이런식을 처리함.
-		return userService.createUser(new UserCreateRequest("woody", "woody@test.com","1234"));
+		return userService.createUser(new UserCreateRequest("woody", "woody@test.com", "1234", null, null, null, null));
 	}
 
 	static Channel setupChannel(ChannelService channelService) {
@@ -45,10 +47,9 @@ public class DiscodeitApplication {
 		return channelService.createPublicChannel(new PublicChannelCreateRequest("woody", "woody"));
 	}
 
-	static void messageCreateTest(MessageService messageService, Channel channel, User author) {
-		//"안녕하세요.", channel.getId(), author.getId()	createMessage로 userId, channelId, content를 받기 때문에 변경.
-		// author.getUserId(), channel.getChannelId(), "안녕하세요"
-		Message message = messageService.createMessage(new MessageCreateRequest());
+	static void messageCreateTest(MessageService messageService, User author, Channel channel) {
+		Message message = messageService.createMessage(
+			new MessageCreateRequest(author.getUserId(), channel.getChannelId(), "메시지", null));
 		System.out.println("메시지 생성: " + message.getMessageId());
 		System.out.println(message);
 	}
