@@ -1,12 +1,12 @@
 package com.sprint.mission.discodeit.dto.channel;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 public class PublicChannelCreateRequest {
 	private String name;
 	private String description;

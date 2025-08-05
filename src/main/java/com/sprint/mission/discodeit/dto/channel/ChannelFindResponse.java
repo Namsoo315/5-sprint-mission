@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.entity.ReadStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 @Builder
 public class ChannelFindResponse {
 	private UUID channelId;
