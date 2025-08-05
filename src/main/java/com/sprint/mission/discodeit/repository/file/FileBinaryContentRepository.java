@@ -14,9 +14,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
+@Repository("binaryContentRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 public class FileBinaryContentRepository implements BinaryContentRepository {
 	private static final String DIRECTORY = "FileData/BINARY";
 	private static final String EXTENSION = ".ser";
