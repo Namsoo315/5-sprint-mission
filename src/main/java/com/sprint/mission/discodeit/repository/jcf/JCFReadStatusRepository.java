@@ -23,9 +23,9 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 		map.put(readStatus.getReadStatusId(), readStatus);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("readStatus가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("readStatus가 업데이트 되었습니다.");
 		}
 		return readStatus;
 	}

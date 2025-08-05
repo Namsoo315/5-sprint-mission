@@ -24,9 +24,9 @@ public class JCFMessageRepository implements MessageRepository {
 		map.put(message.getMessageId(), message);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("message가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("message가 업데이트 되었습니다.");
 		}
 		return message;
 	}

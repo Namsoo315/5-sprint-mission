@@ -23,9 +23,9 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 		map.put(userStatus.getUserStatusId(), userStatus);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("userStatus가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("userStatus가 업데이트 되었습니다.");
 		}
 		return userStatus;
 	}
