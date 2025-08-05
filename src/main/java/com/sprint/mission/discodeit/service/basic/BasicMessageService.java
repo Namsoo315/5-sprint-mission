@@ -29,10 +29,10 @@ public class BasicMessageService implements MessageService {
 	@Override
 	public Message createMessage(MessageCreateRequest request) {
 
-		if (userRepository.findById(request.getUserId()).isPresent()) {
+		if (userRepository.findById(request.getUserId()).isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelRepository.findById(request.getChannelId()).isPresent()) {
+		if (channelRepository.findById(request.getChannelId()).isEmpty()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
@@ -89,6 +89,6 @@ public class BasicMessageService implements MessageService {
 		messageRepository.delete(messageId);
 		Message message = messageRepository.findById(messageId).orElseThrow(
 			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
-		binaryContentRepository.deleteByAttachmentIds(message.getAttachmentIds());
+		binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
 	}
 }
