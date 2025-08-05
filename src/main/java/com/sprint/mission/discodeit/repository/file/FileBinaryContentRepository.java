@@ -93,13 +93,17 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 	}
 
 	@Override
-	public void deleteByUserId(UUID userId) {
-		// 기능 추가해야함.
-	}
+	public void deleteByAttachmentId(List<UUID> attachmentIds) {
+		Path path = null;
+		for(UUID attachmentId : attachmentIds) {
+			path = Paths.get(DIRECTORY, attachmentId.toString() + EXTENSION);
 
-	@Override
-	public void deleteByAttachmentIds(List<UUID> attachmentIds) {
-
+			try {
+				Files.deleteIfExists(path);
+			} catch (IOException e) {
+				throw new RuntimeException(e + "파일 삭제 실패");
+			}
+		}
 	}
 
 	@Override
