@@ -18,8 +18,6 @@ public interface ChannelService {
 
 	Optional<ChannelFindResponse> findByChannelId(UUID channelId);
 
-	List<Channel> findByChannelName(String name);
-
 	List<ChannelFindResponse> findAllByUserId(UUID userId);
 
 	void updateChannel(ChannelUpdateRequest request);
