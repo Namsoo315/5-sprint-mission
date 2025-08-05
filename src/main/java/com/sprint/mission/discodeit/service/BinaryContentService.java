@@ -9,7 +9,10 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 
 public interface BinaryContentService {
 	BinaryContent createBinaryContent(BinaryContentCreateRequest request);
+
 	Optional<BinaryContent> findById(UUID binaryContentId);
-	List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds);
+
+	List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds);
+
 	void delete(UUID binaryContentId);
 }
