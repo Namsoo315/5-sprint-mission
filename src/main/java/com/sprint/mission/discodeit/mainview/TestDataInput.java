@@ -11,12 +11,12 @@ import com.sprint.mission.discodeit.service.UserService;
 
 public class TestDataInput {
 	public void testData(UserService userService, ChannelService channelService, MessageService messageService) {
-		User user1 = userService.createUser(new UserCreateRequest("남현수1", "namsoo1@test1.com", "1234"));
-		User user2 = userService.createUser(new UserCreateRequest("남현수2", "namsoo2@test2.com", "1234"));
-		User user3 = userService.createUser(new UserCreateRequest("남현수3", "namsoo3@test3.com", "1234"));
-
-		Channel channel1 = channelService.createPublicChannel(new PublicChannelCreateRequest("채널 1", "스터디 공부방입니다."));
-		Channel channel2 = channelService.createPublicChannel(new PublicChannelCreateRequest("채널 2", "커뮤니티 노는방입니다."));
+		// User user1 = userService.createUser(new UserCreateRequest("남현수1", "namsoo1@test1.com", "1234"));
+		// User user2 = userService.createUser(new UserCreateRequest("남현수2", "namsoo2@test2.com", "1234"));
+		// User user3 = userService.createUser(new UserCreateRequest("남현수3", "namsoo3@test3.com", "1234"));
+		//
+		// Channel channel1 = channelService.createPublicChannel(new PublicChannelCreateRequest("채널 1", "스터디 공부방입니다."));
+		// Channel channel2 = channelService.createPublicChannel(new PublicChannelCreateRequest("채널 2", "커뮤니티 노는방입니다."));
 
 		// messageService.createMessage(user1.getUserId(), channel2.getChannelId(), "user1의 두번째 메시지");
 		// messageService.createMessage(user1.getUserId(), channel2.getChannelId(), "user1의 세번째 메시지");
