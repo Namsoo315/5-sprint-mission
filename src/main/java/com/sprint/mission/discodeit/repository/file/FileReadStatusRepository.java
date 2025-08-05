@@ -61,6 +61,8 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 		return Optional.ofNullable(readStatus);
 	}
 
+
+
 	@Override
 	public List<ReadStatus> findAll() {
 		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
@@ -79,8 +81,15 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 	}
 
 	@Override
+	public Optional<ReadStatus> findByUserIdAndChannelId(UUID userId, UUID channelId) {
+		return this.findAll().stream()
+			.filter(readStatus -> readStatus.getUserId().equals(userId) && readStatus.getChannelId().equals(channelId))
+			.findFirst();
+	}
+
+	@Override
 	public List<ReadStatus> findAllByUserId(UUID userId) {
-		return this.findAll().stream().filter(status -> status.getUserId().equals(userId)).toList();
+		return this.findAll().stream().filter(readStatus -> readStatus.getUserId().equals(userId)).toList();
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -40,29 +41,25 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 	}
 
 	@Override
+	public Optional<ReadStatus> findByUserIdAndChannelId(UUID userId, UUID channelId) {
+		return this.findAll().stream()
+			.filter(readStatus -> readStatus.getUserId().equals(userId) && readStatus.getChannelId().equals(channelId))
+			.findFirst();
+	}
+
+	@Override
 	public List<ReadStatus> findAll() {
 		return new ArrayList<>(map.values());
 	}
 
 	@Override
 	public List<ReadStatus> findAllByChannelId(UUID channelId) {
-		for (ReadStatus readStatus : map.values()) {
-			if (readStatus.getChannelId().equals(channelId)) {
-				return List.of(readStatus);
-			}
-		}
-		return new ArrayList<>();
+		return this.findAll().stream().filter(status -> status.getChannelId().equals(channelId)).toList();
 	}
 
 	@Override
 	public List<ReadStatus> findAllByUserId(UUID userId) {
-		for (ReadStatus readStatus : map.values()) {
-			if (readStatus.getUserId().equals(userId)) {
-				return List.of(readStatus);
-			}
-		}
-
-		return new ArrayList<>();
+		return this.findAll().stream().filter(status -> status.getUserId().equals(userId)).toList();
 	}
 
 	@Override
