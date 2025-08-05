@@ -84,6 +84,13 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
+	public List<Message> findAllByChannelId(UUID channelId) {
+		return this.findAll().stream()
+			.filter(message -> message.getChannelId().equals(channelId))
+			.toList();
+	}
+
+	@Override
 	public Instant LatestMessageByChannelId(UUID channelId) {
 		return this.findAll().stream()
 			.filter(message -> message.getChannelId().equals(channelId))

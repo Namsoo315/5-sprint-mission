@@ -46,6 +46,17 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
+	public List<Message> findAllByChannelId(UUID channelId) {
+		for (Message message : map.values()) {
+			if (message.getChannelId().equals(channelId)) {
+				return List.of(message);
+			}
+		}
+
+		return new ArrayList<>();
+	}
+
+	@Override
 	public Instant LatestMessageByChannelId(UUID channelId) {
 		return this.findAll().stream()
 			.filter(message -> message.getChannelId().equals(channelId))
