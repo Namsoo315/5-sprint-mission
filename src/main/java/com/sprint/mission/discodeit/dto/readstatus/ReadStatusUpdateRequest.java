@@ -4,11 +4,12 @@ import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 public class ReadStatusUpdateRequest {
 	private UUID ReadStatusId;
 	private UUID userId;

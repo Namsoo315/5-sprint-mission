@@ -1,12 +1,12 @@
 package com.sprint.mission.discodeit.dto.binary;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 public class BinaryContentCreateRequest {
 	private String fileName;
 	private String contentType;
