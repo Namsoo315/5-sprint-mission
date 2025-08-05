@@ -9,12 +9,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
 @Repository("messageRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 public class JCFMessageRepository implements MessageRepository {
 	private final Map<UUID, Message> map = new HashMap<>();
 
