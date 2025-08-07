@@ -129,12 +129,16 @@ public class BasicUserService implements UserService {
 	public void deleteUser(UUID userId) {
 
 		// 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent
-		userRepository.delete(userId);
-		userStatusRepository.deleteByUserId(userId);
-		
+
 		// 2. user 안에 있는 profileId -> BinaryContentId 삭제
 		User user = userRepository.findById(userId).orElseThrow(
 			() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-		binaryContentRepository.delete(user.getProfileId());
+
+		if (user.getProfileId() != null) {
+			binaryContentRepository.delete(user.getProfileId());
+		}
+
+		userStatusRepository.deleteByUserId(userId);
+		userRepository.delete(userId);
 	}
 }

@@ -77,11 +77,11 @@ public class BasicMessageService implements MessageService {
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		messageRepository.delete(messageId);
-
 		Message message = messageRepository.findById(messageId).orElseThrow(
 			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
 
 		binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
+
+		messageRepository.delete(messageId);
 	}
 }
