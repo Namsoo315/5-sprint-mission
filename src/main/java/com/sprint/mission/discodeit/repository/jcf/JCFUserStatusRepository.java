@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,11 +64,7 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 
 	@Override
 	public void deleteByUserId(UUID userId) {
-		for (UserStatus userStatus : map.values()) {
-			if (userStatus.getUserId().equals(userId)) {
-				map.remove(userStatus.getUserStatusId());
-			}
-		}
+		map.values().removeIf(userStatus -> userStatus.getUserId().equals(userId));
 	}
 
 	@Override

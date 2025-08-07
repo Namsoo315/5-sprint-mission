@@ -17,4 +17,13 @@ public class UserFindResponse {
 	private String email;
 	private boolean status;
 
+	@Override
+	public String toString() {
+		return "UserFindResponse{" +
+			"userId=" + userId +
+			", username='" + username + '\'' +
+			", email='" + email + '\'' +
+			", status=" + status +
+			'}';
+	}
 }
