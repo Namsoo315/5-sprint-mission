@@ -12,4 +12,12 @@ import lombok.NoArgsConstructor;
 public class AuthLoginResponse {
 	private String username;
 	private String email;
+
+	@Override
+	public String toString() {
+		return "AuthLoginResponse{" +
+			"username='" + username + '\'' +
+			", email='" + email + '\'' +
+			'}';
+	}
 }

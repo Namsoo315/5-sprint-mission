@@ -22,4 +22,16 @@ public class ChannelFindResponse {
 	private String description;
 	private Instant lastMessageTime;
 	private List<UUID> participantsUserIds;
+
+	@Override
+	public String toString() {
+		return "ChannelFindResponse{" +
+			"channelId=" + channelId +
+			", type=" + type +
+			", name='" + name + '\'' +
+			", description='" + description + '\'' +
+			", lastMessageTime=" + lastMessageTime +
+			", participantsUserIds=" + participantsUserIds +
+			'}';
+	}
 }
