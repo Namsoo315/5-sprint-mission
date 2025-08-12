@@ -7,9 +7,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
+@Repository("userRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 public class JCFUserRepository implements UserRepository {
 	private final Map<UUID, User> map = new HashMap<>();
 
@@ -20,18 +25,40 @@ public class JCFUserRepository implements UserRepository {
 		map.put(user.getUserId(), user);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("user가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("user가 업데이트 되었습니다.");
 		}
 
 		return user;
 	}
 
 	@Override
-	public Optional<User> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<User> findById(UUID userId) {
+		if (existsById(userId)) {
+			return Optional.of(map.get(userId));
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<User> findByUsername(String username) {
+		for (User user : map.values()) {
+			if (user.getUsername().equals(username)) {
+				return Optional.of(user);
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<User> findByEmail(String email) {
+		for (User user : map.values()) {
+			if (user.getEmail().equals(email)) {
+				return Optional.of(user);
+			}
 		}
 
 		return Optional.empty();
@@ -43,21 +70,16 @@ public class JCFUserRepository implements UserRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
-	}
-
-	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public void delete(UUID userId) {
+		if (!existsById(userId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(userId);
+		System.out.println(userId + " 유저가 삭제 되었습니다.");
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public boolean existsById(UUID userId) {
+		return map.containsKey(userId);
 	}
 }

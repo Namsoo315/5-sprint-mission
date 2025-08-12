@@ -2,66 +2,54 @@ package com.sprint.mission.discodeit.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.UUID;
 
+import lombok.Getter;
+
+@Getter
 public class User implements Serializable {
+
 	@Serial
-	private final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	private final UUID userId;
+	private UUID profileId;		// binaryContent Id
+
 	private String username;
-	private int age;
-	private final Long createdAt;
-	private Long updatedAt;
+	private String email;
+	private String password;
 
-	public User(String name, int age) {
-		this.userId =UUID.randomUUID();
+	private final Instant createdAt;
+	private Instant updatedAt;
+
+	public User(String name, String email, String password, UUID profileId) {
+		this.userId = UUID.randomUUID();
 		this.username = name;
-		this.age = age;
-		this.createdAt = System.currentTimeMillis();
+		this.email = email;
+		this.password = password;
+		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
+		this.profileId = profileId;
 	}
 
-	public long getSerialVersionUID() {
-		return serialVersionUID;
-	}
-
-	public UUID getUserId() {
-		return userId;
-	}
-
-	public Long getCreatedAt() {
-		return createdAt;
-	}
-
-	public Long getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public int getAge() {
-		return age;
-	}
-
-	public void update(String username, int age){
+	public void update(String username, String email, String age, UUID profileId) {
 		this.username = username;
-		this.age = age;
-		this.updatedAt = System.currentTimeMillis();
+		this.email = email;
+		this.password = age;
+		this.updatedAt = Instant.now();
+		this.profileId = profileId;
 	}
 
 	@Override
 	public String toString() {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		final StringBuilder sb = new StringBuilder("User[");
-		sb.append(" uuid=").append(userId);
-		sb.append(", username=").append(username);
-		sb.append(", age=").append(age);
-		sb.append(", createdAt=").append(dateFormat.format(createdAt));
-		sb.append(", updatedAt=").append(dateFormat.format(updatedAt));
-		sb.append(" ]");
-		return sb.toString();
+		return "User{" +
+			"userId=" + userId +
+			", username='" + username + '\'' +
+			", email='" + email + '\'' +
+			", password='" + password + '\'' +
+			", createdAt=" + createdAt +
+			", updatedAt=" + updatedAt +
+			", profileId=" + profileId +
+			'}';
 	}
 }

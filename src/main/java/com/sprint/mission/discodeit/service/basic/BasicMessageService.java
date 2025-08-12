@@ -5,67 +5,83 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+
+import com.sprint.mission.discodeit.dto.message.AttachmentDTO;
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
-public class BasicMessageService implements MessageService {
-	private final MessageRepository repo;
+import lombok.RequiredArgsConstructor;
 
-	public BasicMessageService(MessageRepository repo) {
-		this.repo = repo;
-	}
+@Service("messageService")
+@RequiredArgsConstructor
+public class BasicMessageService implements MessageService {
+	private final MessageRepository messageRepository;
+	private final ChannelRepository	channelRepository;
+	private final UserRepository userRepository;
+	private final BinaryContentRepository binaryContentRepository;
 
 	@Override
-	public Message createMessage(UUID userId, UUID channelId, String content) {
+	public Message createMessage(MessageCreateRequest request) {
 
-		if (userId == null) {
+		// 1. 호환성 체크
+		if (userRepository.findById(request.getUserId()).isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelId == null) {
+		if (channelRepository.findById(request.getChannelId()).isEmpty()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
-		Message message = new Message(userId, channelId, content);
-		repo.save(message);
+		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
+		List<UUID> attachmentIds = new ArrayList<>();
+
+		if (request.getAttachments() != null) {
+			for (AttachmentDTO dto : request.getAttachments()){
+				BinaryContent binaryContent = new BinaryContent(dto.getFileName(), dto.getContentType(),
+					dto.getSize(), dto.getBinaryContent());
+				binaryContentRepository.save(binaryContent);
+			}
+		}
+
+		// 2. 메시지 생성
+		Message message = new Message(request.getUserId(), request.getChannelId(), request.getMessage(), attachmentIds);
+		messageRepository.save(message);
 
 		return message;
 	}
 
 	@Override
-	public List<Message> findByUserIdAndChannelId(UUID userId, UUID channelId) {
-		List<Message> result = new ArrayList<>();
-		for (Message m : repo.findAll()) {
-			if (m.getUserId().equals(userId) && m.getChannelId().equals(channelId)) {
-				result.add(m);
-			}
-		}
-
-		return result;
-	}
-
-	@Override
 	public Optional<Message> findByMessageId(UUID messageId) {
-		return repo.findById(messageId);
+		return messageRepository.findById(messageId);
 	}
 
-	public List<Message> findAll() {
-		return repo.findAll();
+	public List<Message> findAllByChannelId(UUID channelId) {
+		return messageRepository.findAllByChannelId(channelId);
 	}
 
 	@Override
-	public void updateMessage(UUID messageId, String newContent) {
-		Message message = repo.findById(messageId).orElse(null);
+	public void updateMessage(MessageUpdateRequest request) {
+		Message message = messageRepository.findById(request.getMessageId()).orElseThrow(
+			() -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
 
-		if(message == null) {
-			throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
-		}
-		message.update(newContent);
-		repo.save(message);
+		message.update(request.getNewContent());
+		messageRepository.save(message);
 	}
 
 	@Override
 	public void deleteMessage(UUID messageId) {
-		repo.delete(messageId);
+		Message message = messageRepository.findById(messageId).orElseThrow(
+			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+
+		binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
+
+		messageRepository.delete(messageId);
 	}
 }

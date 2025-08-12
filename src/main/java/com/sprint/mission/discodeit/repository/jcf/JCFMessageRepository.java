@@ -1,15 +1,22 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
+
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
+@Repository("messageRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 public class JCFMessageRepository implements MessageRepository {
 	private final Map<UUID, Message> map = new HashMap<>();
 
@@ -19,17 +26,17 @@ public class JCFMessageRepository implements MessageRepository {
 		map.put(message.getMessageId(), message);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("message가 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("message가 업데이트 되었습니다.");
 		}
 		return message;
 	}
 
 	@Override
-	public Optional<Message> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<Message> findById(UUID messageId) {
+		if (existsById(messageId)) {
+			return Optional.of(map.get(messageId));
 		}
 
 		return Optional.empty();
@@ -41,21 +48,35 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
+	public List<Message> findAllByChannelId(UUID channelId) {
+		return map.values().stream().filter(message -> message.getChannelId().equals(channelId)).toList();
 	}
 
 	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public Instant LatestMessageByChannelId(UUID channelId) {
+		return this.findAll().stream()
+			.filter(message -> message.getChannelId().equals(channelId))
+			.max(Comparator.comparing(Message::getCreatedAt))
+			.map(Message::getCreatedAt)
+			.orElse(null);
+	}
+
+	@Override
+	public void delete(UUID messageId) {
+		if (!existsById(messageId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(messageId);
+		System.out.println(messageId + " 가 삭제 되었습니다.");
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public void deleteByChannelId(UUID channelId) {
+		map.values().removeIf(message -> message.getChannelId().equals(channelId));
+	}
+
+	@Override
+	public boolean existsById(UUID messageId) {
+		return map.containsKey(messageId);
 	}
 }

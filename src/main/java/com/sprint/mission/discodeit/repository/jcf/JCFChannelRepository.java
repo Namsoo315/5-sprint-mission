@@ -7,11 +7,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+
+@Repository("channelRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 public class JCFChannelRepository implements ChannelRepository {
 	private final Map<UUID, Channel> map = new HashMap<>();
+
 
 	@Override
 	public Channel save(Channel channel) {
@@ -20,17 +28,17 @@ public class JCFChannelRepository implements ChannelRepository {
 		map.put(channel.getChannelId(), channel);
 
 		if (isNew) {
-			System.out.println("생성 되었습니다.");
+			System.out.println("channel이 생성 되었습니다.");
 		} else {
-			System.out.println("업데이트 되었습니다.");
+			System.out.println("channel이 업데이트 되었습니다.");
 		}
 		return channel;
 	}
 
 	@Override
-	public Optional<Channel> findById(UUID id) {
-		if (existsById(id)) {
-			return Optional.of(map.get(id));
+	public Optional<Channel> findById(UUID channelId) {
+		if (existsById(channelId)) {
+			return Optional.of(map.get(channelId));
 		}
 
 		return Optional.empty();
@@ -42,21 +50,15 @@ public class JCFChannelRepository implements ChannelRepository {
 	}
 
 	@Override
-	public long count() {
-		return map.size();
-	}
-
-	@Override
-	public void delete(UUID id) {
-		if (!existsById(id)) {
+	public void delete(UUID channelId) {
+		if (!existsById(channelId)) {
 			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
 		}
-		map.remove(id);
-		System.out.println(id + " 유저가 삭제 되었습니다.");
+		map.remove(channelId);
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return map.containsKey(id);
+	public boolean existsById(UUID channelId) {
+		return map.containsKey(channelId);
 	}
 }

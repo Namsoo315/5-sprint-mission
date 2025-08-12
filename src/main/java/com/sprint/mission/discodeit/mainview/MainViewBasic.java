@@ -1,49 +1,81 @@
 package com.sprint.mission.discodeit.mainview;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
+import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.basic.BasicChannelService;
-import com.sprint.mission.discodeit.service.basic.BasicMessageService;
-import com.sprint.mission.discodeit.service.basic.BasicUserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 
 public class MainViewBasic {
 
-	public void mainMenuBasic(){
-		// 서비스 초기화
-		// TODO Basic*Service 구현체를 초기화하세요.
-		UserService userService = new BasicUserService(new JCFUserRepository());
-		ChannelService channelService = new BasicChannelService(new JCFChannelRepository());
-		MessageService messageService = new BasicMessageService(new JCFMessageRepository());
-
+	public void basicMenu(UserService userService, ChannelService channelService, MessageService messageService) {
 		// 셋업
 		User user = setupUser(userService);
-		Channel channel = setupChannel(channelService);
+		Channel channel = setupChannel(channelService, user);
 		// 테스트
-		messageCreateTest(messageService, channel, user);
+		messageCreateTest(messageService, user, channel);
 	}
+
 	static User setupUser(UserService userService) {
-		//"woody", "woody@codeit.com", "woody1234" 원래 이렇게 넣어야 하지만 name이랑 age만 받아서 이런식을 처리함.
-		User user = userService.createUser("woody", 15);
-		return user;
+		Path path = Paths.get("FileData/testData/test.jpg");
+
+		String fileName;
+		String contentType;
+		long size;
+		byte[] content;
+
+		// BinaryContent 생성을 위한 파일 역질렬화 진행.
+		try {
+			fileName = path.getFileName().toString();
+			contentType = Files.probeContentType(path);
+			size = Files.size(path);
+			content = Files.readAllBytes(path);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return userService.createUser(
+			new UserCreateRequest("woody", "woody@test.com", "1234", fileName, contentType, size, content));
 	}
 
-	static Channel setupChannel(ChannelService channelService) {
-		// ChannelType.PUBLIC Enum 타입으로 정하지 않아서 그냥 뺐음.
-		Channel channel = channelService.createChannel( "공지", "공지 채널입니다.");
-		return channel;
+	static Channel setupChannel(ChannelService channelService, User user) {
+		// Public 생성
+		channelService.createPublicChannel(new PublicChannelCreateRequest("woody", "woody"));
+
+		// Private 생성 (ReadStatus도 생성 됨)
+		List<UUID> userIds = new ArrayList<>();
+		userIds.add(user.getUserId());
+
+		// Private를 Message에 주입하기 위한 return 값 지정.
+		return channelService.createPrivateChannel(new PrivateChannelCreateRequest(userIds));
 	}
 
-	static void messageCreateTest(MessageService messageService, Channel channel, User author) {
-		//"안녕하세요.", channel.getId(), author.getId()	createMessage로 userId, channelId, content를 받기 때문에 변경.
-		Message message = messageService.createMessage( author.getUserId(), channel.getChannelId(), "안녕하세요");
+	static void messageCreateTest(MessageService messageService, User author, Channel channel) {
+		// User, Channel(Private) 주입 후 Message 생성 attachemnet는 넣지 않음.)
+		Message message = messageService.createMessage(
+			new MessageCreateRequest(author.getUserId(), channel.getChannelId(), "메시지", null));
+
 		System.out.println("메시지 생성: " + message.getMessageId());
 		System.out.println(message);
 	}
+
 }

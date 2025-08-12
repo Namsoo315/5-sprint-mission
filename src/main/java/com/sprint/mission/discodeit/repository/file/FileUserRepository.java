@@ -12,17 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
+
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
+@Repository("userRepository")
+@ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 public class FileUserRepository implements UserRepository {
-	private final String DIRECTORY;
-	private final String EXTENSION;
+	private final String DIRECTORY = "FileData/USER";
+	private final String EXTENSION = ".ser";
 
 	public FileUserRepository() {
-		this.DIRECTORY = "USER";
-		this.EXTENSION = ".ser";
 		Path path = Paths.get(DIRECTORY);
 		if (!path.toFile().exists()) {
 			try {
@@ -35,8 +40,6 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		boolean isNew = !existsById(user.getUserId());
-
 		Path path = Paths.get(DIRECTORY, user.getUserId() + EXTENSION);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -45,19 +48,13 @@ public class FileUserRepository implements UserRepository {
 			throw new RuntimeException(e);
 		}
 
-		if (isNew) {
-			System.out.println("생성 되었습니다.");
-		} else {
-			System.out.println("업데이트 되었습니다.");
-		}
-
 		return user;
 	}
 
 	@Override
-	public Optional<User> findById(UUID id) {
+	public Optional<User> findById(UUID userId) {
 		User user = null;
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -70,36 +67,39 @@ public class FileUserRepository implements UserRepository {
 	}
 
 	@Override
-	public List<User> findAll() {
-		List<User> users = new ArrayList<>();
-		Path directory = Paths.get(DIRECTORY);
+	public Optional<User> findByUsername(String username) {
+		return this.findAll().stream()
+			.filter(user -> user.getUsername().equals(username))
+			.findFirst();
+	}
 
-		try {
-			Files.list(directory)
-				.filter(path -> path.toString().endsWith(EXTENSION))
-				.forEach(filePath -> {
+	@Override
+	public Optional<User> findByEmail(String email) {
+		return this.findAll().stream()
+			.filter(user -> user.getEmail().equals(email))
+			.findFirst();
+	}
+
+	@Override
+	public List<User> findAll() {
+		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
+			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						User user = (User)ois.readObject();
-						users.add(user);
+						return (User)ois.readObject();
 					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패",e);
+						throw new RuntimeException("파일 읽기 실패", e);
 					}
-				});
+				}).toList();
 		} catch (IOException e) {
 			throw new RuntimeException("디렉터리 탐색 실패", e);
 		}
-		return users;
 	}
 
 	@Override
-	public long count() {
-		return 0;
-	}
-
-	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+	public void delete(UUID userId) {
+		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
 
 		try {
 			Files.deleteIfExists(path);
@@ -109,7 +109,7 @@ public class FileUserRepository implements UserRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+	public boolean existsById(UUID userId) {
+		return Files.exists(Paths.get(DIRECTORY, userId.toString() + EXTENSION));
 	}
 }

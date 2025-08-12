@@ -4,16 +4,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserFindRequest;
+import com.sprint.mission.discodeit.dto.user.UserFindResponse;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 
 public interface UserService {
-	User createUser(String name, int age);
+	User createUser(UserCreateRequest request);
 
-	Optional<User> findByUserId(UUID uuid);
+	Optional<UserFindResponse> findByUserId(UserFindRequest request);
 
-	List<User> findAll();
+	List<UserFindResponse> findAll();
 
-	void updateUser(UUID uuid, String username, int age);
+	void updateUser(UserUpdateRequest request);
 
 	void deleteUser(UUID uuid);
 }
