@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class BinaryContentCreateRequest {
+public class BinaryContentDTO {
 	private String fileName;
 	private String contentType;
 	private Long size;
