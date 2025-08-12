@@ -23,8 +23,8 @@ public class AuthController {
 	// [ ] 사용자는 로그인할 수 있다.
 	@RequestMapping(path = "/", method = RequestMethod.POST)
 	public ResponseEntity<AuthLoginResponse> login(@RequestBody AuthLoginRequest request) {
-		AuthLoginResponse result = authService.login(request);
+		AuthLoginResponse response = authService.login(request);
 
-		return ResponseEntity.status(HttpStatus.OK).body(result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
