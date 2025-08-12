@@ -1,21 +1,32 @@
 package com.sprint.mission.discodeit.controller;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 
 import lombok.RequiredArgsConstructor;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/binaryContent")
 public class BinaryContentController {
 
-	@RequestMapping("/download")
-	public ResponseEntity<BinaryContent> download() {
-		return ResponseEntity.status(HttpStatus.OK).body(null);
+	private final BinaryContentService binaryContentService;
+
+	// [ ] 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
+	@RequestMapping(path = "/download", method = RequestMethod.GET)
+	public ResponseEntity<List<BinaryContent>> findBinaryContent(@RequestBody List<UUID> requests) {
+		List<BinaryContent> responses = binaryContentService.findAllByIdIn(requests);
+
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
 	}
 }
