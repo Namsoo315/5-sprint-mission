@@ -49,9 +49,9 @@ public class UserController {
 				profile.getBytes());
 		}
 
-		User user = userService.createUser(userCreateRequest, binaryContentDTO);
+		User response = userService.createUser(userCreateRequest, binaryContentDTO);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(user);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	// [ ] 사용자 정보를 수정할 수 있다.
@@ -85,16 +85,16 @@ public class UserController {
 	// [ ] 모든 사용자를 조회할 수 있다.
 	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
 	public ResponseEntity<List<UserFindResponse>> findAllUser() {
-		List<UserFindResponse> users = userService.findAll();
+		List<UserFindResponse> responses = userService.findAll();
 
-		return ResponseEntity.status(HttpStatus.OK).body(users);
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
 	}
 
 	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
 	@RequestMapping(path = "/update/{id}", method = RequestMethod.PATCH)
 	public ResponseEntity<UserStatus> updateUserStatus(@PathVariable("id") UUID userId) {
-		UserStatus userStatus = userStatusService.updateByUserId(userId);
+		UserStatus response = userStatusService.updateByUserId(userId);
 
-		return ResponseEntity.status(HttpStatus.OK).body(userStatus);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
