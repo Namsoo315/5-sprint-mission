@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.sprint.mission.discodeit.dto.message.AttachmentDTO;
+import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
@@ -24,34 +24,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 	private final MessageRepository messageRepository;
-	private final ChannelRepository	channelRepository;
+	private final ChannelRepository channelRepository;
 	private final UserRepository userRepository;
 	private final BinaryContentRepository binaryContentRepository;
 
 	@Override
-	public Message createMessage(MessageCreateRequest request) {
+	public Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO) {
 
 		// 1. 호환성 체크
-		if (userRepository.findById(request.getUserId()).isEmpty()) {
+		if (userRepository.findById(messageCreateRequest.getUserId()).isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelRepository.findById(request.getChannelId()).isEmpty()) {
+		if (channelRepository.findById(messageCreateRequest.getChannelId()).isEmpty()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
-		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
 		List<UUID> attachmentIds = new ArrayList<>();
+		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
+		if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
+			for (BinaryContentDTO dto : binaryContentDTO) {
+				if(dto.getBinaryContent() == null || dto.getBinaryContent().length == 0)
+					continue;
 
-		if (request.getAttachments() != null) {
-			for (AttachmentDTO dto : request.getAttachments()){
-				BinaryContent binaryContent = new BinaryContent(dto.getFileName(), dto.getContentType(),
-					dto.getSize(), dto.getBinaryContent());
+				BinaryContent binaryContent = new BinaryContent(dto.getFileName(), dto.getContentType(), dto.getSize(),
+					dto.getBinaryContent());
+				attachmentIds.add(binaryContent.getBinaryContentId());
 				binaryContentRepository.save(binaryContent);
 			}
 		}
 
 		// 2. 메시지 생성
-		Message message = new Message(request.getUserId(), request.getChannelId(), request.getMessage(), attachmentIds);
+		Message message = new Message(messageCreateRequest.getUserId(), messageCreateRequest.getChannelId(),
+			messageCreateRequest.getMessage(), attachmentIds);
 		messageRepository.save(message);
 
 		return message;

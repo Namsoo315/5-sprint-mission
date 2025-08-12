@@ -52,7 +52,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID readStatusId) {
+	public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
 		ReadStatus readStatus = null;
 		Path path = Paths.get(DIRECTORY, readStatusId.toString() + EXTENSION);
 

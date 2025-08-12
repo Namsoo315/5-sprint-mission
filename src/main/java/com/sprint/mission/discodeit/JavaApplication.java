@@ -1,22 +1,12 @@
 package com.sprint.mission.discodeit;
 
-// import com.sprint.mission.discodeit.mainview.MainViewJCF;
-// import com.sprint.mission.discodeit.mainview.MainViewFile;
-// import com.sprint.mission.discodeit.mainview.MainViewBasic;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-
-
-
+@SpringBootApplication
 public class JavaApplication {
 
-
 	public static void main(String[] args) {
-		// MainViewJCF mainViewJCF = new MainViewJCF();
-		// MainViewFile mainViewFile = new MainViewFile();
-		// MainViewBasic mainViewBasic = new MainViewBasic();
-		// mainViewJCF.mainMenu();		//JCF 테스트 용
-		// mainViewFile.mainMenu(); 	//File 테스트 용
-		// mainViewBasic.mainMenuBasic();
-
+		SpringApplication.run(JavaApplication.class, args);
 	}
 }

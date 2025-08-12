@@ -22,5 +22,5 @@ public interface ChannelService {
 
 	void updateChannel(ChannelUpdateRequest request);
 
-	void deleteChannel(UUID uuid);
+	void deleteChannel(UUID channelId);
 }

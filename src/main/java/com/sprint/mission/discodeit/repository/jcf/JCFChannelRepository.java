@@ -28,9 +28,9 @@ public class JCFChannelRepository implements ChannelRepository {
 		map.put(channel.getChannelId(), channel);
 
 		if (isNew) {
-			System.out.println("channel이 생성 되었습니다.");
+			System.out.println("channel이 생성 되었습니다." + channel.getChannelId());
 		} else {
-			System.out.println("channel이 업데이트 되었습니다.");
+			System.out.println("channel이 업데이트 되었습니다." + channel.getChannelId());
 		}
 		return channel;
 	}

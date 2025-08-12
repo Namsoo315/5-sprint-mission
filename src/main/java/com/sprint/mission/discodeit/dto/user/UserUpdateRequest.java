@@ -14,8 +14,4 @@ public class UserUpdateRequest {
 	private String username;
 	private String email;
 	private String password;
-	private String fileName;
-	private String contentType;
-	private Long size;
-	private byte[] binaryContent;
 }

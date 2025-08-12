@@ -14,5 +14,4 @@ public class MessageCreateRequest {
 	private UUID userId;
 	private UUID channelId;
 	private String message;
-	private List<AttachmentDTO> attachments;
 }

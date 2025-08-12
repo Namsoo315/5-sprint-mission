@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ReadStatusCreateRequest {
 	private UUID userId;
-	private UUID chanelId;
+	private UUID channelId;
 }

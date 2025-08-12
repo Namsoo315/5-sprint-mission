@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class ReadStatusUpdateRequest {
-	private UUID ReadStatusId;
+	private UUID readStatusId;
 	private UUID userId;
-	private UUID chanelId;
+	private UUID channelId;
 }
