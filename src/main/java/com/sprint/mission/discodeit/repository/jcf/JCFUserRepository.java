@@ -25,9 +25,9 @@ public class JCFUserRepository implements UserRepository {
 		map.put(user.getUserId(), user);
 
 		if (isNew) {
-			System.out.println("user가 생성 되었습니다.");
+			System.out.println("user가 생성 되었습니다." + user.getUserId());
 		} else {
-			System.out.println("user가 업데이트 되었습니다.");
+			System.out.println("user가 업데이트 되었습니다." + user.getUserId());
 		}
 
 		return user;

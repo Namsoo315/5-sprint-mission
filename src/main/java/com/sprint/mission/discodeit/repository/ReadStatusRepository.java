@@ -9,7 +9,7 @@ import com.sprint.mission.discodeit.entity.ReadStatus;
 public interface ReadStatusRepository {
 	ReadStatus save(ReadStatus readStatus);
 
-	Optional<ReadStatus> findById(UUID readStatusId);
+	Optional<ReadStatus> findByReadStatusId(UUID readStatusId);
 
 	Optional<ReadStatus> findByUserIdAndChannelId(UUID userId, UUID channelId);
 

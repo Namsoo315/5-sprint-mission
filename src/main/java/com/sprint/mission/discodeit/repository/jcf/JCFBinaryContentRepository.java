@@ -25,9 +25,9 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 		map.put(binaryContent.getBinaryContentId(), binaryContent);
 
 		if (isNew) {
-			System.out.println("binaryContent가 생성 되었습니다.");
+			System.out.println("binaryContent가 생성 되었습니다." + binaryContent.getBinaryContentId());
 		} else {
-			System.out.println("binaryContent가 업데이트 되었습니다.");
+			System.out.println("binaryContent가 업데이트 되었습니다." + binaryContent.getBinaryContentId());
 		}
 		return binaryContent;
 	}

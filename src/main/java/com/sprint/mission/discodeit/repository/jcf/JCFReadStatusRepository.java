@@ -26,15 +26,15 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 		map.put(readStatus.getReadStatusId(), readStatus);
 
 		if (isNew) {
-			System.out.println("readStatus가 생성 되었습니다.");
+			System.out.println("readStatus가 생성 되었습니다. : " + readStatus.getReadStatusId() );
 		} else {
-			System.out.println("readStatus가 업데이트 되었습니다.");
+			System.out.println("readStatus가 업데이트 되었습니다." + readStatus.getReadStatusId() );
 		}
 		return readStatus;
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID readStatusId) {
+	public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
 		if (existsById(readStatusId)) {
 			return Optional.of(map.get(readStatusId));
 		}
