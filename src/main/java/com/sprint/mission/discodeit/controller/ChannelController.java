@@ -30,9 +30,9 @@ public class ChannelController {
 	// [ ] 공개 채널을 생성할 수 있다.
 	@RequestMapping(path = "/public", method = RequestMethod.POST)
 	public ResponseEntity<Channel> publicChannel(@RequestBody PublicChannelCreateRequest request) {
-		Channel publicChannel = channelService.createPublicChannel(request);
+		Channel response = channelService.createPublicChannel(request);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(publicChannel);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	// [ ] 비공개 채널을 생성할 수 있다.
@@ -43,9 +43,9 @@ public class ChannelController {
 		if (request.getParticipantsUserIds().size() < 2) {
 			throw new IllegalArgumentException("비공개 채널은 두 명이상 부터 생성 가능합니다.");
 		}
-		Channel privateChannel = channelService.createPrivateChannel(request);
+		Channel response = channelService.createPrivateChannel(request);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(privateChannel);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	// [ ] 공개 채널의 정보를 수정할 수 있다.
@@ -66,7 +66,8 @@ public class ChannelController {
 	// [ ] 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
 	@RequestMapping(path = "/user/{id}", method =  RequestMethod.GET)
 	public ResponseEntity<List<ChannelFindResponse>> findChannelById(@PathVariable("id") UUID userId) {
-		List<ChannelFindResponse> allByUserId = channelService.findAllByUserId(userId);
-		return ResponseEntity.status(HttpStatus.OK).body(allByUserId);
+		List<ChannelFindResponse> responses = channelService.findAllByUserId(userId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
 	}
 }
