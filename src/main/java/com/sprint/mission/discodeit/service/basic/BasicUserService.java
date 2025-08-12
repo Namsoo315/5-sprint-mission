@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
 import com.sprint.mission.discodeit.dto.user.UserFindResponse;
@@ -29,28 +30,33 @@ public class BasicUserService implements UserService {
 	private final UserStatusRepository userStatusRepository;
 
 	@Override
-	public User createUser(UserCreateRequest request) {
+	public User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO) {
 
 		UUID profileId = null;
+
 		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
-				request.getSize(), request.getBinaryContent());
+		if (binaryContentDTO != null &&
+			binaryContentDTO.getBinaryContent() != null &&
+			binaryContentDTO.getBinaryContent().length > 0) {
+
+			BinaryContent content = new BinaryContent(binaryContentDTO.getFileName(), binaryContentDTO.getContentType(),
+				binaryContentDTO.getSize(), binaryContentDTO.getBinaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}
 
 		// 2. username, email 호환성 확인
-		if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+		if (userRepository.findByUsername(userCreateRequest.getUsername()).isPresent()) {
 			throw new RuntimeException("같은 아이디가 존재합니다.");
 		}
 
-		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+		if (userRepository.findByEmail(userCreateRequest.getEmail()).isPresent()) {
 			throw new RuntimeException("같은 이메일이 존재합니다.");
 		}
 
 		// 3. user, userStatus 같이 생성.
-		User user = new User(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
+		User user = new User(userCreateRequest.getUsername(), userCreateRequest.getEmail(),
+			userCreateRequest.getPassword(), profileId);
 		userRepository.save(user);
 
 		UserStatus status = new UserStatus(user.getUserId());
@@ -104,23 +110,28 @@ public class BasicUserService implements UserService {
 	}
 
 	@Override
-	public void updateUser(UserUpdateRequest request) {
+	public void updateUser(UserUpdateRequest userUpdateRequest, BinaryContentDTO binaryContentDTO) {
 
 		UUID profileId = null;
 		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
-				request.getSize(), request.getBinaryContent());
+		if (binaryContentDTO != null &&
+			binaryContentDTO.getBinaryContent() != null &&
+			binaryContentDTO.getBinaryContent().length > 0) {
+			BinaryContent content = new BinaryContent(binaryContentDTO.getFileName(),
+				binaryContentDTO.getContentType(),
+				binaryContentDTO.getSize(), binaryContentDTO.getBinaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}
 
 		// 2. User 호환성 체크
-		User user = userRepository.findById(request.getUserId())
+		User user = userRepository.findById(userUpdateRequest.getUserId())
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
 		// 3. Update 작업 수행.
-		user.update(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
+		user.update(userUpdateRequest.getUsername(), userUpdateRequest.getEmail(), userUpdateRequest.getPassword(),
+			profileId);
+
 		userRepository.save(user);
 
 	}
