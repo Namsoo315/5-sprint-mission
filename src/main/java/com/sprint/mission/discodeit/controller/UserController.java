@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserFindResponse;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
 	private final UserService userService;
 	private final BasicUserStatusService userStatusService;
@@ -84,10 +84,9 @@ public class UserController {
 
 	// [ ] 모든 사용자를 조회할 수 있다.
 	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
-	public ResponseEntity<List<UserFindResponse>> findAllUser() {
-		List<UserFindResponse> responses = userService.findAll();
-
-		return ResponseEntity.status(HttpStatus.OK).body(responses);
+	public ResponseEntity<List<UserDto>> findAllUser() {
+		List<UserDto> response = userService.findAll();
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
