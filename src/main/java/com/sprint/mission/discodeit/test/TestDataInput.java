@@ -43,8 +43,8 @@ public class TestDataInput {
 		for(UserDto user : userService.findAll()){
 			userService.deleteUser(user.id());
 			for(ChannelFindResponse channel : channelService.findAllByUserId(user.id())){
-				channelService.deleteChannel(channel.getChannelId());
-				for(Message message : messageService.findAllByChannelId(channel.getChannelId())){
+				channelService.deleteChannel(channel.channelId());
+				for(Message message : messageService.findAllByChannelId(channel.channelId())){
 					messageService.deleteMessage(message.getMessageId());
 				}
 			}

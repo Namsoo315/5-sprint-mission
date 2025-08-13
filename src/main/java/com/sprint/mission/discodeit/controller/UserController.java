@@ -72,7 +72,7 @@ public class UserController {
 
 		userService.updateUser(userUpdateRequest, binaryContentDTO);
 
-		return new ResponseEntity<>("수정이 완료 되었습니다. : " + userUpdateRequest.getUserId(), HttpStatus.OK);
+		return new ResponseEntity<>("수정이 완료 되었습니다. : " + userUpdateRequest.userId(), HttpStatus.OK);
 	}
 
 	// [ ] 사용자를 삭제할 수 있다.

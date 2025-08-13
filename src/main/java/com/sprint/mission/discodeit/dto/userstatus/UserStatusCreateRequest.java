@@ -2,13 +2,6 @@ package com.sprint.mission.discodeit.dto.userstatus;
 
 import java.util.UUID;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-public class UserStatusCreateRequest {
-	private UUID userId;
-}
+public record UserStatusCreateRequest(
+	UUID userId
+) {}

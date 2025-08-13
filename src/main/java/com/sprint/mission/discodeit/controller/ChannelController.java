@@ -40,7 +40,7 @@ public class ChannelController {
 	public ResponseEntity<Channel> privateChannel(@RequestBody PrivateChannelCreateRequest request) {
 
 		// 개인적으로 비공개 채널은 두명 이상? 은 반드시 필요해야 할 것 같아 두명 이상이어야만 하는 예외처리 생성함.
-		if (request.getParticipantsUserIds().size() < 2) {
+		if (request.participantsUserIds().size() < 2) {
 			throw new IllegalArgumentException("비공개 채널은 두 명이상 부터 생성 가능합니다.");
 		}
 		Channel response = channelService.createPrivateChannel(request);
@@ -53,7 +53,7 @@ public class ChannelController {
 	public ResponseEntity<String> modifyPublicChannel(@RequestBody ChannelUpdateRequest request) {
 		channelService.updateChannel(request);
 
-		return new ResponseEntity<>("채널이 수정 완료 되었습니다. : " + request.getChannelId(), HttpStatus.OK);
+		return new ResponseEntity<>("채널이 수정 완료 되었습니다. : " + request.channelId(), HttpStatus.OK);
 	}
 
 	// [ ] 채널을 삭제할 수 있다.

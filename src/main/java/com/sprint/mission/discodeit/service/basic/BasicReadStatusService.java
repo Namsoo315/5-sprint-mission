@@ -30,10 +30,10 @@ public class BasicReadStatusService implements ReadStatusService {
 	public ReadStatus createReadStatus(ReadStatusCreateRequest request) {
 
 		// 1. 호환성 체크 User, Channel 체크
-		User user = userRepository.findById(request.getUserId()).orElseThrow(
+		User user = userRepository.findById(request.userId()).orElseThrow(
 			() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
-		Channel channel = channelRepository.findById(request.getChannelId()).orElseThrow(
+		Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
 			() -> new IllegalArgumentException("채널이 존재하지 않습니다."));
 
 		// 1-2. 만약 channelId와 userId가 매치되는 readStatus가 존재하면 예외 처리
@@ -65,7 +65,7 @@ public class BasicReadStatusService implements ReadStatusService {
 	public ReadStatus updateReadStatus(ReadStatusUpdateRequest request) {
 
 		// 1. 호환성 체크
-		ReadStatus readStatus = readStatusRepository.findByReadStatusId(request.getReadStatusId()).orElseThrow(
+		ReadStatus readStatus = readStatusRepository.findByReadStatusId(request.readStatusId()).orElseThrow(
 			() -> new IllegalArgumentException("상태 정보가 없습니다."));
 
 		// 2. 상태정보 업데이트 후 Repository save(update)

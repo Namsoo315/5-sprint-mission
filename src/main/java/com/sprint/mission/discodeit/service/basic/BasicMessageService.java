@@ -32,10 +32,10 @@ public class BasicMessageService implements MessageService {
 	public Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO) {
 
 		// 1. 호환성 체크
-		if (userRepository.findById(messageCreateRequest.getUserId()).isEmpty()) {
+		if (userRepository.findById(messageCreateRequest.userId()).isEmpty()) {
 			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 		}
-		if (channelRepository.findById(messageCreateRequest.getChannelId()).isEmpty()) {
+		if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
 			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
 		}
 
@@ -54,8 +54,8 @@ public class BasicMessageService implements MessageService {
 		}
 
 		// 2. 메시지 생성
-		Message message = new Message(messageCreateRequest.getUserId(), messageCreateRequest.getChannelId(),
-			messageCreateRequest.getMessage(), attachmentIds);
+		Message message = new Message(messageCreateRequest.userId(), messageCreateRequest.channelId(),
+			messageCreateRequest.message(), attachmentIds);
 		messageRepository.save(message);
 
 		return message;
@@ -72,10 +72,10 @@ public class BasicMessageService implements MessageService {
 
 	@Override
 	public void updateMessage(MessageUpdateRequest request) {
-		Message message = messageRepository.findById(request.getMessageId()).orElseThrow(
+		Message message = messageRepository.findById(request.messageId()).orElseThrow(
 			() -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
 
-		message.update(request.getNewContent());
+		message.update(request.newContent());
 		messageRepository.save(message);
 	}
 

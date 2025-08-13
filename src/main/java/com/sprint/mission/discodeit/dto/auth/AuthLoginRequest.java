@@ -1,11 +1,6 @@
 package com.sprint.mission.discodeit.dto.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@AllArgsConstructor
-@Getter
-public class AuthLoginRequest  {
-	private String username;
-	private String password;
-}
+public record AuthLoginRequest(
+	String username,
+	String password
+) {}

@@ -26,17 +26,17 @@ public class BasicUserStatusService implements UserStatusService {
 	public UserStatus createUserStatus(UserStatusCreateRequest request) {
 
 		// 1. 호환성 체크 User 가 존재하지 않으면 예외 처리
-		if (userRepository.findById(request.getUserId()).isEmpty()) {
+		if (userRepository.findById(request.userId()).isEmpty()) {
 			throw new IllegalArgumentException("존재하지 않는 유저입니다.");
 		}
 
 		// 1-2. 같은 User와 관련된 객체가 UserStatus에 이미 존재하면 예외 처리
-		if (userStatusRepository.findByUserId(request.getUserId()).isPresent()) {
+		if (userStatusRepository.findByUserId(request.userId()).isPresent()) {
 			throw new IllegalArgumentException("이미 존재하는 유저입니다.");
 		}
 
 		// 2. 유저 상태정보 저장.
-		UserStatus userStatus = new UserStatus(request.getUserId());
+		UserStatus userStatus = new UserStatus(request.userId());
 		userStatusRepository.save(userStatus);
 
 		return userStatus;
@@ -56,7 +56,7 @@ public class BasicUserStatusService implements UserStatusService {
 	@Override
 	public UserStatus updateUserStatus(UserStatusUpdateRequest request) {
 		// 1. 호환성 체크
-		UserStatus userStatus = userStatusRepository.findById(request.getUserStatusId()).orElseThrow(
+		UserStatus userStatus = userStatusRepository.findById(request.userStatusId()).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 유저 상태 정보입니다."));
 
 		// 2. 유저 상태정보 업데이트

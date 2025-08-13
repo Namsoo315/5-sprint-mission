@@ -57,7 +57,7 @@ public class MessageController {
 	public ResponseEntity<String> modifyMessage(@RequestBody MessageUpdateRequest messageUpdateRequest) {
 		messageService.updateMessage(messageUpdateRequest);
 
-		return new ResponseEntity<>("메시지가 수정이 되었습니다. : " + messageUpdateRequest.getMessageId(), HttpStatus.OK);
+		return new ResponseEntity<>("메시지가 수정이 되었습니다. : " + messageUpdateRequest.messageId(), HttpStatus.OK);
 	}
 
 	// [ ] 메시지를 삭제할 수 있다.
