@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,18 +16,21 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.config.RepositoryProperties;
 import com.sprint.mission.discodeit.entity.ReadStatus;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
-@Repository("readStatusRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
+@Repository
 public class FileReadStatusRepository implements ReadStatusRepository {
-	private final String DIRECTORY = "FileData/READSTATUS";
-	private final String EXTENSION = ".ser";
+	private final String directory;
+	private final String extension;
 
-	public FileReadStatusRepository() {
-		Path path = Paths.get(DIRECTORY);
+	public FileReadStatusRepository(RepositoryProperties properties) {
+		directory = properties.getFileDirectory() + "/READSTATUS";
+		extension = properties.getExtension();
+
+		Path path = Paths.get(directory);
 		if (!path.toFile().exists()) {
 			try {
 				Files.createDirectories(path);
@@ -40,7 +42,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public ReadStatus save(ReadStatus readStatus) {
-		Path path = Paths.get(DIRECTORY, readStatus.getReadStatusId() + EXTENSION);
+		Path path = Paths.get(directory, readStatus.getReadStatusId() + extension);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(readStatus);
@@ -54,7 +56,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 	@Override
 	public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
 		ReadStatus readStatus = null;
-		Path path = Paths.get(DIRECTORY, readStatusId.toString() + EXTENSION);
+		Path path = Paths.get(directory, readStatusId.toString() + extension);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -70,8 +72,8 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public List<ReadStatus> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
-			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+			return paths.filter(path -> path.toString().endsWith(extension))
 				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -104,7 +106,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(directory, id.toString() + extension);
 
 		try {
 			Files.deleteIfExists(path);
@@ -124,6 +126,6 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
 	@Override
 	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(DIRECTORY, id.toString() + EXTENSION));
+		return Files.exists(Paths.get(directory, id.toString() + extension));
 	}
 }

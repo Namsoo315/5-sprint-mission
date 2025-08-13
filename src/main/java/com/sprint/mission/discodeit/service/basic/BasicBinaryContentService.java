@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("binaryContentService")
+@Service
 @RequiredArgsConstructor
 public class BasicBinaryContentService implements BinaryContentService {
 	private final BinaryContentRepository binaryContentRepository;
@@ -28,7 +29,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 	}
 
 	@Override
-	public Optional<BinaryContent> findById(UUID binaryContentId) {
+	public Optional<BinaryContent> findByBinaryContentId(UUID binaryContentId) {
 		return binaryContentRepository.findById(binaryContentId);
 	}
 

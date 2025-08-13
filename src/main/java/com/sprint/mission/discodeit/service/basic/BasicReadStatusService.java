@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("readStatusService")
+@Service
 @RequiredArgsConstructor
 public class BasicReadStatusService implements ReadStatusService {
 	private final ReadStatusRepository readStatusRepository;
@@ -50,8 +51,9 @@ public class BasicReadStatusService implements ReadStatusService {
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID userStatusId) {
-		return readStatusRepository.findByReadStatusId(userStatusId);
+	public ReadStatus findByReadStatusId(UUID readStatusId) {
+		return readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
+			() -> new NoSuchElementException("일치하는 ReadStatusId가 없습니다."));
 	}
 
 	@Override

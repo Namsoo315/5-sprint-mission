@@ -14,7 +14,7 @@ import com.sprint.mission.discodeit.entity.User;
 public interface UserService {
 	User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO);
 
-	Optional<UserFindResponse> findByUserId(UserFindRequest request);
+	UserFindResponse findByUserId(UserFindRequest request);
 
 	List<UserFindResponse> findAll();
 

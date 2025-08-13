@@ -22,7 +22,7 @@ import com.sprint.mission.discodeit.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("userService")
+@Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
 	private final UserRepository userRepository;
@@ -32,9 +32,18 @@ public class BasicUserService implements UserService {
 	@Override
 	public User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO) {
 
+		// 1. username, email 호환성 확인
+		if (userRepository.findByUsername(userCreateRequest.getUsername()).isPresent()) {
+			throw new RuntimeException("같은 아이디가 존재합니다.");
+		}
+
+		if (userRepository.findByEmail(userCreateRequest.getEmail()).isPresent()) {
+			throw new RuntimeException("같은 이메일이 존재합니다.");
+		}
+
 		UUID profileId = null;
 
-		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
+		// 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
 		if (binaryContentDTO != null &&
 			binaryContentDTO.getBinaryContent() != null &&
 			binaryContentDTO.getBinaryContent().length > 0) {
@@ -43,15 +52,6 @@ public class BasicUserService implements UserService {
 				binaryContentDTO.getSize(), binaryContentDTO.getBinaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
-		}
-
-		// 2. username, email 호환성 확인
-		if (userRepository.findByUsername(userCreateRequest.getUsername()).isPresent()) {
-			throw new RuntimeException("같은 아이디가 존재합니다.");
-		}
-
-		if (userRepository.findByEmail(userCreateRequest.getEmail()).isPresent()) {
-			throw new RuntimeException("같은 이메일이 존재합니다.");
 		}
 
 		// 3. user, userStatus 같이 생성.
@@ -66,21 +66,22 @@ public class BasicUserService implements UserService {
 	}
 
 	@Override
-	public Optional<UserFindResponse> findByUserId(UserFindRequest request) {
+	public UserFindResponse findByUserId(UserFindRequest request) {
 
 		// 1. 호환성 체크	user, userStatus Id 체크
 		User user = userRepository.findById(request.getUserId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
 		UserStatus userStatus = userStatusRepository.findByUserId(request.getUserId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
 		// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-		return Optional.of(UserFindResponse.builder()
+		return UserFindResponse.builder()
 			.userId(user.getUserId())
 			.username(user.getUsername())
 			.email(user.getEmail())
 			.status(userStatus.isStatus())
-			.build());
+			.build();
 	}
 
 	@Override
@@ -90,10 +91,7 @@ public class BasicUserService implements UserService {
 
 		for (User user : users) {
 
-			// 1. 호환성 체크	user, userStatus Id 체크
-			userRepository.findById(user.getUserId()).orElseThrow(
-				() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-
+			// 1. 호환성 체크 userStatus Id 체크
 			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(
 				() -> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 

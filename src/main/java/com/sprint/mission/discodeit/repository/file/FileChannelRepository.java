@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,18 +16,21 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.config.RepositoryProperties;
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
-@Repository("channelRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
+@Repository
 public class FileChannelRepository implements ChannelRepository {
-	private static final String DIRECTORY = "FileData/CHANNEL";
-	private static final String EXTENSION = ".ser";
+	private final String directory;
+	private final String extension;
 
-	public FileChannelRepository() {
-		Path path = Paths.get(DIRECTORY);
+	public FileChannelRepository(RepositoryProperties properties) {
+		directory = properties.getFileDirectory() + "/CHANNEL";
+		extension = properties.getExtension();
+
+		Path path = Paths.get(directory);
 		if (!path.toFile().exists()) {
 			try {
 				Files.createDirectories(path);
@@ -40,7 +42,7 @@ public class FileChannelRepository implements ChannelRepository {
 
 	@Override
 	public Channel save(Channel channel) {
-		Path path = Paths.get(DIRECTORY, channel.getChannelId() + EXTENSION);
+		Path path = Paths.get(directory, channel.getChannelId() + extension);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(channel);
@@ -55,7 +57,7 @@ public class FileChannelRepository implements ChannelRepository {
 	public Optional<Channel> findById(UUID channelId) {
 		Channel channel = null;
 
-		Path path = Paths.get(DIRECTORY, channelId.toString() + EXTENSION);
+		Path path = Paths.get(directory, channelId.toString() + extension);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -69,8 +71,8 @@ public class FileChannelRepository implements ChannelRepository {
 
 	@Override
 	public List<Channel> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
-			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+			return paths.filter(path -> path.toString().endsWith(extension))
 				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -87,7 +89,7 @@ public class FileChannelRepository implements ChannelRepository {
 
 	@Override
 	public void delete(UUID channelId) {
-		Path path = Paths.get(DIRECTORY, channelId.toString() + EXTENSION);
+		Path path = Paths.get(directory, channelId.toString() + extension);
 
 		try {
 			Files.deleteIfExists(path);
@@ -98,6 +100,6 @@ public class FileChannelRepository implements ChannelRepository {
 
 	@Override
 	public boolean existsById(UUID channelId) {
-		return Files.exists(Paths.get(DIRECTORY, channelId.toString() + EXTENSION));
+		return Files.exists(Paths.get(directory, channelId.toString() + extension));
 	}
 }

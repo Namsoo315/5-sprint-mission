@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -22,7 +23,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("channelService")
+@Service
 @RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
 	private final ChannelRepository channelRepository;
@@ -55,15 +56,15 @@ public class BasicChannelService implements ChannelService {
 	}
 
 	@Override
-	public Optional<ChannelFindResponse> findByChannelId(UUID channelId) {
+	public ChannelFindResponse findByChannelId(UUID channelId) {
 
 		// 1. 호환성 확인
 		Channel channel = channelRepository.findById(channelId).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 채널입니다."));
 
 		// 2. 해당 채널의 가장 최근 메시지의 시간 정보를 포함.
-		Instant latestMessageTime = messageRepository.LatestMessageByChannelId(channelId);
-
+		Message latestMessageTime = messageRepository.latestMessageByChannelId(channelId)
+			.orElseThrow(() -> new NoSuchElementException("일치하는 채널 아이디가 없습니다."));
 		// 2-2. Private 채널인 경우 참여한 User의 Id 정보까지 포함시킴.
 		List<UUID> participantsIds = new ArrayList<>();
 
@@ -74,14 +75,14 @@ public class BasicChannelService implements ChannelService {
 		}
 
 		// DTO를 통해
-		return Optional.ofNullable(ChannelFindResponse.builder()
+		return ChannelFindResponse.builder()
 			.channelId(channelId)
 			.type(channel.getType())
 			.name(channel.getName())
 			.description(channel.getDescription())
-			.lastMessageTime(latestMessageTime)
+			.lastMessageTime(latestMessageTime.getCreatedAt())
 			.participantsUserIds(participantsIds)
-			.build());
+			.build();
 	}
 
 	@Override
@@ -96,10 +97,12 @@ public class BasicChannelService implements ChannelService {
 		// 2. Public의 Channel도 보여줘야 한다.
 		for (Channel channel : channelRepository.findAll()) {
 			// ChannelType이 Public 경우와 User가 참여한 채널일 경우는 List에 넣게 된다.
-			if (channel.getType() == ChannelType.PUBLIC || channel.getType() == ChannelType.PRIVATE && subscribeChannelIds.contains(channel.getChannelId())) {
+			if (channel.getType() == ChannelType.PUBLIC
+				|| channel.getType() == ChannelType.PRIVATE && subscribeChannelIds.contains(channel.getChannelId())) {
 
 				// 3-1. 해당 채널의 가장 최근 메시지의 시간 정보를 포함시킴
-				Instant latestMessageTime = messageRepository.LatestMessageByChannelId(channel.getChannelId());
+				Message latestMessageTime = messageRepository.latestMessageByChannelId(channel.getChannelId())
+					.orElseThrow(() -> new NoSuchElementException("일치하는 채널 아이디가 없습니다."));
 
 				// 3-2. 그 채널의 참여한 모든 UserId를 불러옴.
 				List<UUID> participantsIds = readStatusRepository.findAllByChannelId(channel.getChannelId()).stream()
@@ -112,7 +115,7 @@ public class BasicChannelService implements ChannelService {
 					.type(channel.getType())
 					.name(channel.getName())
 					.description(channel.getDescription())
-					.lastMessageTime(latestMessageTime)
+					.lastMessageTime(latestMessageTime.getCreatedAt())
 					.participantsUserIds(participantsIds)
 					.build());
 			}

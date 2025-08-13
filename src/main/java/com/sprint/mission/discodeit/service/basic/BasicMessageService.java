@@ -20,7 +20,7 @@ import com.sprint.mission.discodeit.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("messageService")
+@Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 	private final MessageRepository messageRepository;

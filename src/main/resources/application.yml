@@ -1,0 +1,6 @@
+# application.yaml
+discodeit:
+  repository:
+    type: jcf   # jcf | file
+    fileDirectory: FileData
+    extension: .ser

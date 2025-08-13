@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -18,23 +17,23 @@ public class Message implements Serializable {
 	private final UUID channelId;
 	private final List<UUID> attachmentIds;		// binaryContent
 
-	private String message;
+	private String content;
 
 	private final Instant createdAt;
 	private Instant updatedAt;
 
-	public Message(UUID userId, UUID channelId, String message, List<UUID> attachmentIds) {
+	public Message(UUID userId, UUID channelId, String content, List<UUID> attachmentIds) {
 		this.messageId = UUID.randomUUID();
 		this.userId = userId;
 		this.channelId = channelId;
-		this.message = message;
+		this.content = content;
 		this.attachmentIds = attachmentIds;
 		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
 	}
 
 	public void update(String message) {
-		this.message = message;
+		this.content = message;
 		this.updatedAt = Instant.now();
 	}
 
@@ -45,7 +44,7 @@ public class Message implements Serializable {
 			", userId=" + userId +
 			", channelId=" + channelId +
 			", attachmentIds=" + attachmentIds +
-			", message='" + message + '\'' +
+			", message='" + content + '\'' +
 			", createdAt=" + createdAt +
 			", updatedAt=" + updatedAt +
 			'}';

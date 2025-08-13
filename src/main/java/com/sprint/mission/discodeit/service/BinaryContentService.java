@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 public interface BinaryContentService {
 	BinaryContent createBinaryContent(BinaryContentDTO request);
 
-	Optional<BinaryContent> findById(UUID binaryContentId);
+	Optional<BinaryContent> findByBinaryContentId(UUID binaryContentId);
 
 	List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds);
 

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 
-@Repository("userStatusRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
+@Repository
 public class JCFUserStatusRepository implements UserStatusRepository {
 	private final Map<UUID, UserStatus> map = new HashMap<>();
 

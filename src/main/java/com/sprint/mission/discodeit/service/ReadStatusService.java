@@ -11,7 +11,7 @@ import com.sprint.mission.discodeit.entity.ReadStatus;
 public interface ReadStatusService {
 	ReadStatus createReadStatus(ReadStatusCreateRequest request);
 
-	Optional<ReadStatus> findById(UUID userStatusId);
+	ReadStatus findByReadStatusId(UUID readStatusId);
 
 	List<ReadStatus> findAllByUserId(UUID userId);
 

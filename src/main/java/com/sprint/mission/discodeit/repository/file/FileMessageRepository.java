@@ -8,8 +8,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -19,20 +17,21 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.config.RepositoryProperties;
 import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
-@Repository("messageRepository")
+@Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 public class FileMessageRepository implements MessageRepository {
-	private final String DIRECTORY = "FileData/MESSAGE";
-	;
-	private final String EXTENSION = ".ser";
-	;
+	private final String directory;
+	private final String extension;
 
-	public FileMessageRepository() {
-		Path path = Paths.get(DIRECTORY);
+	public FileMessageRepository(RepositoryProperties properties) {
+		directory = properties.getFileDirectory() + "/MESSAGE";
+		extension = properties.getExtension();
+
+		Path path = Paths.get(directory);
 		if (!path.toFile().exists()) {
 			try {
 				Files.createDirectories(path);
@@ -44,7 +43,7 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public Message save(Message message) {
-		Path path = Paths.get(DIRECTORY, message.getMessageId() + EXTENSION);
+		Path path = Paths.get(directory, message.getMessageId() + extension);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(message);
@@ -57,7 +56,7 @@ public class FileMessageRepository implements MessageRepository {
 	@Override
 	public Optional<Message> findById(UUID messageId) {
 		Message message = null;
-		Path path = Paths.get(DIRECTORY, messageId.toString() + EXTENSION);
+		Path path = Paths.get(directory, messageId.toString() + extension);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -71,8 +70,8 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public List<Message> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
-			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+			return paths.filter(path -> path.toString().endsWith(extension))
 				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -94,17 +93,15 @@ public class FileMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public Instant LatestMessageByChannelId(UUID channelId) {
+	public Optional<Message> latestMessageByChannelId(UUID channelId) {
 		return this.findAll().stream()
 			.filter(message -> message.getChannelId().equals(channelId))
-			.max(Comparator.comparing(Message::getCreatedAt))
-			.map(Message::getCreatedAt)
-			.orElse(null);
+			.max(Comparator.comparing(Message::getCreatedAt));
 	}
 
 	@Override
 	public void delete(UUID id) {
-		Path path = Paths.get(DIRECTORY, id.toString() + EXTENSION);
+		Path path = Paths.get(directory, id.toString() + extension);
 
 		try {
 			Files.deleteIfExists(path);
@@ -124,6 +121,6 @@ public class FileMessageRepository implements MessageRepository {
 
 	@Override
 	public boolean existsById(UUID messageId) {
-		return Files.exists(Paths.get(DIRECTORY, messageId.toString() + EXTENSION));
+		return Files.exists(Paths.get(directory, messageId.toString() + extension));
 	}
 }
