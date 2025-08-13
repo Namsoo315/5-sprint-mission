@@ -2,13 +2,13 @@ package com.sprint.mission.discodeit.service.basic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
 import com.sprint.mission.discodeit.dto.user.UserFindResponse;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
@@ -85,9 +85,9 @@ public class BasicUserService implements UserService {
 	}
 
 	@Override
-	public List<UserFindResponse> findAll() {
+	public List<UserDto> findAll() {
 		List<User> users = userRepository.findAll();
-		List<UserFindResponse> responses = new ArrayList<>();
+		List<UserDto> responses = new ArrayList<>();
 
 		for (User user : users) {
 
@@ -96,12 +96,8 @@ public class BasicUserService implements UserService {
 				() -> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
 			// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-			responses.add(UserFindResponse.builder()
-				.userId(user.getUserId())
-				.username(user.getUsername())
-				.email(user.getEmail())
-				.status(status.isStatus())
-				.build());
+			responses.add(new UserDto(user.getUserId(), user.getCreatedAt(), user.getUpdatedAt(), user.getUsername(),
+				user.getEmail(), user.getProfileId(), status.isStatus()));
 		}
 
 		return responses;

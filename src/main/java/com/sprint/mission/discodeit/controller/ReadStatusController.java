@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/readStatus")
+@RequestMapping("/api/readStatus")
 public class ReadStatusController {
 	private final ReadStatusService readStatusService;
 

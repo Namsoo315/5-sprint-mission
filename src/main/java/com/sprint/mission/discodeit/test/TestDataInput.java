@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.mainview;
+package com.sprint.mission.discodeit.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,17 +7,21 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
+import com.sprint.mission.discodeit.dto.channel.ChannelFindResponse;
 import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -31,6 +35,20 @@ public class TestDataInput {
 	@PostConstruct
 	public void init() {
 		testData();
+	}
+	@PreDestroy
+	public void cleanup() {
+		// 차후 개선할 것.
+
+		for(UserDto user : userService.findAll()){
+			userService.deleteUser(user.id());
+			for(ChannelFindResponse channel : channelService.findAllByUserId(user.id())){
+				channelService.deleteChannel(channel.getChannelId());
+				for(Message message : messageService.findAllByChannelId(channel.getChannelId())){
+					messageService.deleteMessage(message.getMessageId());
+				}
+			}
+		}
 	}
 
 	public void testData() {
