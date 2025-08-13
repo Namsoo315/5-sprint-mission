@@ -45,11 +45,11 @@ public class BasicUserService implements UserService {
 
 		// 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
 		if (binaryContentDTO != null &&
-			binaryContentDTO.getBinaryContent() != null &&
-			binaryContentDTO.getBinaryContent().length > 0) {
+			binaryContentDTO.binaryContent() != null &&
+			binaryContentDTO.binaryContent().length > 0) {
 
-			BinaryContent content = new BinaryContent(binaryContentDTO.getFileName(), binaryContentDTO.getContentType(),
-				binaryContentDTO.getSize(), binaryContentDTO.getBinaryContent());
+			BinaryContent content = new BinaryContent(binaryContentDTO.fileName(), binaryContentDTO.contentType(),
+				binaryContentDTO.size(), binaryContentDTO.binaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}
@@ -113,11 +113,11 @@ public class BasicUserService implements UserService {
 		UUID profileId = null;
 		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
 		if (binaryContentDTO != null &&
-			binaryContentDTO.getBinaryContent() != null &&
-			binaryContentDTO.getBinaryContent().length > 0) {
-			BinaryContent content = new BinaryContent(binaryContentDTO.getFileName(),
-				binaryContentDTO.getContentType(),
-				binaryContentDTO.getSize(), binaryContentDTO.getBinaryContent());
+			binaryContentDTO.binaryContent() != null &&
+			binaryContentDTO.binaryContent().length > 0) {
+			BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
+				binaryContentDTO.contentType(),
+				binaryContentDTO.size(), binaryContentDTO.binaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}

@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 	@Override
 	public BinaryContent createBinaryContent(BinaryContentDTO request) {
 
-		BinaryContent binaryContent = new BinaryContent(request.getFileName(), request.getContentType(), request.getSize(), request.getBinaryContent());
+		BinaryContent binaryContent = new BinaryContent(request.fileName(), request.contentType(), request.size(), request.binaryContent());
 		binaryContentRepository.save(binaryContent);
 
 		return binaryContent;
