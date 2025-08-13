@@ -56,7 +56,8 @@ Postman을 이용해 API를 테스트하고, 테스트 결과를 Export하여 PR
 - **URL**: `/api/user/findAll`
 - **요청**: 파라미터, 바디 없음
 - **응답**:
-```java
+  
+```
 ResponseEntity<List<UserDto>>
 public record UserDto(
     UUID id,
@@ -67,16 +68,16 @@ public record UserDto(
     UUID profileId,
     Boolean online
 ) {}
-
+```
 ### 📜 BinaryContent 파일 조회
 - **URL**: `/api/binaryContent/find`
 
-#### 요청:
+#### 요청
 - 파라미터: `binaryContentId`
 - 바디 없음
 
-#### 응답:
-```java
+#### 응답
+
 ResponseEntity<BinaryContent>
 
 ### 📜 정적 리소스 활용
@@ -85,3 +86,4 @@ ResponseEntity<BinaryContent>
 
 ### 🤖 생성형 AI 활용
 - 생성형 AI(Claude, ChatGPT 등)를 활용하여 위 이미지와 유사한 화면을 생성 후 서빙
+
