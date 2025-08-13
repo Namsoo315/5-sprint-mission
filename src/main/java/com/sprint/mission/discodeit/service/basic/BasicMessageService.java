@@ -20,7 +20,7 @@ import com.sprint.mission.discodeit.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("messageService")
+@Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 	private final MessageRepository messageRepository;
@@ -43,11 +43,11 @@ public class BasicMessageService implements MessageService {
 		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
 		if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
 			for (BinaryContentDTO dto : binaryContentDTO) {
-				if(dto.getBinaryContent() == null || dto.getBinaryContent().length == 0)
+				if(dto.binaryContent() == null || dto.binaryContent().length == 0)
 					continue;
 
-				BinaryContent binaryContent = new BinaryContent(dto.getFileName(), dto.getContentType(), dto.getSize(),
-					dto.getBinaryContent());
+				BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(), dto.size(),
+					dto.binaryContent());
 				attachmentIds.add(binaryContent.getBinaryContentId());
 				binaryContentRepository.save(binaryContent);
 			}

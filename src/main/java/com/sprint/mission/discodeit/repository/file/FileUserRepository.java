@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,18 +16,21 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.config.RepositoryProperties;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
-@Repository("userRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
+@Repository
 public class FileUserRepository implements UserRepository {
-	private final String DIRECTORY = "FileData/USER";
-	private final String EXTENSION = ".ser";
+	private final String directory;
+	private final String extension;
 
-	public FileUserRepository() {
-		Path path = Paths.get(DIRECTORY);
+	public FileUserRepository(RepositoryProperties properties) {
+		directory = properties.getFileDirectory() + "/USER";
+		extension = properties.getExtension();
+
+		Path path = Paths.get(directory);
 		if (!path.toFile().exists()) {
 			try {
 				Files.createDirectories(path);
@@ -40,7 +42,7 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		Path path = Paths.get(DIRECTORY, user.getUserId() + EXTENSION);
+		Path path = Paths.get(directory, user.getUserId() + extension);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(user);
@@ -54,7 +56,7 @@ public class FileUserRepository implements UserRepository {
 	@Override
 	public Optional<User> findById(UUID userId) {
 		User user = null;
-		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
+		Path path = Paths.get(directory, userId.toString() + extension);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -82,8 +84,8 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public List<User> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
-			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+			return paths.filter(path -> path.toString().endsWith(extension))
 				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -99,7 +101,7 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public void delete(UUID userId) {
-		Path path = Paths.get(DIRECTORY, userId.toString() + EXTENSION);
+		Path path = Paths.get(directory, userId.toString() + extension);
 
 		try {
 			Files.deleteIfExists(path);
@@ -110,6 +112,6 @@ public class FileUserRepository implements UserRepository {
 
 	@Override
 	public boolean existsById(UUID userId) {
-		return Files.exists(Paths.get(DIRECTORY, userId.toString() + EXTENSION));
+		return Files.exists(Paths.get(directory, userId.toString() + extension));
 	}
 }

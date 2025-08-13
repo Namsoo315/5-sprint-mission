@@ -13,7 +13,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("binaryContentService")
+@Service
 @RequiredArgsConstructor
 public class BasicBinaryContentService implements BinaryContentService {
 	private final BinaryContentRepository binaryContentRepository;
@@ -21,14 +21,14 @@ public class BasicBinaryContentService implements BinaryContentService {
 	@Override
 	public BinaryContent createBinaryContent(BinaryContentDTO request) {
 
-		BinaryContent binaryContent = new BinaryContent(request.getFileName(), request.getContentType(), request.getSize(), request.getBinaryContent());
+		BinaryContent binaryContent = new BinaryContent(request.fileName(), request.contentType(), request.size(), request.binaryContent());
 		binaryContentRepository.save(binaryContent);
 
 		return binaryContent;
 	}
 
 	@Override
-	public Optional<BinaryContent> findById(UUID binaryContentId) {
+	public Optional<BinaryContent> findByBinaryContentId(UUID binaryContentId) {
 		return binaryContentRepository.findById(binaryContentId);
 	}
 

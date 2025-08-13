@@ -15,11 +15,10 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
-@Repository("channelRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
+@Repository
 public class JCFChannelRepository implements ChannelRepository {
 	private final Map<UUID, Channel> map = new HashMap<>();
-
 
 	@Override
 	public Channel save(Channel channel) {

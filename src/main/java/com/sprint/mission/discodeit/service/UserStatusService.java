@@ -11,7 +11,7 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 public interface UserStatusService {
 	UserStatus createUserStatus(UserStatusCreateRequest request);
 
-	Optional<UserStatus> findById(UUID userStatusId);
+	UserStatus findByUserStatusId(UUID userStatusId);
 
 	List<UserStatus> findAll();
 

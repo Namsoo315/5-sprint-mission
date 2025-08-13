@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.service.auth;
+package com.sprint.mission.discodeit.service.basic;
 
 import java.util.Optional;
 
@@ -12,9 +12,9 @@ import com.sprint.mission.discodeit.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("authService")
+@Service
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService {
+public class BasicAuthService implements AuthService {
 
 	private final UserRepository userRepository;
 

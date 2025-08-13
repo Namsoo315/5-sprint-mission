@@ -1,15 +1,8 @@
 package com.sprint.mission.discodeit.dto.binary;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-public class BinaryContentDTO {
-	private String fileName;
-	private String contentType;
-	private Long size;
-	private byte[] binaryContent;
-}
+public record BinaryContentDTO(
+	String fileName,
+	String contentType,
+	Long size,
+	byte[] binaryContent
+) {}

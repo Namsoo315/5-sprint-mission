@@ -12,7 +12,7 @@ public class ReadStatus implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-	private final UUID ReadStatusId;
+	private final UUID readStatusId;
 	private final UUID userId;
 	private final UUID channelId;
 
@@ -22,7 +22,7 @@ public class ReadStatus implements Serializable {
 	private Instant updatedAt;
 
 	public ReadStatus(UUID userId, UUID channelId) {
-		ReadStatusId = UUID.randomUUID();
+		readStatusId = UUID.randomUUID();
 		this.userId = userId;
 		this.channelId = channelId;
 		this.isRead = false;
@@ -38,7 +38,7 @@ public class ReadStatus implements Serializable {
 	@Override
 	public String toString() {
 		return "ReadStatus{" +
-			"ReadStatusId=" + ReadStatusId +
+			"ReadStatusId=" + readStatusId +
 			", userId=" + userId +
 			", channelId=" + channelId +
 			", createdAt=" + createdAt +

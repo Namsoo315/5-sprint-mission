@@ -34,9 +34,9 @@ public class TestDataInput {
 	}
 
 	public void testData() {
-		BinaryContentDTO binaryContentDTO = new BinaryContentDTO();
-
 		// 유저 생성
+		BinaryContentDTO binaryContentDTO = null;
+
 		User user1 = userService.createUser(new UserCreateRequest("test1", "test1@test.com", "1234"), binaryContentDTO);
 		User user2 = userService.createUser(new UserCreateRequest("test2", "test2@test.com", "1234"), binaryContentDTO);
 		User user3 = userService.createUser(new UserCreateRequest("test3", "test3@test.com", "1234"), binaryContentDTO);
