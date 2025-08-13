@@ -1,16 +1,7 @@
 package com.sprint.mission.discodeit.dto.user;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-public class UserCreateRequest {
-	private String username;
-	private String email;
-	private String password;
-}
+public record UserCreateRequest(
+	String username,
+	String email,
+	String password
+) {}

@@ -6,32 +6,14 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.entity.ChannelType;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
 @Builder
-public class ChannelFindResponse {
-	private UUID channelId;
-	private ChannelType type;
-	private String name;
-	private String description;
-	private Instant lastMessageTime;
-	private List<UUID> participantsUserIds;
-
-	@Override
-	public String toString() {
-		return "ChannelFindResponse{" +
-			"channelId=" + channelId +
-			", type=" + type +
-			", name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", lastMessageTime=" + lastMessageTime +
-			", participantsUserIds=" + participantsUserIds +
-			'}';
-	}
-}
+public record ChannelFindResponse(
+	UUID channelId,
+	ChannelType type,
+	String name,
+	String description,
+	Instant lastMessageTime,
+	List<UUID> participantsUserIds
+) {}

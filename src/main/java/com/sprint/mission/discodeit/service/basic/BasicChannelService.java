@@ -33,7 +33,7 @@ public class BasicChannelService implements ChannelService {
 	@Override
 	public Channel createPublicChannel(PublicChannelCreateRequest request) {
 		// Public은 생성시 기존 로직을 유지.
-		Channel channel = new Channel(ChannelType.PUBLIC, request.getName(), request.getDescription());
+		Channel channel = new Channel(ChannelType.PUBLIC, request.name(), request.description());
 		channelRepository.save(channel);
 
 		return channel;
@@ -45,7 +45,7 @@ public class BasicChannelService implements ChannelService {
 		Channel channel = new Channel(ChannelType.PRIVATE, null, null);
 
 		// 1. Channel에 참여하려는 User의 정보를 DTO를 통해서 받아 user 별 ReadStatus 정보를 생성한다.
-		for (UUID userId : request.getParticipantsUserIds()) {
+		for (UUID userId : request.participantsUserIds()) {
 			ReadStatus readStatus = new ReadStatus(userId, channel.getChannelId());
 			readStatusRepository.save(readStatus);
 		}
@@ -128,7 +128,7 @@ public class BasicChannelService implements ChannelService {
 	@Override
 	public void updateChannel(ChannelUpdateRequest request) {
 		// 1. 호환성 체크
-		Channel channel = channelRepository.findById(request.getChannelId()).orElseThrow(
+		Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
 			() -> new IllegalArgumentException("채널을 조회할 수 없습니다."));
 
 		// 1-2. PRIVATE일 경우 update 불가능
@@ -137,7 +137,7 @@ public class BasicChannelService implements ChannelService {
 		}
 
 		// DTO를 통한 update
-		channel.update(request.getName(), request.getDescription());
+		channel.update(request.name(), request.description());
 		channelRepository.save(channel);
 	}
 

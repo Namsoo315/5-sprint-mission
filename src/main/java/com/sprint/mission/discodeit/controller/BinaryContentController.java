@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,13 @@ public class BinaryContentController {
 	public ResponseEntity<BinaryContent> findBinaryContent(@RequestParam("binaryContentId") UUID request) {
 		BinaryContent response = binaryContentService.findByBinaryContentId(request)
 			.orElse(null);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
+	public ResponseEntity<List<BinaryContent>> findAllBinaryContent(@RequestParam("binaryContentId") List<UUID> request) {
+		List<BinaryContent> response = binaryContentService.findAllByIdIn(request);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

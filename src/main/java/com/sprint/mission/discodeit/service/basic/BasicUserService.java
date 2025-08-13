@@ -33,11 +33,11 @@ public class BasicUserService implements UserService {
 	public User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO) {
 
 		// 1. username, email 호환성 확인
-		if (userRepository.findByUsername(userCreateRequest.getUsername()).isPresent()) {
+		if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
 			throw new RuntimeException("같은 아이디가 존재합니다.");
 		}
 
-		if (userRepository.findByEmail(userCreateRequest.getEmail()).isPresent()) {
+		if (userRepository.findByEmail(userCreateRequest.email()).isPresent()) {
 			throw new RuntimeException("같은 이메일이 존재합니다.");
 		}
 
@@ -55,8 +55,8 @@ public class BasicUserService implements UserService {
 		}
 
 		// 3. user, userStatus 같이 생성.
-		User user = new User(userCreateRequest.getUsername(), userCreateRequest.getEmail(),
-			userCreateRequest.getPassword(), profileId);
+		User user = new User(userCreateRequest.username(), userCreateRequest.email(),
+			userCreateRequest.password(), profileId);
 		userRepository.save(user);
 
 		UserStatus status = new UserStatus(user.getUserId());
@@ -69,10 +69,10 @@ public class BasicUserService implements UserService {
 	public UserFindResponse findByUserId(UserFindRequest request) {
 
 		// 1. 호환성 체크	user, userStatus Id 체크
-		User user = userRepository.findById(request.getUserId()).orElseThrow(()
+		User user = userRepository.findById(request.userId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-		UserStatus userStatus = userStatusRepository.findByUserId(request.getUserId()).orElseThrow(()
+		UserStatus userStatus = userStatusRepository.findByUserId(request.userId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
 		// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
@@ -119,11 +119,11 @@ public class BasicUserService implements UserService {
 		}
 
 		// 2. User 호환성 체크
-		User user = userRepository.findById(userUpdateRequest.getUserId())
+		User user = userRepository.findById(userUpdateRequest.userId())
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
 		// 3. Update 작업 수행.
-		user.update(userUpdateRequest.getUsername(), userUpdateRequest.getEmail(), userUpdateRequest.getPassword(),
+		user.update(userUpdateRequest.username(), userUpdateRequest.email(), userUpdateRequest.password(),
 			profileId);
 
 		userRepository.save(user);
