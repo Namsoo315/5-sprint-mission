@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
 import com.sprint.mission.discodeit.dto.user.UserFindResponse;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
@@ -15,7 +16,7 @@ public interface UserService {
 
 	UserFindResponse findByUserId(UserFindRequest request);
 
-	List<UserFindResponse> findAll();
+	List<UserDto> findAll();
 
 	void updateUser(UserUpdateRequest userUpdateRequest, BinaryContentDTO binaryContentDTO);
 
