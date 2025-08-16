@@ -93,7 +93,7 @@ public class UserController {
 	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
 	@RequestMapping(path = "/update/{id}", method = RequestMethod.PATCH)
 	public ResponseEntity<ApiResponse<String>> updateUserStatus(@PathVariable("id") UUID userId) {
-		UserStatus response = userStatusService.updateByUserId(userId);
+		userStatusService.updateByUserId(userId);
 
 		return ResponseEntity.ok(ApiResponse.ok(userId + "님의 온라인 상태 정보 업데이트 완료"));
 	}

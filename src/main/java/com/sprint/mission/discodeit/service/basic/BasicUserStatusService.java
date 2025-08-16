@@ -54,7 +54,7 @@ public class BasicUserStatusService implements UserStatusService {
 	}
 
 	@Override
-	public UserStatus updateUserStatus(UserStatusUpdateRequest request) {
+	public void updateUserStatus(UserStatusUpdateRequest request) {
 		// 1. 호환성 체크
 		UserStatus userStatus = userStatusRepository.findById(request.userStatusId()).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 유저 상태 정보입니다."));
@@ -66,12 +66,10 @@ public class BasicUserStatusService implements UserStatusService {
 
 
 		userStatusRepository.save(userStatus);
-
-		return userStatus;
 	}
 
 	@Override
-	public UserStatus updateByUserId(UUID userId) {
+	public void updateByUserId(UUID userId) {
 		// 1. userId로 특정 UserStatus를 찾는 호환성 체크
 		UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
@@ -83,7 +81,7 @@ public class BasicUserStatusService implements UserStatusService {
 
 		userStatusRepository.save(userStatus);
 
-		return userStatus;
+
 	}
 
 	@Override
