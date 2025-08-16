@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.exception.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,9 +23,9 @@ public class AuthController {
 
 	// [ ] 사용자는 로그인할 수 있다.
 	@RequestMapping(path = "/", method = RequestMethod.POST)
-	public ResponseEntity<AuthLoginResponse> login(@RequestBody AuthLoginRequest request) {
+	public ResponseEntity<ApiResponse<AuthLoginResponse>> login(@RequestBody AuthLoginRequest request) {
 		AuthLoginResponse response = authService.login(request);
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(ApiResponse.ok(response, "로그인에 성공하였습니다."));
 	}
 }

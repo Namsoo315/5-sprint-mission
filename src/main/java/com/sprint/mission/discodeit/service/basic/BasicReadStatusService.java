@@ -62,7 +62,7 @@ public class BasicReadStatusService implements ReadStatusService {
 	}
 
 	@Override
-	public ReadStatus updateReadStatus(ReadStatusUpdateRequest request) {
+	public void updateReadStatus(ReadStatusUpdateRequest request) {
 
 		// 1. 호환성 체크
 		ReadStatus readStatus = readStatusRepository.findByReadStatusId(request.readStatusId()).orElseThrow(
@@ -71,8 +71,6 @@ public class BasicReadStatusService implements ReadStatusService {
 		// 2. 상태정보 업데이트 후 Repository save(update)
 		readStatus.update();
 		readStatusRepository.save(readStatus);
-
-		return readStatus;
 	}
 
 	@Override

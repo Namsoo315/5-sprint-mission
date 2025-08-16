@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.sprint.mission.discodeit.exception.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,17 +25,17 @@ public class BinaryContentController {
 
 	// [ ] 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
 	@RequestMapping(path = "/find", method = RequestMethod.GET)
-	public ResponseEntity<BinaryContent> findBinaryContent(@RequestParam("binaryContentId") UUID request) {
+	public ResponseEntity<ApiResponse<BinaryContent>> findBinaryContent(@RequestParam("binaryContentId") UUID request) {
 		BinaryContent response = binaryContentService.findByBinaryContentId(request)
 			.orElse(null);
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(ApiResponse.ok(response, "파일 조회 완료 [단회]" ));
 	}
 
 	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
-	public ResponseEntity<List<BinaryContent>> findAllBinaryContent(@RequestParam("binaryContentId") List<UUID> request) {
+	public ResponseEntity<ApiResponse<List<BinaryContent>>> findAllBinaryContent(@RequestParam("binaryContentId") List<UUID> request) {
 		List<BinaryContent> response = binaryContentService.findAllByIdIn(request);
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(ApiResponse.ok(response, "파일 조회 완료 [다회]"));
 	}
 }
