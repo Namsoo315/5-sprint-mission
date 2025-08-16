@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.sprint.mission.discodeit.exception.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class MessageController {
 	@RequestMapping(path = "/",
 		method = RequestMethod.POST,
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Message> sendMessage(
+	public ResponseEntity<ApiResponse<Message>> sendMessage(
 		@RequestPart MessageCreateRequest messageCreateRequest,
 		@RequestPart(required = false) List<MultipartFile> profiles) throws IOException {
 
@@ -49,30 +50,30 @@ public class MessageController {
 		}
 		Message response = messageService.createMessage(messageCreateRequest, binaryContents);
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(ApiResponse.ok(response, "메시지 생성 완료"));
 	}
 
 	// [ ] 메시지를 수정할 수 있다.
 	@RequestMapping(path = "/modify", method = RequestMethod.PATCH)
-	public ResponseEntity<String> modifyMessage(@RequestBody MessageUpdateRequest messageUpdateRequest) {
+	public ResponseEntity<ApiResponse<String>> modifyMessage(@RequestBody MessageUpdateRequest messageUpdateRequest) {
 		messageService.updateMessage(messageUpdateRequest);
 
-		return new ResponseEntity<>("메시지가 수정이 되었습니다. : " + messageUpdateRequest.messageId(), HttpStatus.OK);
+		return ResponseEntity.ok(ApiResponse.ok(messageUpdateRequest.messageId() + "님의 메시지 수정 완료"));
 	}
 
 	// [ ] 메시지를 삭제할 수 있다.
 	@RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<String> deleteMessage(@PathVariable("id") UUID messageId) {
+	public ResponseEntity<ApiResponse<String>> deleteMessage(@PathVariable("id") UUID messageId) {
 		messageService.deleteMessage(messageId);
 
-		return new ResponseEntity<>("메시지가 삭제되었습니다. : " + messageId, HttpStatus.OK);
+		return ResponseEntity.ok(ApiResponse.ok(messageId + "님의 메시지 삭제 완료"));
 	}
 
 	// [ ] 특정 채널의 메시지 목록을 조회할 수 있다.
 	@RequestMapping(path = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<List<Message>> findMessageByChannelId(@PathVariable("id") UUID channelId) {
-		List<Message> allByChannelId = messageService.findAllByChannelId(channelId);
+	public ResponseEntity<ApiResponse<List<Message>>> findMessageByChannelId(@PathVariable("id") UUID channelId) {
+		List<Message> responses = messageService.findAllByChannelId(channelId);
 
-		return ResponseEntity.status(HttpStatus.OK).body(allByChannelId);
+		return ResponseEntity.ok(ApiResponse.ok(responses, channelId + "님의 채널 조회 완료"));
 	}
 }
