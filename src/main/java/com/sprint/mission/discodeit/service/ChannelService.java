@@ -16,11 +16,11 @@ public interface ChannelService {
 
 	Channel createPrivateChannel(PrivateChannelCreateRequest request);
 
-	Optional<ChannelFindResponse> findByChannelId(UUID channelId);
+	ChannelFindResponse findByChannelId(UUID channelId);
 
 	List<ChannelFindResponse> findAllByUserId(UUID userId);
 
 	void updateChannel(ChannelUpdateRequest request);
 
-	void deleteChannel(UUID uuid);
+	void deleteChannel(UUID channelId);
 }

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("readStatusService")
+@Service
 @RequiredArgsConstructor
 public class BasicReadStatusService implements ReadStatusService {
 	private final ReadStatusRepository readStatusRepository;
@@ -29,25 +30,30 @@ public class BasicReadStatusService implements ReadStatusService {
 	public ReadStatus createReadStatus(ReadStatusCreateRequest request) {
 
 		// 1. 호환성 체크 User, Channel 체크
-		User user = userRepository.findById(request.getUserId()).orElseThrow(
+		User user = userRepository.findById(request.userId()).orElseThrow(
 			() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
-		Channel channel = channelRepository.findById(request.getChanelId()).orElseThrow(
+		Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
 			() -> new IllegalArgumentException("채널이 존재하지 않습니다."));
 
 		// 1-2. 만약 channelId와 userId가 매치되는 readStatus가 존재하면 예외 처리
-		ReadStatus readStatus = readStatusRepository.findByUserIdAndChannelId(user.getUserId(), channel.getChannelId())
-			.orElseThrow(() -> new IllegalArgumentException("이미 같은 ChannelId와 UserId가 존재하는 readStatusId가 있습니다."));
+		Optional<ReadStatus> existing = readStatusRepository.findByUserIdAndChannelId(user.getUserId(), channel.getChannelId());
+
+		if (existing.isPresent()){
+			throw new IllegalArgumentException("이미 같은 channelId와 UserId가 존재하는 readStatus가 있습니다.");
+		}
 
 		// 2. 생성
+		ReadStatus readStatus = new ReadStatus(user.getUserId(), channel.getChannelId());
 		readStatusRepository.save(readStatus);
 
 		return readStatus;
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID userStatusId) {
-		return readStatusRepository.findById(userStatusId);
+	public ReadStatus findByReadStatusId(UUID readStatusId) {
+		return readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
+			() -> new NoSuchElementException("일치하는 ReadStatusId가 없습니다."));
 	}
 
 	@Override
@@ -56,16 +62,15 @@ public class BasicReadStatusService implements ReadStatusService {
 	}
 
 	@Override
-	public ReadStatus updateReadStatus(ReadStatusUpdateRequest request) {
+	public void updateReadStatus(ReadStatusUpdateRequest request) {
+
 		// 1. 호환성 체크
-		ReadStatus readStatus = readStatusRepository.findById(request.getReadStatusId()).orElseThrow(
+		ReadStatus readStatus = readStatusRepository.findByReadStatusId(request.readStatusId()).orElseThrow(
 			() -> new IllegalArgumentException("상태 정보가 없습니다."));
 
 		// 2. 상태정보 업데이트 후 Repository save(update)
 		readStatus.update();
 		readStatusRepository.save(readStatus);
-
-		return readStatus;
 	}
 
 	@Override

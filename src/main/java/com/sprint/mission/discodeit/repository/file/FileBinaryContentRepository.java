@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,17 +16,21 @@ import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
+import com.sprint.mission.discodeit.config.RepositoryProperties;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-@Repository("binaryContentRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
+@Repository
 public class FileBinaryContentRepository implements BinaryContentRepository {
-	private static final String DIRECTORY = "FileData/BINARY";
-	private static final String EXTENSION = ".ser";
+	private final String directory;
+	private final String extension;
 
-	public FileBinaryContentRepository() {
-		Path path = Paths.get(DIRECTORY);
+	public FileBinaryContentRepository(RepositoryProperties properties) {
+		directory = properties.getFileDirectory() + "/BINARY";
+		extension = properties.getExtension();
+
+		Path path = Paths.get(directory);
 		if (!path.toFile().exists()) {
 			try {
 				Files.createDirectories(path);
@@ -39,7 +42,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public BinaryContent save(BinaryContent binaryContent) {
-		Path path = Paths.get(DIRECTORY, binaryContent.getBinaryContentId() + EXTENSION);
+		Path path = Paths.get(directory, binaryContent.getBinaryContentId() + extension);
 		try (FileOutputStream fos = new FileOutputStream(path.toFile());
 			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(binaryContent);
@@ -52,7 +55,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 	@Override
 	public Optional<BinaryContent> findById(UUID binaryContentId) {
 		BinaryContent binaryContent = null;
-		Path path = Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION);
+		Path path = Paths.get(directory, binaryContentId.toString() + extension);
 
 		try (FileInputStream fis = new FileInputStream(path.toFile());
 			 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -66,8 +69,8 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public List<BinaryContent> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(DIRECTORY))) {
-			return paths.filter(path -> path.toString().endsWith(EXTENSION))
+		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+			return paths.filter(path -> path.toString().endsWith(extension))
 				.map(filePath -> {
 					try (FileInputStream fis = new FileInputStream(filePath.toFile());
 						 ObjectInputStream ois = new ObjectInputStream(fis);) {
@@ -88,7 +91,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public void delete(UUID binaryContentId) {
-		Path path = Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION);
+		Path path = Paths.get(directory, binaryContentId.toString() + extension);
 
 		try {
 			Files.deleteIfExists(path);
@@ -101,7 +104,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 	public void deleteByAttachmentId(List<UUID> attachmentIds) {
 		Path path = null;
 		for(UUID attachmentId : attachmentIds) {
-			path = Paths.get(DIRECTORY, attachmentId.toString() + EXTENSION);
+			path = Paths.get(directory, attachmentId.toString() + extension);
 
 			try {
 				Files.deleteIfExists(path);
@@ -113,7 +116,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
 	@Override
 	public boolean existsById(UUID binaryContentId) {
-		return Files.exists(Paths.get(DIRECTORY, binaryContentId.toString() + EXTENSION));
+		return Files.exists(Paths.get(directory, binaryContentId.toString() + extension));
 	}
 
 }

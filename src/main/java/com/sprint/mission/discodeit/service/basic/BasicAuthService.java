@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.service.auth;
+package com.sprint.mission.discodeit.service.basic;
 
 import java.util.Optional;
 
@@ -12,15 +12,15 @@ import com.sprint.mission.discodeit.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("authService")
+@Service
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService {
+public class BasicAuthService implements AuthService {
 
 	private final UserRepository userRepository;
 
 	@Override
 	public AuthLoginResponse login(AuthLoginRequest request) {
-		Optional<User> optionalUser = userRepository.findByUsername(request.getUsername());
+		Optional<User> optionalUser = userRepository.findByUsername(request.username());
 
 		// 1-1. username과 일치하는 유저가 있는지 확인
 		if(optionalUser.isEmpty()) {
@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
 		User user = optionalUser.get();
 
 		// 1-2. password과 일치하는지 확인
-		if(!user.getPassword().equals(request.getPassword())) {
+		if(!user.getPassword().equals(request.password())) {
 			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 		}
 

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 
-@Repository("userStatusRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
+@Repository
 public class JCFUserStatusRepository implements UserStatusRepository {
 	private final Map<UUID, UserStatus> map = new HashMap<>();
 
@@ -26,9 +26,9 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 		map.put(userStatus.getUserStatusId(), userStatus);
 
 		if (isNew) {
-			System.out.println("userStatus가 생성 되었습니다.");
+			System.out.println("userStatus가 생성 되었습니다." + userStatus.getUserStatusId());
 		} else {
-			System.out.println("userStatus가 업데이트 되었습니다.");
+			System.out.println("userStatus가 업데이트 되었습니다." + userStatus.getUserStatusId());
 		}
 		return userStatus;
 	}

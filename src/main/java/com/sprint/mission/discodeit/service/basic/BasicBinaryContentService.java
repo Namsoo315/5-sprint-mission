@@ -6,28 +6,28 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentCreateRequest;
+import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("binaryContentService")
+@Service
 @RequiredArgsConstructor
 public class BasicBinaryContentService implements BinaryContentService {
 	private final BinaryContentRepository binaryContentRepository;
 
 	@Override
-	public BinaryContent createBinaryContent(BinaryContentCreateRequest request) {
-		BinaryContent binaryContent = new BinaryContent(request.getFileName(), request.getContentType(), request.getSize(), request.getBinaryContent());
+	public BinaryContent createBinaryContent(BinaryContentDTO request) {
+		BinaryContent binaryContent = new BinaryContent(request.fileName(), request.contentType(), request.size(), request.binaryContent());
 		binaryContentRepository.save(binaryContent);
 
 		return binaryContent;
 	}
 
 	@Override
-	public Optional<BinaryContent> findById(UUID binaryContentId) {
+	public Optional<BinaryContent> findByBinaryContentId(UUID binaryContentId) {
 		return binaryContentRepository.findById(binaryContentId);
 	}
 

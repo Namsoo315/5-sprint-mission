@@ -2,12 +2,13 @@ package com.sprint.mission.discodeit.service.basic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
 import com.sprint.mission.discodeit.dto.user.UserFindResponse;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
@@ -21,7 +22,7 @@ import com.sprint.mission.discodeit.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("userService")
+@Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
 	private final UserRepository userRepository;
@@ -29,28 +30,33 @@ public class BasicUserService implements UserService {
 	private final UserStatusRepository userStatusRepository;
 
 	@Override
-	public User createUser(UserCreateRequest request) {
+	public User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO) {
+
+		// 1. username, email 호환성 확인
+		if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
+			throw new RuntimeException("같은 아이디가 존재합니다.");
+		}
+
+		if (userRepository.findByEmail(userCreateRequest.email()).isPresent()) {
+			throw new RuntimeException("같은 이메일이 존재합니다.");
+		}
 
 		UUID profileId = null;
-		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
-				request.getSize(), request.getBinaryContent());
+
+		// 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
+		if (binaryContentDTO != null &&
+			binaryContentDTO.binaryContent() != null &&
+			binaryContentDTO.binaryContent().length > 0) {
+
+			BinaryContent content = new BinaryContent(binaryContentDTO.fileName(), binaryContentDTO.contentType(),
+				binaryContentDTO.size(), binaryContentDTO.binaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}
 
-		// 2. username, email 호환성 확인
-		if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-			throw new RuntimeException("같은 아이디가 존재합니다.");
-		}
-
-		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-			throw new RuntimeException("같은 이메일이 존재합니다.");
-		}
-
 		// 3. user, userStatus 같이 생성.
-		User user = new User(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
+		User user = new User(userCreateRequest.username(), userCreateRequest.email(),
+			userCreateRequest.password(), profileId);
 		userRepository.save(user);
 
 		UserStatus status = new UserStatus(user.getUserId());
@@ -60,67 +66,66 @@ public class BasicUserService implements UserService {
 	}
 
 	@Override
-	public Optional<UserFindResponse> findByUserId(UserFindRequest request) {
+	public UserFindResponse findByUserId(UserFindRequest request) {
 
 		// 1. 호환성 체크	user, userStatus Id 체크
-		User user = userRepository.findById(request.getUserId()).orElseThrow(()
+		User user = userRepository.findById(request.userId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		UserStatus userStatus = userStatusRepository.findByUserId(request.getUserId()).orElseThrow(()
+
+		UserStatus userStatus = userStatusRepository.findByUserId(request.userId()).orElseThrow(()
 			-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
 		// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-		return Optional.of(UserFindResponse.builder()
+		return UserFindResponse.builder()
 			.userId(user.getUserId())
 			.username(user.getUsername())
 			.email(user.getEmail())
 			.status(userStatus.isStatus())
-			.build());
+			.build();
 	}
 
 	@Override
-	public List<UserFindResponse> findAll() {
+	public List<UserDto> findAll() {
 		List<User> users = userRepository.findAll();
-		List<UserFindResponse> responses = new ArrayList<>();
+		List<UserDto> responses = new ArrayList<>();
 
 		for (User user : users) {
 
-			// 1. 호환성 체크	user, userStatus Id 체크
-			userRepository.findById(user.getUserId()).orElseThrow(
-				() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-
+			// 1. 호환성 체크 userStatus Id 체크
 			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(
 				() -> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
 
 			// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-			responses.add(UserFindResponse.builder()
-				.userId(user.getUserId())
-				.username(user.getUsername())
-				.email(user.getEmail())
-				.status(status.isStatus())
-				.build());
+			responses.add(new UserDto(user.getUserId(), user.getCreatedAt(), user.getUpdatedAt(), user.getUsername(),
+				user.getEmail(), user.getProfileId(), status.isStatus()));
 		}
 
 		return responses;
 	}
 
 	@Override
-	public void updateUser(UserUpdateRequest request) {
+	public void updateUser(UserUpdateRequest userUpdateRequest, BinaryContentDTO binaryContentDTO) {
 
 		UUID profileId = null;
 		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
-		if (request.getBinaryContent() != null) {
-			BinaryContent content = new BinaryContent(request.getFileName(), request.getContentType(),
-				request.getSize(), request.getBinaryContent());
+		if (binaryContentDTO != null &&
+			binaryContentDTO.binaryContent() != null &&
+			binaryContentDTO.binaryContent().length > 0) {
+			BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
+				binaryContentDTO.contentType(),
+				binaryContentDTO.size(), binaryContentDTO.binaryContent());
 			binaryContentRepository.save(content);
 			profileId = content.getBinaryContentId();
 		}
 
 		// 2. User 호환성 체크
-		User user = userRepository.findById(request.getUserId())
+		User user = userRepository.findById(userUpdateRequest.userId())
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
 		// 3. Update 작업 수행.
-		user.update(request.getUsername(), request.getEmail(), request.getPassword(), profileId);
+		user.update(userUpdateRequest.username(), userUpdateRequest.email(), userUpdateRequest.password(),
+			profileId);
+
 		userRepository.save(user);
 
 	}

@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
-@Repository("messageRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
+@Repository
 public class JCFMessageRepository implements MessageRepository {
 	private final Map<UUID, Message> map = new HashMap<>();
 
@@ -26,9 +25,9 @@ public class JCFMessageRepository implements MessageRepository {
 		map.put(message.getMessageId(), message);
 
 		if (isNew) {
-			System.out.println("message가 생성 되었습니다.");
+			System.out.println("message가 생성 되었습니다." + message.getMessageId());
 		} else {
-			System.out.println("message가 업데이트 되었습니다.");
+			System.out.println("message가 업데이트 되었습니다." + message.getMessageId());
 		}
 		return message;
 	}
@@ -53,12 +52,10 @@ public class JCFMessageRepository implements MessageRepository {
 	}
 
 	@Override
-	public Instant LatestMessageByChannelId(UUID channelId) {
+	public Optional<Message> latestMessageByChannelId(UUID channelId) {
 		return this.findAll().stream()
 			.filter(message -> message.getChannelId().equals(channelId))
-			.max(Comparator.comparing(Message::getCreatedAt))
-			.map(Message::getCreatedAt)
-			.orElse(null);
+			.max(Comparator.comparing(Message::getCreatedAt));
 	}
 
 	@Override

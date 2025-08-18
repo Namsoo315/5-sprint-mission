@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Repository;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
-@Repository("readStatusRepository")
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
+@Repository
 public class JCFReadStatusRepository implements ReadStatusRepository {
 	private final Map<UUID, ReadStatus> map = new HashMap<>();
 
@@ -26,15 +25,15 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 		map.put(readStatus.getReadStatusId(), readStatus);
 
 		if (isNew) {
-			System.out.println("readStatus가 생성 되었습니다.");
+			System.out.println("readStatus가 생성 되었습니다. : " + readStatus.getReadStatusId() );
 		} else {
-			System.out.println("readStatus가 업데이트 되었습니다.");
+			System.out.println("readStatus가 업데이트 되었습니다." + readStatus.getReadStatusId() );
 		}
 		return readStatus;
 	}
 
 	@Override
-	public Optional<ReadStatus> findById(UUID readStatusId) {
+	public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
 		if (existsById(readStatusId)) {
 			return Optional.of(map.get(readStatusId));
 		}
