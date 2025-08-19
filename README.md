@@ -1,89 +1,39 @@
-# Discodeit Web API 프로젝트
+# 프로젝트 마일스톤 & 요구사항
 
-## 📌 프로젝트 개요
-`Discodeit` 애플리케이션의 서비스 로직을 활용하여 `@RequestMapping` 기반 웹 API를 구현합니다.  
-Postman을 이용해 API를 테스트하고, 테스트 결과를 Export하여 PR에 첨부합니다.
+## 🚀 프로젝트 마일스톤
 
----
-
-## ✅ 구현 요구사항
-
-### 1. 기본 요구사항
-- [x] `DiscodeitApplication`의 테스트 로직 삭제
-- [x] 서비스 로직을 활용한 웹 API 구현 (`@RequestMapping`만 사용)
-- [x] 웹 API 예외 전역 처리 (Global Exception Handler 구현)
+- RESTful API로 재설계 및 리팩토링
+- Swagger를 활용한 API 문서 자동화
+- 프론트엔드 연동
+- PaaS를 활용한 배포
 
 ---
 
-### 2. API 요구사항
+## 📋 기본 요구사항
 
-#### 📂 사용자 관리
-- [x] 사용자를 등록할 수 있다.
-- [x] 사용자 정보를 수정할 수 있다.
-- [x] 사용자를 삭제할 수 있다.
-- [x] 모든 사용자를 조회할 수 있다.
-- [x] 사용자의 온라인 상태를 업데이트할 수 있다.
+1. **RESTful API 재설계**
+    - 스프린트 미션#4에서 구현한 API를 RESTful API로 다시 설계
+    - API 스펙을 확인하고 본인이 설계한 API와 비교
+    - `oasdiff`를 활용하면 API 비교가 수월함
+    - 제공된 API 스펙에 맞추어 구현 (심화 요구사항 프론트엔드 연동을 위해 필수)
 
-#### 🔑 권한 관리
-- [x] 사용자는 로그인할 수 있다.
+2. **API 테스트**
+    - Postman을 활용하여 컨트롤러 테스트
+    - 테스트 결과를 export하여 PR에 첨부
 
-#### 📡 채널 관리
-- [x] 공개 채널을 생성할 수 있다.
-- [x] 비공개 채널을 생성할 수 있다.
-- [x] 공개 채널의 정보를 수정할 수 있다.
-- [x] 채널을 삭제할 수 있다.
-- [x] 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
-
-#### 💬 메시지 관리
-- [x] 메시지를 보낼 수 있다.
-- [x] 메시지를 수정할 수 있다.
-- [x] 메시지를 삭제할 수 있다.
-- [x] 특정 채널의 메시지 목록을 조회할 수 있다.
-
-#### 📥 메시지 수신 정보 관리
-- [x] 특정 채널의 메시지 수신 정보를 생성할 수 있다.
-- [x] 특정 채널의 메시지 수신 정보를 수정할 수 있다.
-- [x] 특정 사용자의 메시지 수신 정보를 조회할 수 있다.
-
-#### 📂 바이너리 파일 다운로드
-- [x] 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
+3. **Swagger 기반 API 문서화**
+    - `springdoc-openapi` 활용
+    - Swagger-UI를 통해 API 테스트 가능
 
 ---
 
-### 3. 정적 리소스 서빙
+## ✨ 심화 요구사항
 
-#### 📜 사용자 목록 조회 API
-- **URL**: `/api/user/findAll`
-- **요청**: 파라미터, 바디 없음
-- **응답**:
-  
-```
-ResponseEntity<List<UserDto>>
-public record UserDto(
-    UUID id,
-    Instant createdAt,
-    Instant updatedAt,
-    String username,
-    String email,
-    UUID profileId,
-    Boolean online
-) {}
-```
-### 📜 BinaryContent 파일 조회
-- **URL**: `/api/binaryContent/find`
+1. **정적 리소스 서빙**
+    - 제공된 `fe_1.0.0.zip` 활용
+    - API 스펙을 준수하면 프론트엔드와 정상 연동
 
-#### 요청
-- 파라미터: `binaryContentId`
-- 바디 없음
-
-#### 응답
-
-ResponseEntity<BinaryContent>
-
-### 📜 정적 리소스 활용
-- `static-resources.zip` 파일 내 이미지를 활용하여 사용자 목록 화면을 서빙
-- 예시 이미지: `dniahuen8-image.png`
-
-### 🤖 생성형 AI 활용
-- 생성형 AI(Claude, ChatGPT 등)를 활용하여 위 이미지와 유사한 화면을 생성 후 서빙
-
+2. **PaaS 배포 (Railway.app)**
+    - Railway.app 가입 및 GitHub 레포지토리 연결
+    - `Settings > Network` 섹션에서 Generate Domain 버튼으로 도메인 생성
+    - 생성된 도메인 접속 후 애플리케이션 테스트
