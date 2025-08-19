@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +12,6 @@ import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
-import com.sprint.mission.discodeit.dto.user.UserFindResponse;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
@@ -59,29 +60,20 @@ public class BasicUserService implements UserService {
 			userCreateRequest.password(), profileId);
 		userRepository.save(user);
 
-		UserStatus status = new UserStatus(user.getUserId());
+		UserStatus status = new UserStatus(user.getUserId(), Instant.MIN);
 		userStatusRepository.save(status);
 
 		return user;
 	}
 
 	@Override
-	public UserFindResponse findByUserId(UserFindRequest request) {
+	public UserDto findByUserId(UserFindRequest request) {
 
-		// 1. 호환성 체크	user, userStatus Id 체크
+		// 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
 		User user = userRepository.findById(request.userId()).orElseThrow(()
-			-> new IllegalArgumentException("존재하지 않는 회원입니다."));
+			-> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-		UserStatus userStatus = userStatusRepository.findByUserId(request.userId()).orElseThrow(()
-			-> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
-
-		// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-		return UserFindResponse.builder()
-			.userId(user.getUserId())
-			.username(user.getUsername())
-			.email(user.getEmail())
-			.status(userStatus.isStatus())
-			.build();
+		return toDto(user);
 	}
 
 	@Override
@@ -90,14 +82,8 @@ public class BasicUserService implements UserService {
 		List<UserDto> responses = new ArrayList<>();
 
 		for (User user : users) {
-
-			// 1. 호환성 체크 userStatus Id 체크
-			UserStatus status = userStatusRepository.findByUserId(user.getUserId()).orElseThrow(
-				() -> new IllegalArgumentException("존재하지 않는 회원의 상태 입니다."));
-
-			// 2. 사용자의 온라인 상태 정보를 포함함 (단 password는 포함 X)
-			responses.add(new UserDto(user.getUserId(), user.getCreatedAt(), user.getUpdatedAt(), user.getUsername(),
-				user.getEmail(), user.getProfileId(), status.isStatus()));
+			// 호환성 체크도 toDto가 하게 됨.
+			responses.add(toDto(user));
 		}
 
 		return responses;
@@ -107,7 +93,7 @@ public class BasicUserService implements UserService {
 	public void updateUser(UserUpdateRequest userUpdateRequest, BinaryContentDTO binaryContentDTO) {
 
 		UUID profileId = null;
-		// 1. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
+		// 1. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
 		if (binaryContentDTO != null &&
 			binaryContentDTO.binaryContent() != null &&
 			binaryContentDTO.binaryContent().length > 0) {
@@ -145,5 +131,22 @@ public class BasicUserService implements UserService {
 
 		userStatusRepository.deleteByUserId(userId);
 		userRepository.delete(userId);
+	}
+
+	// Dto를 사용하는 메서드 분리
+	private UserDto toDto(User user) {
+		Boolean online = userStatusRepository.findByUserId(user.getUserId())
+			.map(UserStatus::isOnline)
+			.orElse(null);
+
+		return new UserDto(
+			user.getUserId(),
+			user.getCreatedAt(),
+			user.getUpdatedAt(),
+			user.getUsername(),
+			user.getEmail(),
+			user.getProfileId(),
+			online
+		);
 	}
 }

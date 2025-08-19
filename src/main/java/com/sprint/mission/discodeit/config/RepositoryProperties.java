@@ -3,34 +3,15 @@ package com.sprint.mission.discodeit.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "discodeit.repository")
 public class RepositoryProperties {
 	private String type;
 	private String fileDirectory;
 	private String extension;
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getFileDirectory() {
-		return fileDirectory;
-	}
-
-	public void setFileDirectory(String fileDirectory) {
-		this.fileDirectory = fileDirectory;
-	}
-
-	public String getExtension() {
-		return extension;
-	}
-
-	public void setExtension(String extension) {
-		this.extension = extension;
-	}
 }

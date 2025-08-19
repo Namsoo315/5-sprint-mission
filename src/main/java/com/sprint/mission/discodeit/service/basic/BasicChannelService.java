@@ -46,7 +46,8 @@ public class BasicChannelService implements ChannelService {
 
 		// 1. Channel에 참여하려는 User의 정보를 DTO를 통해서 받아 user 별 ReadStatus 정보를 생성한다.
 		for (UUID userId : request.participantsUserIds()) {
-			ReadStatus readStatus = new ReadStatus(userId, channel.getChannelId());
+
+			ReadStatus readStatus = new ReadStatus(userId, channel.getChannelId(), Instant.MIN);
 			readStatusRepository.save(readStatus);
 		}
 

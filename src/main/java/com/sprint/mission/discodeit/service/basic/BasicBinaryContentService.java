@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,8 +28,9 @@ public class BasicBinaryContentService implements BinaryContentService {
 	}
 
 	@Override
-	public Optional<BinaryContent> findByBinaryContentId(UUID binaryContentId) {
-		return binaryContentRepository.findById(binaryContentId);
+	public BinaryContent findByBinaryContentId(UUID binaryContentId) {
+		return binaryContentRepository.findById(binaryContentId).orElseThrow(
+			() -> new NoSuchElementException("존재하지 않는 파일 ID 입니다."));
 	}
 
 	@Override

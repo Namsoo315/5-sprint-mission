@@ -7,14 +7,13 @@ import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserFindRequest;
-import com.sprint.mission.discodeit.dto.user.UserFindResponse;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 
 public interface UserService {
 	User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO);
 
-	UserFindResponse findByUserId(UserFindRequest request);
+	UserDto findByUserId(UserFindRequest request);
 
 	List<UserDto> findAll();
 

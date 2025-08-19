@@ -12,7 +12,7 @@ import com.sprint.mission.discodeit.entity.Message;
 public interface MessageService {
 	Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO);
 
-	Optional<Message> findByMessageId(UUID messageId);
+	Message findByMessageId(UUID messageId);
 
 	List<Message> findAllByChannelId(UUID channelId);
 

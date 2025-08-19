@@ -3,8 +3,8 @@ package com.sprint.mission.discodeit.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.exception.ApiResponse;
-import org.springframework.http.HttpStatus;
+import com.sprint.mission.discodeit.dto.ApiResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,25 +27,25 @@ public class ReadStatusController {
 
 	// [ ] 특정 채널의 메시지 수신 정보를 생성할 수 있다.
 	@RequestMapping(path = "/", method = RequestMethod.POST)
-	public ResponseEntity<ApiResponse<ReadStatus>> CreateReadStatus(@RequestBody ReadStatusCreateRequest request) {
-		ReadStatus response = readStatusService.createReadStatus(request);
+	public ResponseEntity<ApiResponse<ReadStatus>> CreateReadStatus(@RequestBody ReadStatusCreateRequest readStatusCreateRequest) {
+		ReadStatus readStatus = readStatusService.createReadStatus(readStatusCreateRequest);
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "메시지 수신 정보 생성 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(readStatus, "메시지 수신 정보 생성 완료"));
 	}
 
 	// [ ] 특정 채널의 메시지 수신 정보를 수정할 수 있다.
 	@RequestMapping(path = "/modify", method = RequestMethod.PATCH)
-	public ResponseEntity<ApiResponse<String>> ModifyReadStatus(@RequestBody ReadStatusUpdateRequest request) {
-		readStatusService.updateReadStatus(request);
+	public ResponseEntity<ApiResponse<String>> ModifyReadStatus(@RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
+		ReadStatus readStatus = readStatusService.updateReadStatus(readStatusUpdateRequest);
 
-		return ResponseEntity.ok(ApiResponse.ok(request.channelId() + "채널의 메시지 수신정보 수정 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(readStatus.getChannelId() + "채널의 메시지 수신정보 수정 완료"));
 	}
 
 	// [ ] 특정 사용자의 메시지 수신 정보를 조회할 수 있다.
 	@RequestMapping(path = "/{id}", method = RequestMethod.GET)	//특정 사용자가 누구인가?
 	public ResponseEntity<ApiResponse<List<ReadStatus>>> findReadStatusById(@PathVariable("id") UUID userId) {
-		List<ReadStatus> responses = readStatusService.findAllByUserId(userId);
+		List<ReadStatus> readStatuses = readStatusService.findAllByUserId(userId);
 
-		return ResponseEntity.ok(ApiResponse.ok(responses, userId + "님의 메시지 수신 정보 조회 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(readStatuses, userId + "님의 메시지 수신 정보 조회 완료"));
 	}
 }

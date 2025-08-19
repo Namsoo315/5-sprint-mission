@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -16,27 +17,36 @@ public class UserStatus implements Serializable {
 	private final UUID UserStatusId;
 	private final UUID userId;
 
-	private boolean status;	// Online = true, Offline = false;
-
 	private final Instant createdAt;
 	private Instant updatedAt;
+	private Instant lastActiveAt;
 
-	public UserStatus(UUID userId) {
+	public UserStatus(UUID userId, Instant lastReadAt) {
 		this.UserStatusId = UUID.randomUUID();
 		this.userId = userId;
-		this.status = true;	// 생성 시 온라인상태로 가야한다
+		this.lastActiveAt = lastReadAt;
 		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
 	}
 
-	public void updateStatus () {
-		this.status = true;
-		this.updatedAt = Instant.now();
+	public void updateStatus(Instant lastActivateAt) {
+		boolean anyValueUpdated = false;
+		if (lastActivateAt != null && !lastActivateAt.equals(this.lastActiveAt)) {
+			this.lastActiveAt = lastActivateAt;
+			anyValueUpdated = true;
+		}
+
+		if (anyValueUpdated) {
+			this.updatedAt = Instant.now();
+		}
+
 	}
 
 	// 현재 시간 기준 5분 이내에 업데이트된 경우 온라인으로 간주;
 	public boolean isOnline() {
-		return updatedAt.isBefore(Instant.now().minusSeconds(300));
+		Instant instantFiveMinutesAgo = Instant.now().minus(Duration.ofMinutes(5));
+
+		return lastActiveAt.isAfter(instantFiveMinutesAgo);
 	}
 
 	@Override
