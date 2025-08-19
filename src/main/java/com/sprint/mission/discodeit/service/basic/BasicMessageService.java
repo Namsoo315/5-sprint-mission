@@ -24,70 +24,74 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
-	private final MessageRepository messageRepository;
-	private final ChannelRepository channelRepository;
-	private final UserRepository userRepository;
-	private final BinaryContentRepository binaryContentRepository;
 
-	@Override
-	public Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO) {
+  private final MessageRepository messageRepository;
+  private final ChannelRepository channelRepository;
+  private final UserRepository userRepository;
+  private final BinaryContentRepository binaryContentRepository;
 
-		// 1. 호환성 체크
-		if (userRepository.findById(messageCreateRequest.userId()).isEmpty()) {
-			throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
-		}
-		if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
-			throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
-		}
+  @Override
+  public Message createMessage(MessageCreateRequest messageCreateRequest,
+      List<BinaryContentDTO> binaryContentDTO) {
 
-		List<UUID> attachmentIds = new ArrayList<>();
-		// 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
-		if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
-			for (BinaryContentDTO dto : binaryContentDTO) {
-				if(dto.binaryContent() == null || dto.binaryContent().length == 0)
+    // 1. 호환성 체크
+    if (userRepository.findById(messageCreateRequest.userId()).isEmpty()) {
+      throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+    }
+    if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
+      throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
+    }
+
+    List<UUID> attachmentIds = new ArrayList<>();
+    // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
+    if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
+      for (BinaryContentDTO dto : binaryContentDTO) {
+				if (dto.binaryContent() == null || dto.binaryContent().length == 0) {
 					continue;
+				}
 
-				BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(), dto.size(),
-					dto.binaryContent());
-				attachmentIds.add(binaryContent.getBinaryContentId());
-				binaryContentRepository.save(binaryContent);
-			}
-		}
+        BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(),
+            dto.size(),
+            dto.binaryContent());
+        attachmentIds.add(binaryContent.getBinaryContentId());
+        binaryContentRepository.save(binaryContent);
+      }
+    }
 
-		// 2. 메시지 생성
-		Message message = new Message(messageCreateRequest.userId(), messageCreateRequest.channelId(),
-			messageCreateRequest.message(), attachmentIds);
-		messageRepository.save(message);
+    // 2. 메시지 생성
+    Message message = new Message(messageCreateRequest.userId(), messageCreateRequest.channelId(),
+        messageCreateRequest.message(), attachmentIds);
+    messageRepository.save(message);
 
-		return message;
-	}
+    return message;
+  }
 
-	@Override
-	public Message findByMessageId(UUID messageId) {
-		return messageRepository.findById(messageId).orElseThrow(
-			() -> new NoSuchElementException("존재하지 않는 메시지 ID 입니다."));
-	}
+  @Override
+  public Message findByMessageId(UUID messageId) {
+    return messageRepository.findById(messageId).orElseThrow(
+        () -> new NoSuchElementException("존재하지 않는 메시지 ID 입니다."));
+  }
 
-	public List<Message> findAllByChannelId(UUID channelId) {
-		return messageRepository.findAllByChannelId(channelId);
-	}
+  public List<Message> findAllByChannelId(UUID channelId) {
+    return messageRepository.findAllByChannelId(channelId);
+  }
 
-	@Override
-	public void updateMessage(MessageUpdateRequest request) {
-		Message message = messageRepository.findById(request.messageId()).orElseThrow(
-			() -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
+  @Override
+  public void updateMessage(UUID messageId, MessageUpdateRequest request) {
+    Message message = messageRepository.findById(messageId).orElseThrow(
+        () -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
 
-		message.update(request.newContent());
-		messageRepository.save(message);
-	}
+    message.update(request.newContent());
+    messageRepository.save(message);
+  }
 
-	@Override
-	public void deleteMessage(UUID messageId) {
-		Message message = messageRepository.findById(messageId).orElseThrow(
-			() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+  @Override
+  public void deleteMessage(UUID messageId) {
+    Message message = messageRepository.findById(messageId).orElseThrow(
+        () -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
 
-		binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
+    binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
 
-		messageRepository.delete(messageId);
-	}
+    messageRepository.delete(messageId);
+  }
 }

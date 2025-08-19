@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository.file;
 
+import com.sprint.mission.discodeit.entity.ChannelType;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,83 +25,85 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 @Repository
 public class FileChannelRepository implements ChannelRepository {
-	private final String directory;
-	private final String extension;
 
-	public FileChannelRepository(RepositoryProperties properties) {
-		directory = properties.getFileDirectory() + "/CHANNEL";
-		extension = properties.getExtension();
+  private final String directory;
+  private final String extension;
 
-		Path path = Paths.get(directory);
-		if (!path.toFile().exists()) {
-			try {
-				Files.createDirectories(path);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+  public FileChannelRepository(RepositoryProperties properties) {
+    directory = properties.getFileDirectory() + "/CHANNEL";
+    extension = properties.getExtension();
 
-	@Override
-	public Channel save(Channel channel) {
-		Path path = Paths.get(directory, channel.getChannelId() + extension);
-		try (FileOutputStream fos = new FileOutputStream(path.toFile());
-			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(channel);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+    Path path = Paths.get(directory);
+    if (!path.toFile().exists()) {
+      try {
+        Files.createDirectories(path);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 
-		return channel;
-	}
+  @Override
+  public Channel save(Channel channel) {
+    Path path = Paths.get(directory, channel.getChannelId() + extension);
+    try (FileOutputStream fos = new FileOutputStream(path.toFile());
+        ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(channel);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
-	@Override
-	public Optional<Channel> findById(UUID channelId) {
-		Channel channel = null;
+    return channel;
+  }
 
-		Path path = Paths.get(directory, channelId.toString() + extension);
+  @Override
+  public Optional<Channel> findById(UUID channelId) {
+    Channel channel = null;
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			channel = (Channel)ois.readObject();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+    Path path = Paths.get(directory, channelId.toString() + extension);
 
-		return Optional.ofNullable(channel);
-	}
+    try (FileInputStream fis = new FileInputStream(path.toFile());
+        ObjectInputStream ois = new ObjectInputStream(fis);) {
+      channel = (Channel) ois.readObject();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
-	@Override
-	public List<Channel> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
-			return paths.filter(path -> path.toString().endsWith(extension))
-				.map(filePath -> {
-					try (FileInputStream fis = new FileInputStream(filePath.toFile());
-						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						return (Channel)ois.readObject();
+    return Optional.ofNullable(channel);
+  }
 
-					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패", e);
-					}
-				}).toList();
-		} catch (IOException e) {
-			throw new RuntimeException("디렉터리 탐색 실패", e);
-		}
-	}
+  @Override
+  public List<Channel> findAll() {
+    try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+      return paths.filter(path -> path.toString().endsWith(extension))
+          .map(filePath -> {
+            try (FileInputStream fis = new FileInputStream(filePath.toFile());
+                ObjectInputStream ois = new ObjectInputStream(fis);) {
+              return (Channel) ois.readObject();
 
-	@Override
-	public void delete(UUID channelId) {
-		Path path = Paths.get(directory, channelId.toString() + extension);
+            } catch (Exception e) {
+              throw new RuntimeException("파일 읽기 실패", e);
+            }
+          }).toList();
+    } catch (IOException e) {
+      throw new RuntimeException("디렉터리 탐색 실패", e);
+    }
+  }
+  
 
-		try {
-			Files.deleteIfExists(path);
-		} catch (IOException e) {
-			throw new RuntimeException(e + "파일 삭제 실패");
-		}
-	}
+  @Override
+  public void delete(UUID channelId) {
+    Path path = Paths.get(directory, channelId.toString() + extension);
 
-	@Override
-	public boolean existsById(UUID channelId) {
-		return Files.exists(Paths.get(directory, channelId.toString() + extension));
-	}
+    try {
+      Files.deleteIfExists(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e + "파일 삭제 실패");
+    }
+  }
+
+  @Override
+  public boolean existsById(UUID channelId) {
+    return Files.exists(Paths.get(directory, channelId.toString() + extension));
+  }
 }

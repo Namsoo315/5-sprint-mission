@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
@@ -18,46 +19,47 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 @Repository
 public class JCFChannelRepository implements ChannelRepository {
-	private final Map<UUID, Channel> map = new HashMap<>();
 
-	@Override
-	public Channel save(Channel channel) {
-		boolean isNew = !existsById(channel.getChannelId());
+  private final Map<UUID, Channel> map = new HashMap<>();
 
-		map.put(channel.getChannelId(), channel);
+  @Override
+  public Channel save(Channel channel) {
+    boolean isNew = !existsById(channel.getChannelId());
 
-		if (isNew) {
-			System.out.println("channel이 생성 되었습니다." + channel.getChannelId());
-		} else {
-			System.out.println("channel이 업데이트 되었습니다." + channel.getChannelId());
-		}
-		return channel;
-	}
+    map.put(channel.getChannelId(), channel);
 
-	@Override
-	public Optional<Channel> findById(UUID channelId) {
-		if (existsById(channelId)) {
-			return Optional.of(map.get(channelId));
-		}
+    if (isNew) {
+      System.out.println("channel이 생성 되었습니다." + channel.getChannelId());
+    } else {
+      System.out.println("channel이 업데이트 되었습니다." + channel.getChannelId());
+    }
+    return channel;
+  }
 
-		return Optional.empty();
-	}
+  @Override
+  public Optional<Channel> findById(UUID channelId) {
+    if (existsById(channelId)) {
+      return Optional.of(map.get(channelId));
+    }
 
-	@Override
-	public List<Channel> findAll() {
-		return new ArrayList<>(map.values());
-	}
+    return Optional.empty();
+  }
 
-	@Override
-	public void delete(UUID channelId) {
-		if (!existsById(channelId)) {
-			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
-		}
-		map.remove(channelId);
-	}
+  @Override
+  public List<Channel> findAll() {
+    return new ArrayList<>(map.values());
+  }
 
-	@Override
-	public boolean existsById(UUID channelId) {
-		return map.containsKey(channelId);
-	}
+  @Override
+  public void delete(UUID channelId) {
+    if (!existsById(channelId)) {
+      throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+    }
+    map.remove(channelId);
+  }
+
+  @Override
+  public boolean existsById(UUID channelId) {
+    return map.containsKey(channelId);
+  }
 }
