@@ -16,9 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/message")
+@RequestMapping("/api/messages")
 @Tag(name = "message", description = "메시지 관련 API")
 public class MessageController {
 
@@ -53,7 +53,7 @@ public class MessageController {
   }
 
   // [ ] 메시지를 수정할 수 있다.	(Content 하나이기에 Put으로 지정함)
-  @PutMapping("/{messageId}")
+  @PatchMapping("/{messageId}")
   public ResponseEntity<ApiResponse<String>> modifyMessage(
       @PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest messageUpdateRequest) {
@@ -71,7 +71,7 @@ public class MessageController {
   }
 
   // [ ] 특정 채널의 메시지 목록을 조회할 수 있다.
-  @GetMapping("/channels/{channelId}/messages")
+  @GetMapping("{channelId}")
   public ResponseEntity<ApiResponse<List<Message>>> findMessageByChannelId(
       @PathVariable UUID channelId) {
     List<Message> messages = messageService.findAllByChannelId(channelId);

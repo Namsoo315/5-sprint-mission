@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/users")
 @Tag(name = "User", description = "유저 관련 API")
 public class UserController {
 
@@ -44,7 +44,7 @@ public class UserController {
   private final BasicUserStatusService userStatusService;
 
   //[ ] 사용자를 등록할 수 있다.
-  @PostMapping(path = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<User>> registerUser(
       @RequestPart UserCreateRequest userCreateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
@@ -107,7 +107,7 @@ public class UserController {
   }
 
   // [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
-  @PatchMapping("/{userId}/status")
+  @PatchMapping("/{userId}/userStatus")
   public ResponseEntity<ApiResponse<String>> updateUserStatus(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {

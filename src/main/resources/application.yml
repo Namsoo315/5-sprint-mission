@@ -1,7 +1,7 @@
 # application.yaml
 discodeit:
   repository:
-    type: file   # jcf | file
+    type: jcf   # jcf | file
     fileDirectory: FileData
     extension: .ser
 

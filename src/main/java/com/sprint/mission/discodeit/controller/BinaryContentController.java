@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/binaryContent")
+@RequestMapping("/api/binaryContents")
 @Tag(name = "BinaryContent", description = "첨부파일 관련 API")
 public class BinaryContentController {
 
