@@ -1,10 +1,10 @@
 # application.yaml
 discodeit:
   repository:
-    type: jcf   # jcf | file
+    type: file   # jcf | file
     fileDirectory: FileData
     extension: .ser
-    
+
 springdoc:
   api-docs:
     enabled: true          # API 스펙 JSON 활성화
