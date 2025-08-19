@@ -10,14 +10,16 @@ import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.Message;
 
 public interface MessageService {
-	Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO);
 
-	Message findByMessageId(UUID messageId);
+  Message createMessage(MessageCreateRequest messageCreateRequest,
+      List<BinaryContentDTO> binaryContentDTO);
 
-	List<Message> findAllByChannelId(UUID channelId);
+  Message findByMessageId(UUID messageId);
 
-	void updateMessage(MessageUpdateRequest request);
+  List<Message> findAllByChannelId(UUID channelId);
 
-	void deleteMessage(UUID messageId);
+  void updateMessage(UUID messageId, MessageUpdateRequest request);
+
+  void deleteMessage(UUID messageId);
 
 }
