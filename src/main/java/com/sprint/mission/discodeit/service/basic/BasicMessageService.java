@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -62,8 +63,9 @@ public class BasicMessageService implements MessageService {
 	}
 
 	@Override
-	public Optional<Message> findByMessageId(UUID messageId) {
-		return messageRepository.findById(messageId);
+	public Message findByMessageId(UUID messageId) {
+		return messageRepository.findById(messageId).orElseThrow(
+			() -> new NoSuchElementException("존재하지 않는 메시지 ID 입니다."));
 	}
 
 	public List<Message> findAllByChannelId(UUID channelId) {

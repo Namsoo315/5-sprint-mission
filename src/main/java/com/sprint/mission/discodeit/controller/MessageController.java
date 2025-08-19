@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.exception.ApiResponse;
-import org.springframework.http.HttpStatus;
+import com.sprint.mission.discodeit.dto.ApiResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,19 +38,19 @@ public class MessageController {
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<Message>> sendMessage(
 		@RequestPart MessageCreateRequest messageCreateRequest,
-		@RequestPart(required = false) List<MultipartFile> profiles) throws IOException {
+		@RequestPart(required = false) List<MultipartFile> multipartFiles) throws IOException {
 
 		List<BinaryContentDTO> binaryContents = new ArrayList<>();
 
-		if (!profiles.isEmpty()) {
-			for (MultipartFile profile : profiles) {
-				binaryContents.add(new BinaryContentDTO(profile.getOriginalFilename(), profile.getContentType(),
-					profile.getSize(), profile.getBytes()));
+		if (!multipartFiles.isEmpty()) {
+			for (MultipartFile file : multipartFiles) {
+				binaryContents.add(new BinaryContentDTO(file.getOriginalFilename(), file.getContentType(),
+					file.getSize(), file.getBytes()));
 			}
 		}
-		Message response = messageService.createMessage(messageCreateRequest, binaryContents);
+		Message message = messageService.createMessage(messageCreateRequest, binaryContents);
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "메시지 생성 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(message, "메시지 생성 완료"));
 	}
 
 	// [ ] 메시지를 수정할 수 있다.
@@ -72,8 +72,8 @@ public class MessageController {
 	// [ ] 특정 채널의 메시지 목록을 조회할 수 있다.
 	@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<ApiResponse<List<Message>>> findMessageByChannelId(@PathVariable("id") UUID channelId) {
-		List<Message> responses = messageService.findAllByChannelId(channelId);
+		List<Message> messages = messageService.findAllByChannelId(channelId);
 
-		return ResponseEntity.ok(ApiResponse.ok(responses, channelId + "님의 채널 조회 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(messages, channelId + "님의 채널 조회 완료"));
 	}
 }

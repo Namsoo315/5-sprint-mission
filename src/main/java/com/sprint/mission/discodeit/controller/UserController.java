@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.exception.ApiResponse;
-import org.springframework.http.HttpStatus;
+import com.sprint.mission.discodeit.dto.ApiResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +20,6 @@ import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 
@@ -50,9 +49,9 @@ public class UserController {
 				profile.getBytes());
 		}
 
-		User response = userService.createUser(userCreateRequest, binaryContentDTO);
+		User user = userService.createUser(userCreateRequest, binaryContentDTO);
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "유저 생성 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(user, "유저 생성 완료"));
 	}
 
 	// [ ] 사용자 정보를 수정할 수 있다.
@@ -86,8 +85,8 @@ public class UserController {
 	// [ ] 모든 사용자를 조회할 수 있다.
 	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
 	public ResponseEntity<ApiResponse<List<UserDto>>> findAllUser() {
-		List<UserDto> response = userService.findAll();
-		return ResponseEntity.ok(ApiResponse.ok(response, "모든 사용자 조회 완료"));
+		List<UserDto> userDto = userService.findAll();
+		return ResponseEntity.ok(ApiResponse.ok(userDto, "모든 사용자 조회 완료"));
 	}
 
 	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
