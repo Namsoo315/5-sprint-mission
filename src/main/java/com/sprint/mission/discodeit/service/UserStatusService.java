@@ -4,20 +4,20 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sprint.mission.discodeit.dto.userstatus.UserStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequestByUserId;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequestByUserStatusId;
+import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.UserStatus;
 
 public interface UserStatusService {
-	UserStatus createUserStatus(UserStatusCreateRequest request);
 
-	UserStatus findByUserStatusId(UUID userStatusId);
+  UserStatus createUserStatus(UserStatusCreateRequest request);
 
-	List<UserStatus> findAll();
+  UserStatus findByUserStatusId(UUID userStatusId);
 
-	void updateUserStatus(UserStatusUpdateRequestByUserStatusId request);
+  List<UserStatus> findAll();
 
-	void updateByUserId(UserStatusUpdateRequestByUserId request);
+  void updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request);
 
-	void delete(UUID userStatusId);
+  void updateByUserId(UUID userId, UserStatusUpdateRequest request);
+
+  void delete(UUID userStatusId);
 }

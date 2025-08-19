@@ -12,15 +12,16 @@ import com.sprint.mission.discodeit.entity.Channel;
 ;
 
 public interface ChannelService {
-	Channel createPublicChannel(PublicChannelCreateRequest request);
 
-	Channel createPrivateChannel(PrivateChannelCreateRequest request);
+  Channel createPublicChannel(PublicChannelCreateRequest request);
 
-	ChannelFindResponse findByChannelId(UUID channelId);
+  Channel createPrivateChannel(PrivateChannelCreateRequest request);
 
-	List<ChannelFindResponse> findAllByUserId(UUID userId);
+  ChannelFindResponse findByChannelId(UUID channelId);
 
-	void updateChannel(ChannelUpdateRequest request);
+  List<ChannelFindResponse> findAllByUserId(UUID userId);
 
-	void deleteChannel(UUID channelId);
+  void updateChannel(UUID chanelId, ChannelUpdateRequest request);
+
+  void deleteChannel(UUID channelId);
 }
