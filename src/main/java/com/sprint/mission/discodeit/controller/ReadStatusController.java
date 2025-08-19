@@ -36,9 +36,9 @@ public class ReadStatusController {
 	// [ ] 특정 채널의 메시지 수신 정보를 수정할 수 있다.
 	@RequestMapping(path = "/modify", method = RequestMethod.PATCH)
 	public ResponseEntity<ApiResponse<String>> ModifyReadStatus(@RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
-		readStatusService.updateReadStatus(readStatusUpdateRequest);
+		ReadStatus readStatus = readStatusService.updateReadStatus(readStatusUpdateRequest);
 
-		return ResponseEntity.ok(ApiResponse.ok(readStatusUpdateRequest.channelId() + "채널의 메시지 수신정보 수정 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(readStatus.getChannelId() + "채널의 메시지 수신정보 수정 완료"));
 	}
 
 	// [ ] 특정 사용자의 메시지 수신 정보를 조회할 수 있다.

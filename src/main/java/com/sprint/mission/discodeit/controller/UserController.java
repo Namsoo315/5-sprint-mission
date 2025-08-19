@@ -4,22 +4,25 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.dto.ApiResponse;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sprint.mission.discodeit.dto.ApiResponse;
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequestByUserId;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 
@@ -37,7 +40,7 @@ public class UserController {
 		method = RequestMethod.POST,
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<User>> registerUser(@RequestPart UserCreateRequest userCreateRequest,
-													@RequestPart(required = false) MultipartFile profile) throws IOException {
+		@RequestPart(required = false) MultipartFile profile) throws IOException {
 
 		BinaryContentDTO binaryContentDTO = null;
 
@@ -90,10 +93,19 @@ public class UserController {
 	}
 
 	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
-	@RequestMapping(path = "/update/{id}", method = RequestMethod.PATCH)
-	public ResponseEntity<ApiResponse<String>> updateUserStatus(@PathVariable("id") UUID userId) {
-		userStatusService.updateByUserId(userId);
+	@RequestMapping(path = "/update", method = RequestMethod.PATCH)
+	public ResponseEntity<ApiResponse<String>> updateUserStatus(
+		@RequestBody UserStatusUpdateRequestByUserId userStatusUpdateRequest) {
+		userStatusService.updateByUserId(userStatusUpdateRequest);
 
-		return ResponseEntity.ok(ApiResponse.ok(userId + "님의 온라인 상태 정보 업데이트 완료"));
+		return ResponseEntity.ok(ApiResponse.ok(userStatusUpdateRequest.lastActiveAt() + "님의 온라인 상태 정보 업데이트 완료"));
+	}
+
+	// 온라인 상태를 조회한다.
+	@GetMapping("/find/userStatus/{userStatusId}")
+	public ResponseEntity<ApiResponse<UserStatus>> findUserStatus(@PathVariable UUID userStatusId) {
+		UserStatus userStatus = userStatusService.findByUserStatusId(userStatusId);
+
+		return ResponseEntity.ok(ApiResponse.ok((userStatus), "유저 상태정보 조회 완료"));
 	}
 }

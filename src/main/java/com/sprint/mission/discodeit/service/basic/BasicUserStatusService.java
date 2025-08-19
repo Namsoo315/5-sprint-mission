@@ -2,13 +2,13 @@ package com.sprint.mission.discodeit.service.basic;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.sprint.mission.discodeit.dto.userstatus.UserStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
+import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequestByUserId;
+import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequestByUserStatusId;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -36,7 +36,7 @@ public class BasicUserStatusService implements UserStatusService {
 		}
 
 		// 2. 유저 상태정보 저장.
-		UserStatus userStatus = new UserStatus(request.userId());
+		UserStatus userStatus = new UserStatus(request.userId(), request.lastActiveAt());
 		userStatusRepository.save(userStatus);
 
 		return userStatus;
@@ -54,33 +54,25 @@ public class BasicUserStatusService implements UserStatusService {
 	}
 
 	@Override
-	public void updateUserStatus(UserStatusUpdateRequest request) {
+	public void updateUserStatus(UserStatusUpdateRequestByUserStatusId request) {
 		// 1. 호환성 체크
 		UserStatus userStatus = userStatusRepository.findById(request.userStatusId()).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 유저 상태 정보입니다."));
 
 		// 2. 유저 상태정보 업데이트
-		if(userStatus.isOnline()){
-			userStatus.updateStatus();
-		}
-
-
+		userStatus.updateStatus(request.lastActiveAt());
 		userStatusRepository.save(userStatus);
 	}
 
 	@Override
-	public void updateByUserId(UUID userId) {
+	public void updateByUserId(UserStatusUpdateRequestByUserId request) {
 		// 1. userId로 특정 UserStatus를 찾는 호환성 체크
-		UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(
+		UserStatus userStatus = userStatusRepository.findByUserId(request.userId()).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
 
 		// 2. 유저 상태정보 업데이트
-		if(userStatus.isOnline()){
-			userStatus.updateStatus();
-		}
-
+		userStatus.updateStatus(request.lastActiveAt());
 		userStatusRepository.save(userStatus);
-
 
 	}
 
