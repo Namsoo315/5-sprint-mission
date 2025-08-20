@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.entity.UserStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class UserController {
 
   // [ ] 사용자 정보 수정
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<String> modifyUser(
+  public ResponseEntity<User> modifyUser(
       @PathVariable UUID userId,
       @RequestPart UserUpdateRequest userUpdateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
@@ -76,8 +77,8 @@ public class UserController {
           profile.getBytes());
     }
 
-    userService.updateUser(userId, userUpdateRequest, binaryContentDTO);
-    return ResponseEntity.status(HttpStatus.OK).body(userId + "님의 정보 수정 완료"); // 200 OK
+    User user = userService.updateUser(userId, userUpdateRequest, binaryContentDTO);
+    return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
   // [ ] 사용자 삭제
@@ -103,11 +104,10 @@ public class UserController {
 
   // [ ] 사용자의 온라인 상태 업데이트
   @PatchMapping("/{userId}/userStatus")
-  public ResponseEntity<String> updateUserStatus(
+  public ResponseEntity<UserStatus> updateUserStatus(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {
-    userStatusService.updateByUserId(userId, userStatusUpdateRequest);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(userId + "님의 온라인 상태 정보 업데이트 완료"); // 200 OK
+    UserStatus userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(userStatus); // 200 OK
   }
 }

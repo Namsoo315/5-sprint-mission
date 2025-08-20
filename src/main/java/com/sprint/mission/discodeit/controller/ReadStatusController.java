@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,18 +37,18 @@ public class ReadStatusController {
 
   // [ ] 특정 채널의 메시지 수신 정보 수정
   @PatchMapping("/{readStatusId}")
-  public ResponseEntity<String> modifyReadStatus(
+  public ResponseEntity<ReadStatus> modifyReadStatus(
       @PathVariable UUID readStatusId,
       @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
     ReadStatus readStatus = readStatusService.updateReadStatus(readStatusId,
         readStatusUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK)
-        .body(readStatus.getChannelId() + " 채널의 메시지 수신정보 수정 완료"); // 200 OK
+        .body(readStatus); // 200 OK
   }
 
   // [ ] 특정 사용자의 메시지 수신 정보 조회
-  @GetMapping("{userId}/users")
-  public ResponseEntity<List<ReadStatus>> findReadStatusByUserId(@PathVariable UUID userId) {
+  @GetMapping
+  public ResponseEntity<List<ReadStatus>> findReadStatusByUserId(@RequestParam UUID userId) {
     List<ReadStatus> readStatuses = readStatusService.findAllByUserId(userId);
     return ResponseEntity.status(HttpStatus.OK).body(readStatuses); // 200 OK
   }

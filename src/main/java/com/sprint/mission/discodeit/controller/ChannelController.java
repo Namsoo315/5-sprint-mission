@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,7 +43,7 @@ public class ChannelController {
   public ResponseEntity<Channel> privateChannel(
       @RequestBody PrivateChannelCreateRequest privateChannelCreateRequest) {
 
-    if (privateChannelCreateRequest.participantsUserIds().size() < 2) {
+    if (privateChannelCreateRequest.participantIds().size() < 2) {
       throw new IllegalArgumentException("비공개 채널은 두 명 이상부터 생성 가능합니다.");
     }
     Channel channel = channelService.createPrivateChannel(privateChannelCreateRequest);
@@ -51,11 +52,11 @@ public class ChannelController {
 
   // [ ] 공개 채널 정보 수정
   @PatchMapping("/{channelId}")
-  public ResponseEntity<String> modifyPublicChannel(
+  public ResponseEntity<Channel> modifyPublicChannel(
       @PathVariable UUID channelId,
       @RequestBody ChannelUpdateRequest channelUpdateRequest) {
-    channelService.updateChannel(channelId, channelUpdateRequest);
-    return ResponseEntity.status(HttpStatus.OK).body(channelId + "의 채널 수정 완료"); // 200 OK
+    Channel channel = channelService.updateChannel(channelId, channelUpdateRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(channel); // 200 OK
   }
 
   // [ ] 채널 삭제
@@ -67,8 +68,8 @@ public class ChannelController {
   }
 
   // [ ] 특정 사용자가 볼 수 있는 모든 채널 조회
-  @GetMapping("{userId}")
-  public ResponseEntity<List<ChannelFindResponse>> findChannelById(@PathVariable UUID userId) {
+  @GetMapping
+  public ResponseEntity<List<ChannelFindResponse>> findChannelById(@RequestParam UUID userId) {
     List<ChannelFindResponse> channelFindResponses = channelService.findAllByUserId(userId);
     return ResponseEntity.status(HttpStatus.OK).body(channelFindResponses); // 200 OK
   }

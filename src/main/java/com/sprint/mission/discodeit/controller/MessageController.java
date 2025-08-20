@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,12 +38,12 @@ public class MessageController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Message> sendMessage(
       @RequestPart MessageCreateRequest messageCreateRequest,
-      @RequestPart(required = false) List<MultipartFile> multipartFiles) throws IOException {
+      @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
 
     List<BinaryContentDTO> binaryContents = new ArrayList<>();
 
-    if (multipartFiles != null && !multipartFiles.isEmpty()) {
-      for (MultipartFile file : multipartFiles) {
+    if (attachments != null && !attachments.isEmpty()) {
+      for (MultipartFile file : attachments) {
         binaryContents.add(new BinaryContentDTO(
             file.getOriginalFilename(),
             file.getContentType(),
@@ -58,11 +59,11 @@ public class MessageController {
 
   // [ ] 메시지 수정
   @PatchMapping("/{messageId}")
-  public ResponseEntity<String> modifyMessage(
+  public ResponseEntity<Message> modifyMessage(
       @PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest messageUpdateRequest) {
-    messageService.updateMessage(messageId, messageUpdateRequest);
-    return ResponseEntity.status(HttpStatus.OK).body(messageId + "님의 메시지 수정 완료"); // 200 OK
+    Message message = messageService.updateMessage(messageId, messageUpdateRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(message); // 200 OK
   }
 
   // [ ] 메시지 삭제
@@ -74,8 +75,8 @@ public class MessageController {
   }
 
   // [ ] 특정 채널의 메시지 조회
-  @GetMapping("/{channelId}/channels")
-  public ResponseEntity<List<Message>> findMessageByChannelId(@PathVariable UUID channelId) {
+  @GetMapping
+  public ResponseEntity<List<Message>> findMessageByChannelId(@RequestParam UUID channelId) {
     List<Message> messages = messageService.findAllByChannelId(channelId);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
