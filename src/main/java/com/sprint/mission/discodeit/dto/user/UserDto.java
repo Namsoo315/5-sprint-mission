@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record UserDto(
-    UUID userId,
+    UUID id,
     Instant createdAt,
     Instant updatedAt,
     String username,
