@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,22 +14,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.sprint.mission.discodeit.dto.ApiResponse;
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 
@@ -43,9 +40,9 @@ public class UserController {
   private final UserService userService;
   private final BasicUserStatusService userStatusService;
 
-  //[ ] 사용자를 등록할 수 있다.
+  // [ ] 사용자를 등록
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse<User>> registerUser(
+  public ResponseEntity<User> registerUser(
       @RequestPart UserCreateRequest userCreateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
 
@@ -60,13 +57,12 @@ public class UserController {
     }
 
     User user = userService.createUser(userCreateRequest, binaryContentDTO);
-
-    return ResponseEntity.ok(ApiResponse.ok(user, "유저 생성 완료"));
+    return ResponseEntity.status(HttpStatus.CREATED).body(user); // 201 Created
   }
 
-  // [ ] 사용자 정보를 수정할 수 있다.
+  // [ ] 사용자 정보 수정
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse<String>> modifyUser(
+  public ResponseEntity<String> modifyUser(
       @PathVariable UUID userId,
       @RequestPart UserUpdateRequest userUpdateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
@@ -81,39 +77,37 @@ public class UserController {
     }
 
     userService.updateUser(userId, userUpdateRequest, binaryContentDTO);
-
-    return ResponseEntity.ok(ApiResponse.ok(userId + "님의 정보 수정 완료"));
+    return ResponseEntity.status(HttpStatus.OK).body(userId + "님의 정보 수정 완료"); // 200 OK
   }
 
-  // [ ] 사용자를 삭제할 수 있다.
+  // [ ] 사용자 삭제
   @DeleteMapping("/{userId}")
-  public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable UUID userId) {
+  public ResponseEntity<String> deleteUser(@PathVariable UUID userId) {
     userService.deleteUser(userId);
-    return ResponseEntity.ok(ApiResponse.ok(userId + "님 삭제 완료"));
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(userId + "님 삭제 완료"); // 204 No Content
   }
 
-  // 단일 사용자 조회
+  // [ ] 단일 사용자 조회
   @GetMapping("/{userId}")
-  public ResponseEntity<ApiResponse<UserDto>> findUser(@PathVariable UUID userId) {
+  public ResponseEntity<UserDto> findUser(@PathVariable UUID userId) {
     UserDto userDto = userService.findByUserId(userId);
-    return ResponseEntity.ok(ApiResponse.ok(userDto, "사용자 조회 완료"));
+    return ResponseEntity.status(HttpStatus.OK).body(userDto); // 200 OK
   }
 
-  // [ ] 모든 사용자를 조회할 수 있다.
+  // [ ] 모든 사용자 조회
   @GetMapping
-  public ResponseEntity<ApiResponse<List<UserDto>>> findAllUser() {
+  public ResponseEntity<List<UserDto>> findAllUser() {
     List<UserDto> userDto = userService.findAll();
-    return ResponseEntity.ok(ApiResponse.ok(userDto, "모든 사용자 조회 완료"));
+    return ResponseEntity.status(HttpStatus.OK).body(userDto); // 200 OK
   }
 
-  // [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
+  // [ ] 사용자의 온라인 상태 업데이트
   @PatchMapping("/{userId}/userStatus")
-  public ResponseEntity<ApiResponse<String>> updateUserStatus(
+  public ResponseEntity<String> updateUserStatus(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {
     userStatusService.updateByUserId(userId, userStatusUpdateRequest);
-
-    return ResponseEntity.ok(
-        ApiResponse.ok(userId + "님의 온라인 상태 정보 업데이트 완료"));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(userId + "님의 온라인 상태 정보 업데이트 완료"); // 200 OK
   }
 }

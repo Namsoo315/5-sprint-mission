@@ -1,12 +1,12 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.ApiResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,21 +22,18 @@ public class BinaryContentController {
 
   private final BinaryContentService binaryContentService;
 
-  // [ ] 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
+  // [ ] 바이너리 파일을 1개 조회
   @GetMapping("/{binaryContentId}")
-  public ResponseEntity<ApiResponse<BinaryContent>> findBinaryContent(
-      @PathVariable UUID binaryContentId) {
+  public ResponseEntity<BinaryContent> findBinaryContent(@PathVariable UUID binaryContentId) {
     BinaryContent binaryContent = binaryContentService.findByBinaryContentId(binaryContentId);
-
-    return ResponseEntity.ok(ApiResponse.ok(binaryContent, "파일 조회 완료 [단회]"));
+    return ResponseEntity.status(HttpStatus.OK).body(binaryContent);
   }
 
-  // Get은 Find의 의미가 있기에 /find를 제거해서 path를 간결화 (
+  // [ ] 바이너리 파일을 여러 개 조회
   @GetMapping
-  public ResponseEntity<ApiResponse<List<BinaryContent>>> findAllBinaryContent(
+  public ResponseEntity<List<BinaryContent>> findAllBinaryContent(
       @RequestParam List<UUID> binaryContentIds) {
     List<BinaryContent> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);
-
-    return ResponseEntity.ok(ApiResponse.ok(binaryContents, "파일 조회 완료 [다회]"));
+    return ResponseEntity.status(HttpStatus.OK).body(binaryContents);
   }
 }

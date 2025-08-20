@@ -46,9 +46,9 @@ public class BasicMessageService implements MessageService {
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
       for (BinaryContentDTO dto : binaryContentDTO) {
-				if (dto.binaryContent() == null || dto.binaryContent().length == 0) {
-					continue;
-				}
+        if (dto.binaryContent() == null || dto.binaryContent().length == 0) {
+          continue;
+        }
 
         BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(),
             dto.size(),
@@ -60,7 +60,7 @@ public class BasicMessageService implements MessageService {
 
     // 2. 메시지 생성
     Message message = new Message(messageCreateRequest.userId(), messageCreateRequest.channelId(),
-        messageCreateRequest.message(), attachmentIds);
+        messageCreateRequest.content(), attachmentIds);
     messageRepository.save(message);
 
     return message;
