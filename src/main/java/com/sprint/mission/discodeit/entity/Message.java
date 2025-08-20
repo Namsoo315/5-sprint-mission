@@ -10,43 +10,33 @@ import lombok.Getter;
 
 @Getter
 public class Message implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-	private final UUID messageId;
-	private final UUID userId;
-	private final UUID channelId;
-	private final List<UUID> attachmentIds;		// binaryContent
 
-	private String content;
+  @Serial
+  private static final long serialVersionUID = 1L;
+  private final UUID id;
+  private final UUID authorId;
+  private final UUID channelId;
+  private final List<UUID> attachmentIds;    // binaryContent
 
-	private final Instant createdAt;
-	private Instant updatedAt;
+  private String content;
 
-	public Message(UUID userId, UUID channelId, String content, List<UUID> attachmentIds) {
-		this.messageId = UUID.randomUUID();
-		this.userId = userId;
-		this.channelId = channelId;
-		this.content = content;
-		this.attachmentIds = attachmentIds;
-		this.createdAt = Instant.now();
-		this.updatedAt = createdAt;
-	}
+  private final Instant createdAt;
+  private Instant updatedAt;
 
-	public void update(String message) {
-		this.content = message;
-		this.updatedAt = Instant.now();
-	}
+  public Message(UUID authorId, UUID channelId, String content, List<UUID> attachmentIds) {
+    this.id = UUID.randomUUID();
+    this.authorId = authorId;
+    this.channelId = channelId;
+    this.content = content;
+    this.attachmentIds = attachmentIds;
+    this.createdAt = Instant.now();
+    this.updatedAt = createdAt;
+  }
 
-	@Override
-	public String toString() {
-		return "Message{" +
-			"messageId=" + messageId +
-			", userId=" + userId +
-			", channelId=" + channelId +
-			", attachmentIds=" + attachmentIds +
-			", message='" + content + '\'' +
-			", createdAt=" + createdAt +
-			", updatedAt=" + updatedAt +
-			'}';
-	}
+  public void update(String newContent) {
+    if (newContent != null && !newContent.isEmpty()) {
+      this.content = newContent;
+      this.updatedAt = Instant.now();
+    }
+  }
 }

@@ -9,24 +9,25 @@ import lombok.Getter;
 
 @Getter
 public class BinaryContent implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-	private final UUID binaryContentId;
 
-	private final Instant createdAt;
+  @Serial
+  private static final long serialVersionUID = 1L;
+  private final UUID id;
 
-	private final String fileName;
-	private final String contentType;
-	private final Long size;
-	private final byte[] binaryContent;
-	// 수정 불가능 하기 때문에 updatedAt은 삭제
+  private final Instant createdAt;
 
-	public BinaryContent(String fileName, String contentType, Long size, byte[] binaryContent) {
-		this.binaryContentId = UUID.randomUUID();
-		this.createdAt = Instant.now();
-		this.fileName = fileName;
-		this.contentType = contentType;
-		this.size = size;
-		this.binaryContent = binaryContent;
-	}
+  private final String fileName;
+  private final Long size;
+  private final String contentType;
+  private final byte[] bytes;
+  // 수정 불가능 하기 때문에 updatedAt은 삭제
+
+  public BinaryContent(String fileName, String contentType, Long size, byte[] bytes) {
+    this.id = UUID.randomUUID();
+    this.createdAt = Instant.now();
+    this.fileName = fileName;
+    this.contentType = contentType;
+    this.size = size;
+    this.bytes = bytes;
+  }
 }
