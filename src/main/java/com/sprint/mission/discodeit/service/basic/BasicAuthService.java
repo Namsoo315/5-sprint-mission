@@ -35,7 +35,7 @@ public class BasicAuthService implements AuthService {
 
     // 2. DTO를 통한 username, email 보내줌.
     return AuthLoginResponse.builder()
-        .id(user.getUserId())
+        .id(user.getId())
         .username(user.getUsername())
         .password(user.getPassword())
         .email(user.getEmail())

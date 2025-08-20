@@ -53,7 +53,7 @@ public class BasicUserService implements UserService {
           binaryContentDTO.contentType(),
           binaryContentDTO.size(), binaryContentDTO.binaryContent());
       binaryContentRepository.save(content);
-      profileId = content.getBinaryContentId();
+      profileId = content.getId();
     }
 
     // 3. user, userStatus 같이 생성.
@@ -61,7 +61,7 @@ public class BasicUserService implements UserService {
         userCreateRequest.password(), profileId);
     userRepository.save(user);
 
-    UserStatus status = new UserStatus(user.getUserId(), Instant.MIN);
+    UserStatus status = new UserStatus(user.getId(), Instant.MIN);
     userStatusRepository.save(status);
 
     return user;
@@ -91,7 +91,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  public void updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
+  public User updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
       BinaryContentDTO binaryContentDTO) {
 
     UUID profileId = null;
@@ -103,7 +103,7 @@ public class BasicUserService implements UserService {
           binaryContentDTO.contentType(),
           binaryContentDTO.size(), binaryContentDTO.binaryContent());
       binaryContentRepository.save(content);
-      profileId = content.getBinaryContentId();
+      profileId = content.getId();
     }
 
     // 2. User 호환성 체크
@@ -111,12 +111,10 @@ public class BasicUserService implements UserService {
         .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
     // 3. Update 작업 수행.
-    user.update(userUpdateRequest.username(), userUpdateRequest.email(),
-        userUpdateRequest.password(),
-        profileId);
+    user.update(userUpdateRequest.newUsername(), userUpdateRequest.newEmail(),
+        userUpdateRequest.newPassword(), profileId);
 
-    userRepository.save(user);
-
+    return userRepository.save(user);
   }
 
   @Override
@@ -138,12 +136,12 @@ public class BasicUserService implements UserService {
 
   // Dto를 사용하는 메서드 분리
   private UserDto toDto(User user) {
-    Boolean online = userStatusRepository.findByUserId(user.getUserId())
+    Boolean online = userStatusRepository.findByUserId(user.getId())
         .map(UserStatus::isOnline)
         .orElse(null);
 
     return new UserDto(
-        user.getUserId(),
+        user.getId(),
         user.getCreatedAt(),
         user.getUpdatedAt(),
         user.getUsername(),

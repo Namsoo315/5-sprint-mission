@@ -54,26 +54,25 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
-  public void updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
+  public UserStatus updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
     // 1. 호환성 체크
     UserStatus userStatus = userStatusRepository.findById(userStatusId).orElseThrow(
         () -> new IllegalArgumentException("존재하지 않는 유저 상태 정보입니다."));
 
     // 2. 유저 상태정보 업데이트
-    userStatus.updateStatus(request.lastActiveAt());
-    userStatusRepository.save(userStatus);
+    userStatus.updateStatus(request.newLastActiveAt());
+    return userStatusRepository.save(userStatus);
   }
 
   @Override
-  public void updateByUserId(UUID userId, UserStatusUpdateRequest request) {
+  public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest request) {
     // 1. userId로 특정 UserStatus를 찾는 호환성 체크
     UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(
         () -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
 
     // 2. 유저 상태정보 업데이트
-    userStatus.updateStatus(request.lastActiveAt());
-    userStatusRepository.save(userStatus);
-
+    userStatus.updateStatus(request.newLastActiveAt());
+    return userStatusRepository.save(userStatus);
   }
 
   @Override
