@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.entity.ChannelType;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -45,7 +43,7 @@ public class FileChannelRepository implements ChannelRepository {
 
   @Override
   public Channel save(Channel channel) {
-    Path path = Paths.get(directory, channel.getChannelId() + extension);
+    Path path = Paths.get(directory, channel.getId() + extension);
     try (FileOutputStream fos = new FileOutputStream(path.toFile());
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
       oos.writeObject(channel);
@@ -89,7 +87,7 @@ public class FileChannelRepository implements ChannelRepository {
       throw new RuntimeException("디렉터리 탐색 실패", e);
     }
   }
-  
+
 
   @Override
   public void delete(UUID channelId) {

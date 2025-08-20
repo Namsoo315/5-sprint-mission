@@ -23,109 +23,113 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 @Repository
 public class FileReadStatusRepository implements ReadStatusRepository {
-	private final String directory;
-	private final String extension;
 
-	public FileReadStatusRepository(RepositoryProperties properties) {
-		directory = properties.getFileDirectory() + "/READSTATUS";
-		extension = properties.getExtension();
+  private final String directory;
+  private final String extension;
 
-		Path path = Paths.get(directory);
-		if (!path.toFile().exists()) {
-			try {
-				Files.createDirectories(path);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+  public FileReadStatusRepository(RepositoryProperties properties) {
+    directory = properties.getFileDirectory() + "/READSTATUS";
+    extension = properties.getExtension();
 
-	@Override
-	public ReadStatus save(ReadStatus readStatus) {
-		Path path = Paths.get(directory, readStatus.getReadStatusId() + extension);
-		try (FileOutputStream fos = new FileOutputStream(path.toFile());
-			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(readStatus);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+    Path path = Paths.get(directory);
+    if (!path.toFile().exists()) {
+      try {
+        Files.createDirectories(path);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 
-		return readStatus;
-	}
+  @Override
+  public ReadStatus save(ReadStatus readStatus) {
+    Path path = Paths.get(directory, readStatus.getId() + extension);
+    try (FileOutputStream fos = new FileOutputStream(path.toFile());
+        ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(readStatus);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
-	@Override
-	public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
-		ReadStatus readStatus = null;
-		Path path = Paths.get(directory, readStatusId.toString() + extension);
+    return readStatus;
+  }
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			readStatus = (ReadStatus)ois.readObject();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+  @Override
+  public Optional<ReadStatus> findByReadStatusId(UUID readStatusId) {
+    ReadStatus readStatus = null;
+    Path path = Paths.get(directory, readStatusId.toString() + extension);
 
-		return Optional.ofNullable(readStatus);
-	}
+    try (FileInputStream fis = new FileInputStream(path.toFile());
+        ObjectInputStream ois = new ObjectInputStream(fis);) {
+      readStatus = (ReadStatus) ois.readObject();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return Optional.ofNullable(readStatus);
+  }
 
 
+  @Override
+  public List<ReadStatus> findAll() {
+    try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+      return paths.filter(path -> path.toString().endsWith(extension))
+          .map(filePath -> {
+            try (FileInputStream fis = new FileInputStream(filePath.toFile());
+                ObjectInputStream ois = new ObjectInputStream(fis);) {
+              return (ReadStatus) ois.readObject();
+            } catch (Exception e) {
+              throw new RuntimeException("파일 읽기 실패", e);
+            }
+          }).toList();
+    } catch (IOException e) {
+      throw new RuntimeException("디렉터리 탐색 실패", e);
+    }
+  }
 
-	@Override
-	public List<ReadStatus> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
-			return paths.filter(path -> path.toString().endsWith(extension))
-				.map(filePath -> {
-					try (FileInputStream fis = new FileInputStream(filePath.toFile());
-						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						return (ReadStatus)ois.readObject();
-					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패", e);
-					}
-				}).toList();
-		} catch (IOException e) {
-			throw new RuntimeException("디렉터리 탐색 실패", e);
-		}
-	}
+  @Override
+  public Optional<ReadStatus> findByUserIdAndChannelId(UUID userId, UUID channelId) {
+    return this.findAll().stream()
+        .filter(readStatus -> readStatus.getUserId().equals(userId) && readStatus.getChannelId()
+            .equals(channelId))
+        .findFirst();
+  }
 
-	@Override
-	public Optional<ReadStatus> findByUserIdAndChannelId(UUID userId, UUID channelId) {
-		return this.findAll().stream()
-			.filter(readStatus -> readStatus.getUserId().equals(userId) && readStatus.getChannelId().equals(channelId))
-			.findFirst();
-	}
+  @Override
+  public List<ReadStatus> findAllByUserId(UUID userId) {
+    return this.findAll().stream().filter(readStatus -> readStatus.getUserId().equals(userId))
+        .toList();
+  }
 
-	@Override
-	public List<ReadStatus> findAllByUserId(UUID userId) {
-		return this.findAll().stream().filter(readStatus -> readStatus.getUserId().equals(userId)).toList();
-	}
+  @Override
+  public List<ReadStatus> findAllByChannelId(UUID channelId) {
+    return this.findAll().stream().filter(status -> status.getChannelId().equals(channelId))
+        .toList();
+  }
 
-	@Override
-	public List<ReadStatus> findAllByChannelId(UUID channelId) {
-		return this.findAll().stream().filter(status -> status.getChannelId().equals(channelId)).toList();
-	}
+  @Override
+  public void delete(UUID id) {
+    Path path = Paths.get(directory, id.toString() + extension);
 
-	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(directory, id.toString() + extension);
+    try {
+      Files.deleteIfExists(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e + "파일 삭제 실패");
+    }
+  }
 
-		try {
-			Files.deleteIfExists(path);
-		} catch (IOException e) {
-			throw new RuntimeException(e + "파일 삭제 실패");
-		}
-	}
+  @Override
+  public void deleteByChannelId(UUID channelId) {
+    List<ReadStatus> list = this.findAll().stream()
+        .filter(readStatus -> readStatus.getChannelId().equals(channelId)).toList();
 
-	@Override
-	public void deleteByChannelId(UUID channelId) {
-		List<ReadStatus> list = this.findAll().stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).toList();
+    for (ReadStatus readStatus : list) {
+      this.delete(readStatus.getId());
+    }
+  }
 
-		for(ReadStatus readStatus : list) {
-			this.delete(readStatus.getReadStatusId());
-		}
-	}
-
-	@Override
-	public boolean existsById(UUID id) {
-		return Files.exists(Paths.get(directory, id.toString() + extension));
-	}
+  @Override
+  public boolean existsById(UUID id) {
+    return Files.exists(Paths.get(directory, id.toString() + extension));
+  }
 }

@@ -24,103 +24,105 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 @Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file", matchIfMissing = true)
 public class FileMessageRepository implements MessageRepository {
-	private final String directory;
-	private final String extension;
 
-	public FileMessageRepository(RepositoryProperties properties) {
-		directory = properties.getFileDirectory() + "/MESSAGE";
-		extension = properties.getExtension();
+  private final String directory;
+  private final String extension;
 
-		Path path = Paths.get(directory);
-		if (!path.toFile().exists()) {
-			try {
-				Files.createDirectories(path);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+  public FileMessageRepository(RepositoryProperties properties) {
+    directory = properties.getFileDirectory() + "/MESSAGE";
+    extension = properties.getExtension();
 
-	@Override
-	public Message save(Message message) {
-		Path path = Paths.get(directory, message.getMessageId() + extension);
-		try (FileOutputStream fos = new FileOutputStream(path.toFile());
-			 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(message);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		return message;
-	}
+    Path path = Paths.get(directory);
+    if (!path.toFile().exists()) {
+      try {
+        Files.createDirectories(path);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 
-	@Override
-	public Optional<Message> findById(UUID messageId) {
-		Message message = null;
-		Path path = Paths.get(directory, messageId.toString() + extension);
+  @Override
+  public Message save(Message message) {
+    Path path = Paths.get(directory, message.getId() + extension);
+    try (FileOutputStream fos = new FileOutputStream(path.toFile());
+        ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(message);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return message;
+  }
 
-		try (FileInputStream fis = new FileInputStream(path.toFile());
-			 ObjectInputStream ois = new ObjectInputStream(fis);) {
-			message = (Message)ois.readObject();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+  @Override
+  public Optional<Message> findById(UUID messageId) {
+    Message message = null;
+    Path path = Paths.get(directory, messageId.toString() + extension);
 
-		return Optional.ofNullable(message);
-	}
+    try (FileInputStream fis = new FileInputStream(path.toFile());
+        ObjectInputStream ois = new ObjectInputStream(fis);) {
+      message = (Message) ois.readObject();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
-	@Override
-	public List<Message> findAll() {
-		try (Stream<Path> paths = Files.list(Paths.get(directory))) {
-			return paths.filter(path -> path.toString().endsWith(extension))
-				.map(filePath -> {
-					try (FileInputStream fis = new FileInputStream(filePath.toFile());
-						 ObjectInputStream ois = new ObjectInputStream(fis);) {
-						return (Message)ois.readObject();
-					} catch (Exception e) {
-						throw new RuntimeException("파일 읽기 실패", e);
-					}
-				}).toList();
-		} catch (IOException e) {
-			throw new RuntimeException("디렉터리 탐색 실패", e);
-		}
-	}
+    return Optional.ofNullable(message);
+  }
 
-	@Override
-	public List<Message> findAllByChannelId(UUID channelId) {
-		return this.findAll().stream()
-			.filter(message -> message.getChannelId().equals(channelId))
-			.toList();
-	}
+  @Override
+  public List<Message> findAll() {
+    try (Stream<Path> paths = Files.list(Paths.get(directory))) {
+      return paths.filter(path -> path.toString().endsWith(extension))
+          .map(filePath -> {
+            try (FileInputStream fis = new FileInputStream(filePath.toFile());
+                ObjectInputStream ois = new ObjectInputStream(fis);) {
+              return (Message) ois.readObject();
+            } catch (Exception e) {
+              throw new RuntimeException("파일 읽기 실패", e);
+            }
+          }).toList();
+    } catch (IOException e) {
+      throw new RuntimeException("디렉터리 탐색 실패", e);
+    }
+  }
 
-	@Override
-	public Optional<Message> latestMessageByChannelId(UUID channelId) {
-		return this.findAll().stream()
-			.filter(message -> message.getChannelId().equals(channelId))
-			.max(Comparator.comparing(Message::getCreatedAt));
-	}
+  @Override
+  public List<Message> findAllByChannelId(UUID channelId) {
+    return this.findAll().stream()
+        .filter(message -> message.getChannelId().equals(channelId))
+        .toList();
+  }
 
-	@Override
-	public void delete(UUID id) {
-		Path path = Paths.get(directory, id.toString() + extension);
+  @Override
+  public Optional<Message> latestMessageByChannelId(UUID channelId) {
+    return this.findAll().stream()
+        .filter(message -> message.getChannelId().equals(channelId))
+        .max(Comparator.comparing(Message::getCreatedAt));
+  }
 
-		try {
-			Files.deleteIfExists(path);
-		} catch (IOException e) {
-			throw new RuntimeException(e + "파일 삭제 실패");
-		}
-	}
+  @Override
+  public void delete(UUID id) {
+    Path path = Paths.get(directory, id.toString() + extension);
 
-	@Override
-	public void deleteByChannelId(UUID channelId) {
-		List<Message> list = this.findAll().stream().filter(messages -> messages.getChannelId().equals(channelId)).toList();
+    try {
+      Files.deleteIfExists(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e + "파일 삭제 실패");
+    }
+  }
 
-		for(Message messages : list) {
-			this.delete(messages.getMessageId());
-		}
-	}
+  @Override
+  public void deleteByChannelId(UUID channelId) {
+    List<Message> list = this.findAll().stream()
+        .filter(messages -> messages.getChannelId().equals(channelId)).toList();
 
-	@Override
-	public boolean existsById(UUID messageId) {
-		return Files.exists(Paths.get(directory, messageId.toString() + extension));
-	}
+    for (Message messages : list) {
+      this.delete(messages.getId());
+    }
+  }
+
+  @Override
+  public boolean existsById(UUID messageId) {
+    return Files.exists(Paths.get(directory, messageId.toString() + extension));
+  }
 }

@@ -7,14 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 @Repository
@@ -24,14 +21,14 @@ public class JCFChannelRepository implements ChannelRepository {
 
   @Override
   public Channel save(Channel channel) {
-    boolean isNew = !existsById(channel.getChannelId());
+    boolean isNew = !existsById(channel.getId());
 
-    map.put(channel.getChannelId(), channel);
+    map.put(channel.getId(), channel);
 
     if (isNew) {
-      System.out.println("channel이 생성 되었습니다." + channel.getChannelId());
+      System.out.println("channel이 생성 되었습니다." + channel.getId());
     } else {
-      System.out.println("channel이 업데이트 되었습니다." + channel.getChannelId());
+      System.out.println("channel이 업데이트 되었습니다." + channel.getId());
     }
     return channel;
   }
