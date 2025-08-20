@@ -30,17 +30,17 @@ public class BasicReadStatusService implements ReadStatusService {
 
     // 1. 호환성 체크 User, Channel 체크
     User user = userRepository.findById(request.userId()).orElseThrow(
-        () -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+        () -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
     Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
-        () -> new IllegalArgumentException("채널이 존재하지 않습니다."));
+        () -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
     // 1-2. 만약 channelId와 userId가 매치되는 readStatus가 존재하면 예외 처리
     Optional<ReadStatus> existing = readStatusRepository.findByUserIdAndChannelId(user.getId(),
         channel.getId());
 
     if (existing.isPresent()) {
-      throw new IllegalArgumentException("이미 같은 channelId와 UserId가 존재하는 readStatus가 있습니다.");
+      throw new IllegalArgumentException("이미 같은 channelId와 UserId가 존재하는 상태정보가 있습니다.");
     }
 
     // 2. 생성
@@ -54,7 +54,7 @@ public class BasicReadStatusService implements ReadStatusService {
   @Override
   public ReadStatus findByReadStatusId(UUID readStatusId) {
     return readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
-        () -> new NoSuchElementException("일치하는 ReadStatusId가 없습니다."));
+        () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
   }
 
   @Override
@@ -64,10 +64,10 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   public ReadStatus updateReadStatus(UUID readStatusId, ReadStatusUpdateRequest request) {
-    Instant newLastReadAt = request.lastReadAt();
+    Instant newLastReadAt = request.newLastReadAt();
     // 1. 호환성 체크
     ReadStatus readStatus = readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
-        () -> new IllegalArgumentException("상태 정보가 없습니다."));
+        () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
 
     // 2. 상태정보 업데이트 후 Repository save(update)
     readStatus.update(newLastReadAt);

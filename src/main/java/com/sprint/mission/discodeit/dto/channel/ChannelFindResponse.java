@@ -14,7 +14,7 @@ public record ChannelFindResponse(
     ChannelType type,
     String name,
     String description,
-    Instant lastMessageTime,
+    Instant lastMessageAt,
     List<UUID> participantIds
 ) {
 

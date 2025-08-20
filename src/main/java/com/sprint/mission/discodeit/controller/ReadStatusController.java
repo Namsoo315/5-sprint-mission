@@ -42,8 +42,7 @@ public class ReadStatusController {
       @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
     ReadStatus readStatus = readStatusService.updateReadStatus(readStatusId,
         readStatusUpdateRequest);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(readStatus); // 200 OK
+    return ResponseEntity.status(HttpStatus.OK).body(readStatus); // 200 OK
   }
 
   // [ ] 특정 사용자의 메시지 수신 정보 조회

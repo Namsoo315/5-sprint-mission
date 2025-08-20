@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,10 +64,9 @@ public class JCFMessageRepository implements MessageRepository {
   @Override
   public void delete(UUID messageId) {
     if (!existsById(messageId)) {
-      throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+      throw new NoSuchElementException("존재하지 않는 회원입니다.");
     }
     map.remove(messageId);
-    System.out.println(messageId + " 가 삭제 되었습니다.");
   }
 
   @Override
