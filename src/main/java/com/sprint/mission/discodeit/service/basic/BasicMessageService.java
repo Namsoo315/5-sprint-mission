@@ -46,13 +46,13 @@ public class BasicMessageService implements MessageService {
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
       for (BinaryContentDTO dto : binaryContentDTO) {
-        if (dto.binaryContent() == null || dto.binaryContent().length == 0) {
+        if (dto.bytes() == null || dto.bytes().length == 0) {
           continue;
         }
 
         BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(),
             dto.size(),
-            dto.binaryContent());
+            dto.bytes());
         attachmentIds.add(binaryContent.getId());
         binaryContentRepository.save(binaryContent);
       }

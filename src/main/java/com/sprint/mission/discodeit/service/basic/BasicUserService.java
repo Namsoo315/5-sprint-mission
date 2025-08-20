@@ -46,12 +46,12 @@ public class BasicUserService implements UserService {
 
     // 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null &&
-        binaryContentDTO.binaryContent() != null &&
-        binaryContentDTO.binaryContent().length > 0) {
+        binaryContentDTO.bytes() != null &&
+        binaryContentDTO.bytes().length > 0) {
 
       BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
           binaryContentDTO.contentType(),
-          binaryContentDTO.size(), binaryContentDTO.binaryContent());
+          binaryContentDTO.size(), binaryContentDTO.bytes());
       binaryContentRepository.save(content);
       profileId = content.getId();
     }
@@ -97,11 +97,11 @@ public class BasicUserService implements UserService {
     UUID profileId = null;
     // 1. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
     if (binaryContentDTO != null &&
-        binaryContentDTO.binaryContent() != null &&
-        binaryContentDTO.binaryContent().length > 0) {
+        binaryContentDTO.bytes() != null &&
+        binaryContentDTO.bytes().length > 0) {
       BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
           binaryContentDTO.contentType(),
-          binaryContentDTO.size(), binaryContentDTO.binaryContent());
+          binaryContentDTO.size(), binaryContentDTO.bytes());
       binaryContentRepository.save(content);
       profileId = content.getId();
     }
