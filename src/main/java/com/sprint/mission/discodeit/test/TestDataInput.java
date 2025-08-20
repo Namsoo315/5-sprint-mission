@@ -24,7 +24,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 
-@Component
 @RequiredArgsConstructor
 public class TestDataInput {
 
@@ -40,11 +39,11 @@ public class TestDataInput {
   @PreDestroy
   public void cleanup() {
     for (UserDto user : userService.findAll()) {
-      userService.deleteUser(user.userId());
-      for (ChannelFindResponse channel : channelService.findAllByUserId(user.userId())) {
-        channelService.deleteChannel(channel.channelId());
-        for (Message message : messageService.findAllByChannelId(channel.channelId())) {
-          messageService.deleteMessage(message.getMessageId());
+      userService.deleteUser(user.id());
+      for (ChannelFindResponse channel : channelService.findAllByUserId(user.id())) {
+        channelService.deleteChannel(channel.id());
+        for (Message message : messageService.findAllByChannelId(channel.id())) {
+          messageService.deleteMessage(message.getId());
         }
       }
     }
@@ -68,9 +67,9 @@ public class TestDataInput {
         new PublicChannelCreateRequest("공용 방2", "공용방 입니다."));
 
     // Private 채널 유저 리스트 준비
-    List<UUID> users1 = List.of(user1.getUserId(), user2.getUserId(), user3.getUserId());
-    List<UUID> users2 = List.of(user2.getUserId(), user3.getUserId());
-    List<UUID> users3 = List.of(user1.getUserId(), user3.getUserId());
+    List<UUID> users1 = List.of(user1.getId(), user2.getId(), user3.getId());
+    List<UUID> users2 = List.of(user2.getId(), user3.getId());
+    List<UUID> users3 = List.of(user1.getId(), user3.getId());
 
     // Private 채널 생성
     Channel privateChannel1 = channelService.createPrivateChannel(
@@ -84,25 +83,25 @@ public class TestDataInput {
 
     // 메시지 생성
     messageService.createMessage(
-        new MessageCreateRequest(user1.getUserId(), publicChannel1.getChannelId(),
+        new MessageCreateRequest(user1.getId(), publicChannel1.getId(),
             "안녕하세요 유저1 -> 공용채널1"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user2.getUserId(), publicChannel2.getChannelId(),
+        new MessageCreateRequest(user2.getId(), publicChannel2.getId(),
             "안녕하세요 유저2 -> 공용채널2"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user1.getUserId(), privateChannel1.getChannelId(),
+        new MessageCreateRequest(user1.getId(), privateChannel1.getId(),
             "안녕하세요 유저1 -> 개인채널1"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user2.getUserId(), privateChannel1.getChannelId(),
+        new MessageCreateRequest(user2.getId(), privateChannel1.getId(),
             "안녕하세요 유저2 -> 개인채널1"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user3.getUserId(), privateChannel1.getChannelId(),
+        new MessageCreateRequest(user3.getId(), privateChannel1.getId(),
             "안녕하세요 유저3 -> 개인채널1"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user3.getUserId(), privateChannel2.getChannelId(),
+        new MessageCreateRequest(user3.getId(), privateChannel2.getId(),
             "안녕하세요 유저2 -> 개인채널2"), dtos);
     messageService.createMessage(
-        new MessageCreateRequest(user3.getUserId(), privateChannel3.getChannelId(),
+        new MessageCreateRequest(user3.getId(), privateChannel3.getId(),
             "안녕하세요 유저3 -> 개인채널3"), dtos);
   }
 }
