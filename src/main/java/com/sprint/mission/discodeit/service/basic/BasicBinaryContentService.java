@@ -17,29 +17,31 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BasicBinaryContentService implements BinaryContentService {
-	private final BinaryContentRepository binaryContentRepository;
 
-	@Override
-	public BinaryContent createBinaryContent(BinaryContentDTO request) {
-		BinaryContent binaryContent = new BinaryContent(request.fileName(), request.contentType(), request.size(), request.binaryContent());
-		binaryContentRepository.save(binaryContent);
+  private final BinaryContentRepository binaryContentRepository;
 
-		return binaryContent;
-	}
+  @Override
+  public BinaryContent createBinaryContent(BinaryContentDTO request) {
+    BinaryContent binaryContent = new BinaryContent(request.fileName(), request.contentType(),
+        request.size(), request.bytes());
+    binaryContentRepository.save(binaryContent);
 
-	@Override
-	public BinaryContent findByBinaryContentId(UUID binaryContentId) {
-		return binaryContentRepository.findById(binaryContentId).orElseThrow(
-			() -> new NoSuchElementException("존재하지 않는 파일 ID 입니다."));
-	}
+    return binaryContent;
+  }
 
-	@Override
-	public List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds) {
-		return binaryContentRepository.findAllByIdIn(attachmentIds);
-	}
+  @Override
+  public BinaryContent findByBinaryContentId(UUID binaryContentId) {
+    return binaryContentRepository.findById(binaryContentId).orElseThrow(
+        () -> new NoSuchElementException("존재하지 않는 파일 ID 입니다."));
+  }
 
-	@Override
-	public void delete(UUID binaryContentId) {
-		binaryContentRepository.delete(binaryContentId);
-	}
+  @Override
+  public List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds) {
+    return binaryContentRepository.findAllByIdIn(attachmentIds);
+  }
+
+  @Override
+  public void delete(UUID binaryContentId) {
+    binaryContentRepository.delete(binaryContentId);
+  }
 }

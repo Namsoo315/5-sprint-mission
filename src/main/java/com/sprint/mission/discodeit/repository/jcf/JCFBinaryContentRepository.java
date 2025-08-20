@@ -16,67 +16,68 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 @Repository
 public class JCFBinaryContentRepository implements BinaryContentRepository {
-	private final Map<UUID, BinaryContent> map = new HashMap<>();
 
-	@Override
-	public BinaryContent save(BinaryContent binaryContent) {
-		boolean isNew = !existsById(binaryContent.getBinaryContentId());
+  private final Map<UUID, BinaryContent> map = new HashMap<>();
 
-		map.put(binaryContent.getBinaryContentId(), binaryContent);
+  @Override
+  public BinaryContent save(BinaryContent binaryContent) {
+    boolean isNew = !existsById(binaryContent.getId());
 
-		if (isNew) {
-			System.out.println("binaryContent가 생성 되었습니다." + binaryContent.getBinaryContentId());
-		} else {
-			System.out.println("binaryContent가 업데이트 되었습니다." + binaryContent.getBinaryContentId());
-		}
-		return binaryContent;
-	}
+    map.put(binaryContent.getId(), binaryContent);
 
-	@Override
-	public Optional<BinaryContent> findById(UUID binaryId) {
-		if (existsById(binaryId)) {
-			return Optional.of(map.get(binaryId));
-		}
+    if (isNew) {
+      System.out.println("binaryContent가 생성 되었습니다." + binaryContent.getId());
+    } else {
+      System.out.println("binaryContent가 업데이트 되었습니다." + binaryContent.getId());
+    }
+    return binaryContent;
+  }
 
-		return Optional.empty();
-	}
+  @Override
+  public Optional<BinaryContent> findById(UUID binaryId) {
+    if (existsById(binaryId)) {
+      return Optional.of(map.get(binaryId));
+    }
 
-	@Override
-	public List<BinaryContent> findAll() {
-		return new ArrayList<>(map.values());
-	}
+    return Optional.empty();
+  }
 
-	@Override
-	public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
-		List<BinaryContent> result = new ArrayList<>();
+  @Override
+  public List<BinaryContent> findAll() {
+    return new ArrayList<>(map.values());
+  }
 
-		for (UUID binaryContentId : binaryContentIds) {
-			result.add(map.get(binaryContentId));
-		}
+  @Override
+  public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
+    List<BinaryContent> result = new ArrayList<>();
 
-		return result;
-	}
+    for (UUID binaryContentId : binaryContentIds) {
+      result.add(map.get(binaryContentId));
+    }
 
-	@Override
-	public void delete(UUID binaryId) {
-		if (!existsById(binaryId)) {
-			throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
-		}
-		map.remove(binaryId);
-	}
+    return result;
+  }
 
-	@Override
-	public void deleteByAttachmentId(List<UUID> attachmentIds) {
-		for(UUID binaryId : attachmentIds) {
-			if (!existsById(binaryId)) {
-				throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
-			}
-			map.remove(binaryId);
-		}
-	}
+  @Override
+  public void delete(UUID binaryId) {
+    if (!existsById(binaryId)) {
+      throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
+    }
+    map.remove(binaryId);
+  }
 
-	@Override
-	public boolean existsById(UUID binaryId) {
-		return map.containsKey(binaryId);
-	}
+  @Override
+  public void deleteByAttachmentId(List<UUID> attachmentIds) {
+    for (UUID binaryId : attachmentIds) {
+      if (!existsById(binaryId)) {
+        throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
+      }
+      map.remove(binaryId);
+    }
+  }
+
+  @Override
+  public boolean existsById(UUID binaryId) {
+    return map.containsKey(binaryId);
+  }
 }

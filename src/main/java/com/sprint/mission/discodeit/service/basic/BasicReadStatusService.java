@@ -36,15 +36,15 @@ public class BasicReadStatusService implements ReadStatusService {
         () -> new IllegalArgumentException("채널이 존재하지 않습니다."));
 
     // 1-2. 만약 channelId와 userId가 매치되는 readStatus가 존재하면 예외 처리
-    Optional<ReadStatus> existing = readStatusRepository.findByUserIdAndChannelId(user.getUserId(),
-        channel.getChannelId());
+    Optional<ReadStatus> existing = readStatusRepository.findByUserIdAndChannelId(user.getId(),
+        channel.getId());
 
     if (existing.isPresent()) {
       throw new IllegalArgumentException("이미 같은 channelId와 UserId가 존재하는 readStatus가 있습니다.");
     }
 
     // 2. 생성
-    ReadStatus readStatus = new ReadStatus(user.getUserId(), channel.getChannelId(),
+    ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(),
         request.lastReadAt());
     readStatusRepository.save(readStatus);
 

@@ -10,10 +10,12 @@ import lombok.Builder;
 
 @Builder
 public record ChannelFindResponse(
-	UUID channelId,
-	ChannelType type,
-	String name,
-	String description,
-	Instant lastMessageTime,
-	List<UUID> participantsUserIds
-) {}
+    UUID id,
+    ChannelType type,
+    String name,
+    String description,
+    Instant lastMessageTime,
+    List<UUID> participantIds
+) {
+
+}

@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.service.basic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+
 public class BasicMessageService implements MessageService {
 
   private final MessageRepository messageRepository;
@@ -35,7 +35,7 @@ public class BasicMessageService implements MessageService {
       List<BinaryContentDTO> binaryContentDTO) {
 
     // 1. 호환성 체크
-    if (userRepository.findById(messageCreateRequest.userId()).isEmpty()) {
+    if (userRepository.findById(messageCreateRequest.authorId()).isEmpty()) {
       throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
     }
     if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
@@ -46,21 +46,21 @@ public class BasicMessageService implements MessageService {
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
       for (BinaryContentDTO dto : binaryContentDTO) {
-				if (dto.binaryContent() == null || dto.binaryContent().length == 0) {
-					continue;
-				}
+        if (dto.bytes() == null || dto.bytes().length == 0) {
+          continue;
+        }
 
         BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(),
             dto.size(),
-            dto.binaryContent());
-        attachmentIds.add(binaryContent.getBinaryContentId());
+            dto.bytes());
+        attachmentIds.add(binaryContent.getId());
         binaryContentRepository.save(binaryContent);
       }
     }
 
     // 2. 메시지 생성
-    Message message = new Message(messageCreateRequest.userId(), messageCreateRequest.channelId(),
-        messageCreateRequest.message(), attachmentIds);
+    Message message = new Message(messageCreateRequest.authorId(), messageCreateRequest.channelId(),
+        messageCreateRequest.content(), attachmentIds);
     messageRepository.save(message);
 
     return message;
@@ -77,12 +77,12 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  public void updateMessage(UUID messageId, MessageUpdateRequest request) {
+  public Message updateMessage(UUID messageId, MessageUpdateRequest request) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
 
     message.update(request.newContent());
-    messageRepository.save(message);
+    return messageRepository.save(message);
   }
 
   @Override

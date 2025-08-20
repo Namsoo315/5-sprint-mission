@@ -16,70 +16,71 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf")
 @Repository
 public class JCFUserRepository implements UserRepository {
-	private final Map<UUID, User> map = new HashMap<>();
 
-	@Override
-	public User save(User user) {
-		boolean isNew = !existsById(user.getUserId());
+  private final Map<UUID, User> map = new HashMap<>();
 
-		map.put(user.getUserId(), user);
+  @Override
+  public User save(User user) {
+    boolean isNew = !existsById(user.getId());
 
-		if (isNew) {
-			System.out.println("user가 생성 되었습니다." + user.getUserId());
-		} else {
-			System.out.println("user가 업데이트 되었습니다." + user.getUserId());
-		}
+    map.put(user.getId(), user);
 
-		return user;
-	}
+    if (isNew) {
+      System.out.println("user가 생성 되었습니다." + user.getId());
+    } else {
+      System.out.println("user가 업데이트 되었습니다." + user.getId());
+    }
 
-	@Override
-	public Optional<User> findById(UUID userId) {
-		if (existsById(userId)) {
-			return Optional.of(map.get(userId));
-		}
+    return user;
+  }
 
-		return Optional.empty();
-	}
+  @Override
+  public Optional<User> findById(UUID userId) {
+    if (existsById(userId)) {
+      return Optional.of(map.get(userId));
+    }
 
-	@Override
-	public Optional<User> findByUsername(String username) {
-		for (User user : map.values()) {
-			if (user.getUsername().equals(username)) {
-				return Optional.of(user);
-			}
-		}
+    return Optional.empty();
+  }
 
-		return Optional.empty();
-	}
+  @Override
+  public Optional<User> findByUsername(String username) {
+    for (User user : map.values()) {
+      if (user.getUsername().equals(username)) {
+        return Optional.of(user);
+      }
+    }
 
-	@Override
-	public Optional<User> findByEmail(String email) {
-		for (User user : map.values()) {
-			if (user.getEmail().equals(email)) {
-				return Optional.of(user);
-			}
-		}
+    return Optional.empty();
+  }
 
-		return Optional.empty();
-	}
+  @Override
+  public Optional<User> findByEmail(String email) {
+    for (User user : map.values()) {
+      if (user.getEmail().equals(email)) {
+        return Optional.of(user);
+      }
+    }
 
-	@Override
-	public List<User> findAll() {
-		return new ArrayList<>(map.values());
-	}
+    return Optional.empty();
+  }
 
-	@Override
-	public void delete(UUID userId) {
-		if (!existsById(userId)) {
-			throw new IllegalArgumentException("일치하는 ID가 없습니다.");
-		}
-		map.remove(userId);
-		System.out.println(userId + " 유저가 삭제 되었습니다.");
-	}
+  @Override
+  public List<User> findAll() {
+    return new ArrayList<>(map.values());
+  }
 
-	@Override
-	public boolean existsById(UUID userId) {
-		return map.containsKey(userId);
-	}
+  @Override
+  public void delete(UUID userId) {
+    if (!existsById(userId)) {
+      throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+    }
+    map.remove(userId);
+    System.out.println(userId + " 유저가 삭제 되었습니다.");
+  }
+
+  @Override
+  public boolean existsById(UUID userId) {
+    return map.containsKey(userId);
+  }
 }
