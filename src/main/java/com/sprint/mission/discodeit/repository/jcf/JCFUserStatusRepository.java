@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,6 +60,9 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 
   @Override
   public void delete(UUID userStatusId) {
+    if (!existsById(userStatusId)) {
+      throw new NoSuchElementException("존재하지 않는 유저정보입니다.");
+    }
     map.remove(userStatusId);
   }
 

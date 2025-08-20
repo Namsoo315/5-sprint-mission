@@ -36,10 +36,10 @@ public class BasicMessageService implements MessageService {
 
     // 1. 호환성 체크
     if (userRepository.findById(messageCreateRequest.authorId()).isEmpty()) {
-      throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+      throw new NoSuchElementException("존재하지 않는 회원입니다.");
     }
     if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
-      throw new IllegalArgumentException("채널방을 찾을 수 없습니다.");
+      throw new NoSuchElementException("존재하지 않는 채널입니다.");
     }
 
     List<UUID> attachmentIds = new ArrayList<>();
@@ -69,7 +69,7 @@ public class BasicMessageService implements MessageService {
   @Override
   public Message findByMessageId(UUID messageId) {
     return messageRepository.findById(messageId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 메시지 ID 입니다."));
+        () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
   }
 
   public List<Message> findAllByChannelId(UUID channelId) {
@@ -79,7 +79,7 @@ public class BasicMessageService implements MessageService {
   @Override
   public Message updateMessage(UUID messageId, MessageUpdateRequest request) {
     Message message = messageRepository.findById(messageId).orElseThrow(
-        () -> new IllegalArgumentException("메시지 아이디가 존재하지 않습니다."));
+        () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
 
     message.update(request.newContent());
     return messageRepository.save(message);
@@ -88,7 +88,7 @@ public class BasicMessageService implements MessageService {
   @Override
   public void deleteMessage(UUID messageId) {
     Message message = messageRepository.findById(messageId).orElseThrow(
-        () -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+        () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
 
     binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
 

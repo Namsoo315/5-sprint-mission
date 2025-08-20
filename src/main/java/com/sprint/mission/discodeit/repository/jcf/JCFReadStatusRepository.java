@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,6 +69,9 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 
   @Override
   public void delete(UUID readStatusId) {
+    if (!existsById(readStatusId)) {
+      throw new NoSuchElementException("존재하지 않는 상태정보입니다");
+    }
     map.remove(readStatusId);
   }
 

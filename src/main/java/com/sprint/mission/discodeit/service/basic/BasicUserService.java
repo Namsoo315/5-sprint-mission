@@ -35,11 +35,11 @@ public class BasicUserService implements UserService {
 
     // 1. username, email 호환성 확인
     if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
-      throw new RuntimeException("같은 아이디가 존재합니다.");
+      throw new IllegalArgumentException("같은 아이디가 존재합니다.");
     }
 
     if (userRepository.findByEmail(userCreateRequest.email()).isPresent()) {
-      throw new RuntimeException("같은 이메일이 존재합니다.");
+      throw new IllegalArgumentException("같은 이메일이 존재합니다.");
     }
 
     UUID profileId = null;
@@ -108,7 +108,7 @@ public class BasicUserService implements UserService {
 
     // 2. User 호환성 체크
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
     // 3. Update 작업 수행.
     user.update(userUpdateRequest.newUsername(), userUpdateRequest.newEmail(),
@@ -124,7 +124,7 @@ public class BasicUserService implements UserService {
 
     // 2. user 안에 있는 profileId -> BinaryContentId 삭제
     User user = userRepository.findById(userId).orElseThrow(
-        () -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        () -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
     if (user.getProfileId() != null) {
       binaryContentRepository.delete(user.getProfileId());

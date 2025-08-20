@@ -50,7 +50,7 @@ public class BasicChannelService implements ChannelService {
 
       //호환성 처리가 필요하다 생각함 (UserId가 없으면 생성되면 안됨.)
       userRepository.findById(userId)
-          .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원이 있습니다."));
+          .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
       ReadStatus readStatus = new ReadStatus(userId, channel.getId(), Instant.MIN);
       readStatusRepository.save(readStatus);
@@ -66,11 +66,11 @@ public class BasicChannelService implements ChannelService {
 
     // 1. 호환성 확인
     Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채널입니다."));
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
     // 2. 해당 채널의 가장 최근 메시지의 시간 정보를 포함.
     Message latestMessageTime = messageRepository.latestMessageByChannelId(channelId)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 채널 아이디가 없습니다."));
+        .orElseThrow(() -> new IllegalArgumentException("일치하는 채널 아이디가 없습니다."));
     // 2-2. Private 채널인 경우 참여한 User의 Id 정보까지 포함시킴.
     List<UUID> participantsIds = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public class BasicChannelService implements ChannelService {
     // DTO를 통해
     return ChannelFindResponse.builder().id(channelId).type(channel.getType())
         .name(channel.getName()).description(channel.getDescription())
-        .lastMessageTime(latestMessageTime.getCreatedAt()).participantIds(participantsIds).build();
+        .lastMessageAt(latestMessageTime.getCreatedAt()).participantIds(participantsIds).build();
   }
 
   @Override
@@ -90,7 +90,7 @@ public class BasicChannelService implements ChannelService {
     List<ChannelFindResponse> responses = new ArrayList<>();
 
     // 호환성 체크
-    userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("존재하는 회원이 없습니다."));
+    userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
     // 1. Private 채널은 User가 참여한 채널만 조회하기 위한 ChannelId를 List화 시킴.
     List<UUID> subscribeChannelIds = readStatusRepository.findAllByUserId(userId).stream()
         .map(ReadStatus::getChannelId).toList();
@@ -113,7 +113,7 @@ public class BasicChannelService implements ChannelService {
         // 4. DTO에 값 추가.
         responses.add(ChannelFindResponse.builder().id(channel.getId()).type(channel.getType())
             .name(channel.getName()).description(channel.getDescription())
-            .lastMessageTime(latestMessageTime != null ? latestMessageTime.getCreatedAt() : null)
+            .lastMessageAt(latestMessageTime != null ? latestMessageTime.getCreatedAt() : null)
             .participantIds(participantsIds).build());
       }
 
@@ -125,7 +125,7 @@ public class BasicChannelService implements ChannelService {
   public Channel updateChannel(UUID channelId, ChannelUpdateRequest request) {
     // 1. 호환성 체크
     Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(() -> new IllegalArgumentException("채널을 조회할 수 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
     // 1-2. PRIVATE일 경우 update 불가능
     if (channel.getType() == ChannelType.PRIVATE) {

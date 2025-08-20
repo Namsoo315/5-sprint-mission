@@ -32,7 +32,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Override
   public BinaryContent findByBinaryContentId(UUID binaryContentId) {
     return binaryContentRepository.findById(binaryContentId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 파일 ID 입니다."));
+        () -> new NoSuchElementException("존재하지 않는 파일입니다."));
   }
 
   @Override

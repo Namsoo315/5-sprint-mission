@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -20,17 +21,14 @@ public class BasicAuthService implements AuthService {
 
   @Override
   public AuthLoginResponse login(AuthLoginRequest request) {
-    Optional<User> optionalUser = userRepository.findByUsername(request.username());
 
     // 1-1. username과 일치하는 유저가 있는지 확인
-    if (optionalUser.isEmpty()) {
-      throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-    }
-    User user = optionalUser.get();
+    User user = userRepository.findByUsername(request.username()).orElseThrow(
+        () -> new NoSuchElementException("아이디가 일치하지 않습니다."));
 
     // 1-2. password과 일치하는지 확인
     if (!user.getPassword().equals(request.password())) {
-      throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+      throw new NoSuchElementException("비밀번호가 일치하지 않습니다.");
     }
 
     // 2. DTO를 통한 username, email 보내줌.

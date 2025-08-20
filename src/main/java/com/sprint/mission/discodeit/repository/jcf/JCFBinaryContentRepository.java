@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,9 +35,9 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
   }
 
   @Override
-  public Optional<BinaryContent> findById(UUID binaryId) {
-    if (existsById(binaryId)) {
-      return Optional.of(map.get(binaryId));
+  public Optional<BinaryContent> findById(UUID binaryContentId) {
+    if (existsById(binaryContentId)) {
+      return Optional.of(map.get(binaryContentId));
     }
 
     return Optional.empty();
@@ -59,25 +60,25 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
   }
 
   @Override
-  public void delete(UUID binaryId) {
-    if (!existsById(binaryId)) {
-      throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
+  public void delete(UUID binaryContentId) {
+    if (!existsById(binaryContentId)) {
+      throw new NoSuchElementException("존재하지 않는 파일입니다.");
     }
-    map.remove(binaryId);
+    map.remove(binaryContentId);
   }
 
   @Override
   public void deleteByAttachmentId(List<UUID> attachmentIds) {
     for (UUID binaryId : attachmentIds) {
       if (!existsById(binaryId)) {
-        throw new IllegalArgumentException("일치하는 ID 가 없습니다.");
+        throw new NoSuchElementException("존재하지 않는 파일입니다.");
       }
       map.remove(binaryId);
     }
   }
 
   @Override
-  public boolean existsById(UUID binaryId) {
-    return map.containsKey(binaryId);
+  public boolean existsById(UUID binaryContentId) {
+    return map.containsKey(binaryContentId);
   }
 }

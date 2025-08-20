@@ -6,6 +6,8 @@ import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.service.ChannelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +33,9 @@ public class ChannelController {
   private final ChannelService channelService;
 
   // [ ] 공개 채널 생성
+  @Operation(summary = "Create Public channel", responses = {
+      @ApiResponse(responseCode = "201", description = "Public Channel created successfully")
+  })
   @PostMapping("/public")
   public ResponseEntity<Channel> publicChannel(
       @RequestBody PublicChannelCreateRequest publicChannelCreateRequest) {

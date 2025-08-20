@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class JCFChannelRepository implements ChannelRepository {
   @Override
   public void delete(UUID channelId) {
     if (!existsById(channelId)) {
-      throw new IllegalArgumentException("일치하는 ID가 없습니다.");
+      throw new NoSuchElementException("존재하지 않는 채널입니다.");
     }
     map.remove(channelId);
   }
