@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.exception;
 
+import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +17,23 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+    // 400 Bad Request
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  }
+
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException e) {
     // 404 Not Found
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
 
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-    // 400 Bad Request
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  @ExceptionHandler(FileNotFoundException.class)
+  public ResponseEntity<String> handleFileNotFoundException(FileNotFoundException e) {
+    // 404 Not Found
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
+
+  // 나중에 회원 인증 까지 필요할 것 같음.
 }
