@@ -34,6 +34,4 @@ public class GlobalExceptionHandler {
     // 404 Not Found
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
-
-  // 나중에 회원 인증 까지 필요할 것 같음.
 }
