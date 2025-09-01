@@ -1,33 +1,39 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+
+@Table(name = "binary_contents")
+@Entity
 @Getter
-public class BinaryContent implements Serializable {
+@SuperBuilder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class BinaryContent extends BaseEntity {
 
-  @Serial
-  private static final long serialVersionUID = 1L;
-  private final UUID id;
+  @Column(name = "file_name", nullable = false, length = 255)
+  private String fileName;
 
-  private final Instant createdAt;
+  @Column(nullable = false)
+  private Long size;
 
-  private final String fileName;
-  private final Long size;
-  private final String contentType;
-  private final byte[] bytes;
-  // 수정 불가능 하기 때문에 updatedAt은 삭제
+  @Column(name = "content_type", nullable = false, length = 100)
+  private String contentType;
 
-  public BinaryContent(String fileName, String contentType, Long size, byte[] bytes) {
-    this.id = UUID.randomUUID();
-    this.createdAt = Instant.now();
-    this.fileName = fileName;
-    this.contentType = contentType;
-    this.size = size;
-    this.bytes = bytes;
-  }
+  @Column(nullable = false)
+  private byte[] bytes;
+
 }

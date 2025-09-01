@@ -1,51 +1,58 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@Table(name = "channels")
+@Entity
 @Getter
-public class Channel implements Serializable {
+@SuperBuilder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Channel extends BaseUpdatableEntity {
 
-  @Serial
-  private static final long serialVersionUID = 1L;
-  private final UUID id;
-
+  @Column(length = 100)
   private String name;
+
+  @Column(length = 500)
   private String description;
-  private final ChannelType type;
 
-  private final Instant createdAt;
-  private Instant updatedAt;
+  @Enumerated(EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private ChannelType type;
 
-  public Channel(ChannelType type, String name, String description) {
-    this.id = UUID.randomUUID();
-    this.type = type;
-    this.name = name;
-    this.description = description;
-    this.createdAt = Instant.now();
-    this.updatedAt = createdAt;
-  }
-
-  public void update(String newName, String newDescription) {
-    boolean anyValueUpdated = false;
-
-    if (newName != null && !newName.isEmpty()) {
-      this.name = newName;
-      anyValueUpdated = true;
-    }
-
-    if (newDescription != null && !newDescription.isEmpty()) {
-      this.description = newDescription;
-      anyValueUpdated = true;
-    }
-
-    if (anyValueUpdated) {
-      this.updatedAt = Instant.now();
-    }
-  }
+//  public Channel(ChannelType type, String name, String description) {
+//    this.type = type;
+//    this.name = name;
+//    this.description = description;
+//  }
+//
+//  public void update(String newName, String newDescription) {
+//    boolean anyValueUpdated = false;
+//
+//    if (newName != null && !newName.isEmpty()) {
+//      this.name = newName;
+//      anyValueUpdated = true;
+//    }
+//
+//    if (newDescription != null && !newDescription.isEmpty()) {
+//      this.description = newDescription;
+//      anyValueUpdated = true;
+//    }
+//  }
 
 }
