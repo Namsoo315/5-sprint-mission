@@ -43,36 +43,4 @@ public class User extends BaseUpdatableEntity {
   @JoinColumn(name = "profile_id")
   private BinaryContent profile;
 
-  @OneToOne
-  private UserStatus status;
-
-//  public void update(String newUserName, String newEmail, String newPassword, UUID newProfileId) {
-//    boolean anyValueUpdated = false; // 업데이트 여부 확인
-//
-//    if (newUserName != null && !newUserName.isEmpty()) {
-//      this.username = newUserName;
-//      anyValueUpdated = true;
-//    }
-//
-//    if (newEmail != null && !newEmail.isEmpty()) {
-//      this.email = newEmail;
-//      anyValueUpdated = true;
-//    }
-//
-//    if (newPassword != null && !newPassword.isEmpty()) {
-//      this.password = newPassword;
-//      anyValueUpdated = true;
-//    }
-//
-//    if (newProfileId != null) {
-//      this.profileId = newProfileId;
-//      anyValueUpdated = true;
-//    }
-//
-//    if (anyValueUpdated) {
-//      // 값이 하나라도 업데이트 됐으면 updatedAt 갱신
-//    }
-//  }
-//
-
 }
