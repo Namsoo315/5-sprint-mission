@@ -21,7 +21,7 @@ public class BasicAuthService implements AuthService {
   private final UserRepository userRepository;
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public AuthLoginResponse login(AuthLoginRequest request) {
 
     // 1-1. username과 일치하는 유저가 있는지 확인
@@ -40,7 +40,7 @@ public class BasicAuthService implements AuthService {
         .email(user.getEmail())
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())
-        .profileId(user.getProfile().getId())
+        .profileId(user.getProfile() != null ? user.getProfile().getId() : null)
         .build();
   }
 }

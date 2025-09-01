@@ -77,12 +77,14 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public Message findByMessageId(UUID messageId) {
     return messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
   }
 
+  @Override
+  @Transactional(readOnly = true)
   public List<Message> findAllByChannelId(UUID channelId) {
     return messageRepository.findAllByChannelId(channelId);
   }
@@ -97,7 +99,7 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public void deleteMessage(UUID messageId) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));

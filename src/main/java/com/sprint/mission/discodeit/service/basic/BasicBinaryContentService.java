@@ -32,20 +32,20 @@ public class BasicBinaryContentService implements BinaryContentService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public BinaryContent findByBinaryContentId(UUID binaryContentId) {
     return binaryContentRepository.findById(binaryContentId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 파일입니다."));
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds) {
     return binaryContentRepository.findAllById(attachmentIds);
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public void delete(UUID binaryContentId) {
     if (!binaryContentRepository.existsById(binaryContentId)) {
       throw new NoSuchElementException("존재하지 않는 파일입니다.");
