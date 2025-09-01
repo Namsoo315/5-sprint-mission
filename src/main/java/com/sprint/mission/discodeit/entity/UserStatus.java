@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,5 +29,12 @@ public class UserStatus extends BaseUpdatableEntity {
 
   @Column(name = "last_active_at", nullable = false)
   private Instant lastActiveAt;
-  
+
+
+  @Transient
+  public boolean isOnline() {
+    Instant now = Instant.now();
+    // 규칙 예시: 최근 5분 내 활동이면 온라인
+    return lastActiveAt != null && lastActiveAt.isAfter(now.minusSeconds(300));
+  }
 }
