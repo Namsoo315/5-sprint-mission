@@ -35,24 +35,4 @@ public class Channel extends BaseUpdatableEntity {
   @Column(length = 10, nullable = false)
   private ChannelType type;
 
-//  public Channel(ChannelType type, String name, String description) {
-//    this.type = type;
-//    this.name = name;
-//    this.description = description;
-//  }
-//
-//  public void update(String newName, String newDescription) {
-//    boolean anyValueUpdated = false;
-//
-//    if (newName != null && !newName.isEmpty()) {
-//      this.name = newName;
-//      anyValueUpdated = true;
-//    }
-//
-//    if (newDescription != null && !newDescription.isEmpty()) {
-//      this.description = newDescription;
-//      anyValueUpdated = true;
-//    }
-//  }
-
 }

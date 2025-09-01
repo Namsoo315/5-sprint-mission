@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class BasicReadStatusService implements ReadStatusService {
   private final ChannelRepository channelRepository;
 
   @Override
+  @Transactional
   public ReadStatus createReadStatus(ReadStatusCreateRequest request) {
 
     // 1. 호환성 체크 User, Channel 체크
@@ -44,40 +46,49 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     // 2. 생성
-    ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(),
-        request.lastReadAt());
+    ReadStatus readStatus = ReadStatus.builder()
+        .user(user)
+        .channel(channel)
+        .lastReadAt(request.lastReadAt())
+        .build();
     readStatusRepository.save(readStatus);
 
     return readStatus;
   }
 
   @Override
+  @Transactional
   public ReadStatus findByReadStatusId(UUID readStatusId) {
-    return readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
+    return readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
   }
 
   @Override
+  @Transactional
   public List<ReadStatus> findAllByUserId(UUID userId) {
     return readStatusRepository.findAllByUserId(userId);
   }
 
   @Override
+  @Transactional
   public ReadStatus updateReadStatus(UUID readStatusId, ReadStatusUpdateRequest request) {
     Instant newLastReadAt = request.newLastReadAt();
     // 1. 호환성 체크
-    ReadStatus readStatus = readStatusRepository.findByReadStatusId(readStatusId).orElseThrow(
+    ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
 
     // 2. 상태정보 업데이트 후 Repository save(update)
-    readStatus.update(newLastReadAt);
     readStatusRepository.save(readStatus);
 
     return readStatus;
   }
 
   @Override
-  public void delete(UUID userStatusId) {
-    readStatusRepository.delete(userStatusId);
+  @Transactional
+  public void delete(UUID readStatusId) {
+    if (!readStatusRepository.existsById(readStatusId)) {
+      throw new NoSuchElementException("존재하지 않는 상태정보입니다.");
+    }
+    readStatusRepository.deleteById(readStatusId);
   }
 }

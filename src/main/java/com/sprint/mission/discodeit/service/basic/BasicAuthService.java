@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class BasicAuthService implements AuthService {
   private final UserRepository userRepository;
 
   @Override
+  @Transactional
   public AuthLoginResponse login(AuthLoginRequest request) {
 
     // 1-1. username과 일치하는 유저가 있는지 확인
@@ -35,11 +37,10 @@ public class BasicAuthService implements AuthService {
     return AuthLoginResponse.builder()
         .id(user.getId())
         .username(user.getUsername())
-        .password(user.getPassword())
         .email(user.getEmail())
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())
-        .profileId(user.getProfileId())
+        .profileId(user.getProfile().getId())
         .build();
   }
 }

@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
@@ -10,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -21,7 +24,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public abstract class BaseEntity {
 
   @Id
-  @Column(name = "id", updatable = false, nullable = false) // 이름이 불일치하면 name으로 컬럼명을 적는다.
+  @GeneratedValue(strategy = GenerationType.UUID)   //PK 자동 삽입
+  @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 
   @CreatedDate
