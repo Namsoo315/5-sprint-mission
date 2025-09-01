@@ -75,7 +75,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public User findByUserId(UUID userId) {
     // 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
     return userRepository.findById(userId).orElseThrow(()
@@ -83,7 +83,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public List<User> findAll() {
     return userRepository.findAll();
   }
@@ -114,7 +114,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public void deleteUser(UUID userId) {
 
     // 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent

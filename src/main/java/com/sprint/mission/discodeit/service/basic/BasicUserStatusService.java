@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,17 +46,20 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public UserStatus findByUserStatusId(UUID userStatusId) {
     return userStatusRepository.findById(userStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 유저정보입니다."));
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<UserStatus> findAll() {
     return userStatusRepository.findAll();
   }
 
   @Override
+  @Transactional
   public UserStatus updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
     // 1. 호환성 체크
     UserStatus userStatus = userStatusRepository.findById(userStatusId).orElseThrow(
@@ -74,6 +78,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public void delete(UUID userStatusId) {
     if (!userStatusRepository.existsById(userStatusId)) {
       throw new NoSuchElementException("존재하지 않는 유저정보입니다.");

@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
@@ -38,9 +39,10 @@ public class User extends BaseUpdatableEntity {
   @Column(nullable = false, length = 60)
   private String password;
 
-
   @OneToOne(orphanRemoval = true)
   @JoinColumn(name = "profile_id")
   private BinaryContent profile;
 
+  @Transient
+  private UserStatus status;
 }

@@ -37,23 +37,16 @@ public class BasicReadStatusService implements ReadStatusService {
     Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
-    // 1-2. 만약 channelId와 userId가 매치되는 readStatus가 존재하면 예외 처리
-    Optional<ReadStatus> existing = readStatusRepository.findByUserIdAndChannelId(user.getId(),
-        channel.getId());
-
-    if (existing.isPresent()) {
-      throw new IllegalArgumentException("이미 같은 channelId와 UserId가 존재하는 상태정보가 있습니다.");
-    }
-
-    // 2. 생성
-    ReadStatus readStatus = ReadStatus.builder()
-        .user(user)
-        .channel(channel)
-        .lastReadAt(request.lastReadAt())
-        .build();
-    readStatusRepository.save(readStatus);
-
-    return readStatus;
+    // 2.이미 존재하면 새로 생성하지 않고 반환
+    return readStatusRepository.findByUserIdAndChannelId(user.getId(), channel.getId())
+        .orElseGet(() -> {
+          ReadStatus rs = ReadStatus.builder()
+              .user(user)
+              .channel(channel)
+              .lastReadAt(Instant.now())
+              .build();
+          return readStatusRepository.save(rs);
+        });
   }
 
   @Override
