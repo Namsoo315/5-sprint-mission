@@ -1,16 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
@@ -19,8 +10,13 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
-
+import java.time.Instant;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +27,7 @@ public class BasicUserService implements UserService {
   private final UserStatusRepository userStatusRepository;
 
   @Override
+  @Transactional
   public User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO) {
 
     // 1. username, email 호환성 확인
@@ -42,82 +39,82 @@ public class BasicUserService implements UserService {
       throw new IllegalArgumentException("같은 이메일이 존재합니다.");
     }
 
-    UUID profileId = null;
-
+    BinaryContent content = null;
     // 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null &&
         binaryContentDTO.bytes() != null &&
         binaryContentDTO.bytes().length > 0) {
 
-      BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
-          binaryContentDTO.contentType(),
-          binaryContentDTO.size(), binaryContentDTO.bytes());
+      content = BinaryContent.builder()
+          .fileName(binaryContentDTO.fileName())
+          .contentType(binaryContentDTO.contentType())
+          .size(binaryContentDTO.size())
+          .bytes(binaryContentDTO.bytes())
+          .build();
       binaryContentRepository.save(content);
-      profileId = content.getId();
     }
 
     // 3. user, userStatus 같이 생성.
-    User user = new User(userCreateRequest.username(), userCreateRequest.email(),
-        userCreateRequest.password(), profileId);
-    userRepository.save(user);
+    User result = User.builder()
+        .username(userCreateRequest.username())
+        .email(userCreateRequest.email())
+        .password(userCreateRequest.password())
+        .profile(content)
+        .build();
 
-    UserStatus status = new UserStatus(user.getId(), Instant.MIN);
-    userStatusRepository.save(status);
+    userRepository.save(result);
 
-    return user;
+    UserStatus userStatus = UserStatus.builder()
+        .user(result)
+        .lastActiveAt(Instant.now())
+        .build();
+
+    userStatusRepository.save(userStatus);
+
+    return result;
   }
 
   @Override
-  public UserDto findByUserId(UUID userId) {
-
+  @Transactional
+  public User findByUserId(UUID userId) {
     // 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
-    User user = userRepository.findById(userId).orElseThrow(()
+    return userRepository.findById(userId).orElseThrow(()
         -> new NoSuchElementException("존재하지 않는 회원입니다."));
-
-    return toDto(user);
   }
 
   @Override
-  public List<UserDto> findAll() {
-    List<User> users = userRepository.findAll();
-    List<UserDto> responses = new ArrayList<>();
-
-    for (User user : users) {
-      // 호환성 체크도 toDto가 하게 됨.
-      responses.add(toDto(user));
-    }
-
-    return responses;
+  @Transactional
+  public List<User> findAll() {
+    return userRepository.findAll();
   }
 
   @Override
+  @Transactional
   public User updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
       BinaryContentDTO binaryContentDTO) {
 
-    UUID profileId = null;
     // 1. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
     if (binaryContentDTO != null &&
         binaryContentDTO.bytes() != null &&
         binaryContentDTO.bytes().length > 0) {
-      BinaryContent content = new BinaryContent(binaryContentDTO.fileName(),
-          binaryContentDTO.contentType(),
-          binaryContentDTO.size(), binaryContentDTO.bytes());
-      binaryContentRepository.save(content);
-      profileId = content.getId();
+      BinaryContent binaryContent = BinaryContent.builder()
+          .fileName(binaryContentDTO.fileName())
+          .contentType(binaryContentDTO.contentType())
+          .size(binaryContentDTO.size())
+          .bytes(binaryContentDTO.bytes())
+          .build();
+      binaryContentRepository.save(binaryContent);
     }
 
     // 2. User 호환성 체크
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-    // 3. Update 작업 수행.
-    user.update(userUpdateRequest.newUsername(), userUpdateRequest.newEmail(),
-        userUpdateRequest.newPassword(), profileId);
-
     return userRepository.save(user);
   }
 
   @Override
+  @Transactional
   public void deleteUser(UUID userId) {
 
     // 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent
@@ -126,28 +123,11 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(userId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-    if (user.getProfileId() != null) {
-      binaryContentRepository.delete(user.getProfileId());
+    if (user.getProfile() != null) {
+      binaryContentRepository.delete(user.getProfile());
     }
 
     userStatusRepository.deleteByUserId(userId);
-    userRepository.delete(userId);
-  }
-
-  // Dto를 사용하는 메서드 분리
-  private UserDto toDto(User user) {
-    Boolean online = userStatusRepository.findByUserId(user.getId())
-        .map(UserStatus::isOnline)
-        .orElse(null);
-
-    return new UserDto(
-        user.getId(),
-        user.getCreatedAt(),
-        user.getUpdatedAt(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getProfileId(),
-        online
-    );
+    userRepository.deleteById(userId);
   }
 }

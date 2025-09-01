@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,6 +21,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,18 +34,18 @@ public class BasicMessageService implements MessageService {
   private final BinaryContentRepository binaryContentRepository;
 
   @Override
+  @Transactional
   public Message createMessage(MessageCreateRequest messageCreateRequest,
       List<BinaryContentDTO> binaryContentDTO) {
 
     // 1. 호환성 체크
-    if (userRepository.findById(messageCreateRequest.authorId()).isEmpty()) {
-      throw new NoSuchElementException("존재하지 않는 회원입니다.");
-    }
-    if (channelRepository.findById(messageCreateRequest.channelId()).isEmpty()) {
-      throw new NoSuchElementException("존재하지 않는 채널입니다.");
-    }
+    User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(
+        () -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-    List<UUID> attachmentIds = new ArrayList<>();
+    Channel channel = channelRepository.findById(messageCreateRequest.channelId()).orElseThrow(
+        () -> new NoSuchElementException("존재하지 않는 채널입니다."));
+
+    List<BinaryContent> attachmentIds = new ArrayList<>();
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
       for (BinaryContentDTO dto : binaryContentDTO) {
@@ -50,23 +53,31 @@ public class BasicMessageService implements MessageService {
           continue;
         }
 
-        BinaryContent binaryContent = new BinaryContent(dto.fileName(), dto.contentType(),
-            dto.size(),
-            dto.bytes());
-        attachmentIds.add(binaryContent.getId());
+        BinaryContent binaryContent = BinaryContent.builder()
+            .fileName(dto.fileName())
+            .contentType(dto.contentType())
+            .size(dto.size())
+            .bytes(dto.bytes())
+            .build();
+        attachmentIds.add(binaryContent);
         binaryContentRepository.save(binaryContent);
       }
     }
 
     // 2. 메시지 생성
-    Message message = new Message(messageCreateRequest.authorId(), messageCreateRequest.channelId(),
-        messageCreateRequest.content(), attachmentIds);
+    Message message = Message.builder()
+        .author(user)
+        .channel(channel)
+        .content(messageCreateRequest.content())
+        .attachments(attachmentIds)
+        .build();
     messageRepository.save(message);
 
     return message;
   }
 
   @Override
+  @Transactional
   public Message findByMessageId(UUID messageId) {
     return messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
@@ -77,21 +88,22 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
+  @Transactional
   public Message updateMessage(UUID messageId, MessageUpdateRequest request) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
 
-    message.update(request.newContent());
     return messageRepository.save(message);
   }
 
   @Override
+  @Transactional
   public void deleteMessage(UUID messageId) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
 
-    binaryContentRepository.deleteByAttachmentId(message.getAttachmentIds());
+    binaryContentRepository.deleteAll(message.getAttachments());
 
-    messageRepository.delete(messageId);
+    messageRepository.deleteById(messageId);
   }
 }
