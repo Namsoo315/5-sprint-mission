@@ -1,15 +1,17 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelFindResponse;
+import com.sprint.mission.discodeit.dto.channel.ChannelDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequest;
 import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -19,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,22 +35,29 @@ public class BasicChannelService implements ChannelService {
   private final ReadStatusRepository readStatusRepository;
   private final MessageRepository messageRepository;
   private final ChannelMapper channelMapper;
+  private final UserMapper userMapper;
 
   @Override
   @Transactional
-  public Channel createPublicChannel(PublicChannelCreateRequest request) {
+  public ChannelDto createPublicChannel(PublicChannelCreateRequest request) {
     // Public은 생성시 기존 로직을 유지.
-    Channel channel = channelMapper.toPublicEntity(request);
-    return channelRepository.save(channel);
+    Channel channel = Channel.builder()
+        .type(ChannelType.PUBLIC)
+        .name(request.name())
+        .description(request.description())
+        .build();
+    channelRepository.save(channel);
+
+    return channelMapper.toDto(channel);
   }
 
   @Override
   @Transactional
-  public Channel createPrivateChannel(PrivateChannelCreateRequest request) {
+  public ChannelDto createPrivateChannel(PrivateChannelCreateRequest request) {
     // Private 채널 생성 로직 (name, description 은 생략함.)
-    Channel channel = Channel.builder().type(ChannelType.PRIVATE).build();
-
-    // 트랜잭션 덕분에 작업이 제대로 되지않으면 롤백됨
+    Channel channel = Channel.builder()
+        .type(ChannelType.PRIVATE)
+        .build();
     channelRepository.save(channel);
 
 // 1. Channel에 참여하려는 User의 정보를 DTO를 통해서 받아 user 별 ReadStatus 정보를 생성한다.
@@ -65,43 +73,46 @@ public class BasicChannelService implements ChannelService {
       readStatusRepository.save(readStatus);
     }
 
-    return channel;
+    return channelMapper.toDto(channel);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public ChannelFindResponse findByChannelId(UUID channelId) {
+  public ChannelDto findByChannelId(UUID channelId) {
 
     // 1. 호환성 확인
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
-    // 2. 해당 채널의 가장 최근 메시지의 시간 정보를 포함.
+    // 2. 해당 채널의 가장 최근 메시지의 시간 정보를 포함 없으면 null
     Message latestMessage = messageRepository.findTop1ByChannelIdOrderByCreatedAtDesc(channelId)
         .orElse(null);
 
     // 2-2. Private 채널인 경우 참여한 User의 Id 정보까지 포함시킴.
-    List<UUID> participantsIds = new ArrayList<>();
+    List<UserDto> participantsIds = new ArrayList<>();
 
     if (channel.getType() == ChannelType.PRIVATE) {
       participantsIds = readStatusRepository.findAllByChannelId(channelId).stream()
-          .map(readStatus -> readStatus.getUser().getId()).toList();
+          .map(ReadStatus::getUser)
+          .map(userMapper::toDto)
+          .toList();
     }
 
     // DTO를 통해
-    return ChannelFindResponse.builder()
+    return ChannelDto.builder()
         .id(channelId)
         .type(channel.getType())
         .name(channel.getName())
         .description(channel.getDescription())
-        .lastMessageAt(latestMessage.getCreatedAt())
-        .participantIds(participantsIds).build();
+        .participants(participantsIds)
+        .lastMessageAt(latestMessage != null ? latestMessage.getCreatedAt() : null)
+        .build();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChannelFindResponse> findAllByUserId(UUID userId) {
-    List<ChannelFindResponse> responses = new ArrayList<>();
+  public List<ChannelDto> findAllByUserId(UUID userId) {
+    List<ChannelDto> responses = new ArrayList<>();
 
     // 호환성 체크
     userRepository.findById(userId)
@@ -121,15 +132,18 @@ public class BasicChannelService implements ChannelService {
             channel.getId()).orElse(null);
 
         // 3-2. 그 채널의 참여한 모든 UserId를 불러옴.
-        List<UUID> participantIds = readStatusRepository.findAllByChannelId(channel.getId())
-            .stream().map(readStatus -> readStatus.getUser().getId())  // User → UUID
+        List<UserDto> participantsIds = readStatusRepository.findAllByChannelId(channel.getId())
+            .stream()
+            .map(ReadStatus::getUser)
+            .map(userMapper::toDto)
             .toList();
 
         // 4. DTO에 값 추가.
-        responses.add(ChannelFindResponse.builder().id(channel.getId()).type(channel.getType())
+        responses.add(ChannelDto.builder().id(channel.getId()).type(channel.getType())
             .name(channel.getName()).description(channel.getDescription())
             .lastMessageAt(latestMessageTime != null ? latestMessageTime.getCreatedAt() : null)
-            .participantIds(participantIds).build());
+            .participants(participantsIds)
+            .build());
       }
 
     }
@@ -138,7 +152,7 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional
-  public Channel updateChannel(UUID channelId, ChannelUpdateRequest request) {
+  public ChannelDto updateChannel(UUID channelId, ChannelUpdateRequest request) {
     // 1. 호환성 체크
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
@@ -147,7 +161,8 @@ public class BasicChannelService implements ChannelService {
     if (channel.getType() == ChannelType.PRIVATE) {
       throw new IllegalArgumentException("PRIVATE 채널은 수정할 수 없습니다.");
     }
-    return channelRepository.save(channel);
+    channelRepository.save(channel);
+    return channelMapper.toDto(channel);
   }
 
   @Override

@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.userstatus.UserStatusDto;
 import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -39,20 +40,10 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<User> registerUser(
+  public ResponseEntity<UserDto> registerUser(
       @RequestPart UserCreateRequest userCreateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
-    BinaryContentDTO binaryContentDTO = null;
-    if (profile != null) {
-      binaryContentDTO = BinaryContentDTO.builder()
-          .fileName(profile.getOriginalFilename())
-          .contentType(profile.getContentType())
-          .size(profile.getSize())
-          .bytes(profile.getBytes())
-          .build();
-
-    }
-    User user = userService.createUser(userCreateRequest, binaryContentDTO);
+    UserDto user = userService.createUser(userCreateRequest, profile);
     return ResponseEntity.status(HttpStatus.CREATED).body(user); // 201 Created
   }
 
@@ -64,20 +55,11 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<User> modifyUser(
+  public ResponseEntity<UserDto> modifyUser(
       @PathVariable UUID userId,
       @RequestPart UserUpdateRequest userUpdateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
-    BinaryContentDTO binaryContentDTO = null;
-    if (profile != null && !profile.isEmpty()) {
-      binaryContentDTO = BinaryContentDTO.builder()
-          .fileName(profile.getOriginalFilename())
-          .contentType(profile.getContentType())
-          .size(profile.getSize())
-          .bytes(profile.getBytes())
-          .build();
-    }
-    User user = userService.updateUser(userId, userUpdateRequest, binaryContentDTO);
+    UserDto user = userService.updateUser(userId, userUpdateRequest, profile);
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -100,8 +82,8 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping("/{userId}")
-  public ResponseEntity<User> findUser(@PathVariable UUID userId) {
-    User user = userService.findByUserId(userId);
+  public ResponseEntity<UserDto> findUser(@PathVariable UUID userId) {
+    UserDto user = userService.findByUserId(userId);
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -111,8 +93,8 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
-  public ResponseEntity<List<User>> findAllUser() {
-    List<User> user = userService.findAll();
+  public ResponseEntity<List<UserDto>> findAllUser() {
+    List<UserDto> user = userService.findAll();
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -124,10 +106,10 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping("/{userId}/userStatus")
-  public ResponseEntity<UserStatus> updateUserStatus(
+  public ResponseEntity<UserStatusDto> updateUserStatus(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {
-    UserStatus userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+    UserStatusDto userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(userStatus); // 200 OK
   }
 }

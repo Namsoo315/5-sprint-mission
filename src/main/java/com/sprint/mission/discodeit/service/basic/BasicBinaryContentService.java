@@ -1,9 +1,12 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
+import com.sprint.mission.discodeit.dto.binary.BinaryCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -16,32 +19,40 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasicBinaryContentService implements BinaryContentService {
 
   private final BinaryContentRepository binaryContentRepository;
+  private final BinaryContentStorage binaryContentStorage;
+  private final BinaryContentMapper binaryContentMapper;
 
   @Override
   @Transactional
-  public BinaryContent createBinaryContent(BinaryContentDTO request) {
+  public BinaryContentDTO createBinaryContent(BinaryCreateRequest request) {
     BinaryContent binaryContent = BinaryContent.builder()
         .fileName(request.fileName())
         .contentType(request.contentType())
         .size(request.size())
-        .bytes(request.bytes())
         .build();
-    binaryContentRepository.save(binaryContent);
 
-    return binaryContent;
+    BinaryContent save = binaryContentRepository.save(binaryContent);
+    if (request.bytes() != null && request.bytes().length > 0) {
+      binaryContentStorage.put(save.getId(), request.bytes());
+    }
+
+    return binaryContentMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public BinaryContent findByBinaryContentId(UUID binaryContentId) {
-    return binaryContentRepository.findById(binaryContentId).orElseThrow(
+  public BinaryContentDTO findByBinaryContentId(UUID binaryContentId) {
+    BinaryContent save = binaryContentRepository.findById(binaryContentId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 파일입니다."));
+    return binaryContentMapper.toDto(save);
+
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<BinaryContent> findAllByIdIn(List<UUID> attachmentIds) {
-    return binaryContentRepository.findAllById(attachmentIds);
+  public List<BinaryContentDTO> findAllByIdIn(List<UUID> attachmentIds) {
+    List<BinaryContent> saves = binaryContentRepository.findAllById(attachmentIds);
+    return binaryContentMapper.toDto(saves);
   }
 
   @Override

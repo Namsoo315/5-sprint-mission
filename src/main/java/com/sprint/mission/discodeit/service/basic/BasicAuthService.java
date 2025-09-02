@@ -38,9 +38,6 @@ public class BasicAuthService implements AuthService {
         .id(user.getId())
         .username(user.getUsername())
         .email(user.getEmail())
-        .createdAt(user.getCreatedAt())
-        .updatedAt(user.getUpdatedAt())
-        .profileId(user.getProfile() != null ? user.getProfile().getId() : null)
         .build();
   }
 }

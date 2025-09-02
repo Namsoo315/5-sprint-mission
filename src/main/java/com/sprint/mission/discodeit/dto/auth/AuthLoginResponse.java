@@ -8,11 +8,7 @@ import lombok.Builder;
 public record AuthLoginResponse(
     UUID id,
     String username,
-    String email,
-    String password,
-    Instant createdAt,
-    Instant updatedAt,
-    UUID profileId
+    String email
 ) {
 
 }

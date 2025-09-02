@@ -2,21 +2,24 @@ package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
-  User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO);
+  UserDto createUser(UserCreateRequest userCreateRequest, MultipartFile profile) throws IOException;
 
-  User findByUserId(UUID userId);
+  UserDto findByUserId(UUID userId);
 
-  List<User> findAll();
+  List<UserDto> findAll();
 
-  User updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
-      BinaryContentDTO binaryContentDTO);
+  UserDto updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
+      MultipartFile profile) throws IOException;
 
   void deleteUser(UUID userId);
 }

@@ -4,11 +4,6 @@ import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.UUID;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,8 +27,4 @@ public class BinaryContent extends BaseEntity {
 
   @Column(name = "content_type", nullable = false, length = 100)
   private String contentType;
-
-  @Column(nullable = false)
-  private byte[] bytes;
-
 }
