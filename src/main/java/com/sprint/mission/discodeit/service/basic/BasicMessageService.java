@@ -22,6 +22,7 @@ import com.sprint.mission.discodeit.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional
   public Message createMessage(MessageCreateRequest messageCreateRequest,
-      List<BinaryContentDTO> binaryContentDTO) {
+      List<MultipartFile> attachments) {
 
     // 1. 호환성 체크
     User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(
@@ -47,20 +48,18 @@ public class BasicMessageService implements MessageService {
 
     List<BinaryContent> attachmentIds = new ArrayList<>();
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
-    if (binaryContentDTO != null && !binaryContentDTO.isEmpty()) {
-      for (BinaryContentDTO dto : binaryContentDTO) {
-        if (dto.bytes() == null || dto.bytes().length == 0) {
-          continue;
-        }
+    if (attachments != null && !attachments.isEmpty()) {
+      for (MultipartFile profile : attachments) {
+        if (profile != null && !profile.isEmpty()) {
 
-        BinaryContent binaryContent = BinaryContent.builder()
-            .fileName(dto.fileName())
-            .contentType(dto.contentType())
-            .size(dto.size())
-            .bytes(dto.bytes())
-            .build();
-        attachmentIds.add(binaryContent);
-        binaryContentRepository.save(binaryContent);
+          BinaryContent content = BinaryContent.builder()
+              .fileName(profile.getOriginalFilename())
+              .contentType(profile.getContentType())
+              .size(profile.getSize())
+              .build();
+          attachmentIds.add(content);
+          binaryContentRepository.save(content);
+        }
       }
     }
 

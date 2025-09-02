@@ -38,22 +38,9 @@ public class MessageController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Message> sendMessage(
       @RequestPart MessageCreateRequest messageCreateRequest,
-      @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
+      @RequestPart(required = false) List<MultipartFile> attachments) {
 
-    List<BinaryContentDTO> binaryContentDTOS = new ArrayList<>();
-
-    if (attachments != null && !attachments.isEmpty()) {
-      for (MultipartFile file : attachments) {
-        binaryContentDTOS.add(BinaryContentDTO.builder()
-            .fileName(file.getOriginalFilename())
-            .contentType(file.getContentType())
-            .size(file.getSize())
-            .bytes(file.getBytes())
-            .build());
-      }
-    }
-
-    Message message = messageService.createMessage(messageCreateRequest, binaryContentDTOS);
+    Message message = messageService.createMessage(messageCreateRequest, attachments);
     return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
   }
 

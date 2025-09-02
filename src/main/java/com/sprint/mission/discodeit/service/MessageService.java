@@ -1,18 +1,16 @@
 package com.sprint.mission.discodeit.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.Message;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MessageService {
 
   Message createMessage(MessageCreateRequest messageCreateRequest,
-      List<BinaryContentDTO> binaryContentDTO);
+      List<MultipartFile> attachments);
 
   Message findByMessageId(UUID messageId);
 
