@@ -1,4 +1,11 @@
 # application.yaml
+discodeit:
+  storage:
+    type: local
+    local:
+      root-path: ./storage
+
+
 springdoc:
   api-docs:
     enabled: true          # API 스펙 JSON 활성화
