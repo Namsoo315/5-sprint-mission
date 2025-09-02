@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusDto;
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.data.ReadStatusDTO;
+import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -14,7 +14,6 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   @Transactional
-  public ReadStatusDto createReadStatus(ReadStatusCreateRequest request) {
+  public ReadStatusDTO createReadStatus(ReadStatusCreateRequest request) {
 
     // 1. 호환성 체크 User, Channel 체크
     User user = userRepository.findById(request.userId()).orElseThrow(
@@ -56,7 +55,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   @Transactional
-  public ReadStatusDto findByReadStatusId(UUID readStatusId) {
+  public ReadStatusDTO findByReadStatusId(UUID readStatusId) {
     ReadStatus save = readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
     return readStatusMapper.toDto(save);
@@ -64,14 +63,14 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   @Transactional
-  public List<ReadStatusDto> findAllByUserId(UUID userId) {
+  public List<ReadStatusDTO> findAllByUserId(UUID userId) {
     List<ReadStatus> saves = readStatusRepository.findAllByUserId(userId);
     return readStatusMapper.toDto(saves);
   }
 
   @Override
   @Transactional
-  public ReadStatusDto updateReadStatus(UUID readStatusId, ReadStatusUpdateRequest request) {
+  public ReadStatusDTO updateReadStatus(UUID readStatusId, ReadStatusUpdateRequest request) {
     // 1. 호환성 체크
     ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));

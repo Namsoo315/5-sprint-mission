@@ -1,6 +1,5 @@
-package com.sprint.mission.discodeit.dto.auth;
+package com.sprint.mission.discodeit.dto.response;
 
-import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 

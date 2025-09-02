@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelDto;
+import com.sprint.mission.discodeit.dto.data.ChannelDTO;
 import com.sprint.mission.discodeit.entity.Channel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface ChannelMapper {
   @Mapping(target = "description", source = "description")
   @Mapping(target = "participants", ignore = true)
   @Mapping(target = "lastMessageAt", ignore = true)
-  ChannelDto toDto(Channel channel);
+  ChannelDTO toDto(Channel channel);
 }

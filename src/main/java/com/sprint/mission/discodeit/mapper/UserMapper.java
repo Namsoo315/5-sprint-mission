@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.user.UserDto;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.entity.User;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -14,7 +14,7 @@ public interface UserMapper {
   @Mapping(target = "email", source = "email")
   @Mapping(target = "profile", source = "profile")
   @Mapping(target = "online", source = "status.online")
-  UserDto toDto(User user);
+  UserDTO toDto(User user);
 
-  List<UserDto> toDto(List<User> users);
+  List<UserDTO> toDto(List<User> users);
 }

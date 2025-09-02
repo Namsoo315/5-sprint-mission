@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusDto;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.UserStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserStatusDTO;
+import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.mapper.UserStatusMapper;
@@ -25,7 +25,7 @@ public class BasicUserStatusService implements UserStatusService {
   private final UserStatusMapper userStatusMapper;
 
   @Override
-  public UserStatusDto createUserStatus(UserStatusCreateRequest request) {
+  public UserStatusDTO createUserStatus(UserStatusCreateRequest request) {
 
     // 1. 호환성 체크: User가 존재하지 않으면 예외 처리
     User user = userRepository.findById(request.userId())
@@ -50,7 +50,7 @@ public class BasicUserStatusService implements UserStatusService {
 
   @Override
   @Transactional(readOnly = true)
-  public UserStatusDto findByUserStatusId(UUID userStatusId) {
+  public UserStatusDTO findByUserStatusId(UUID userStatusId) {
     UserStatus save = userStatusRepository.findById(userStatusId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 유저정보입니다."));
     return userStatusMapper.toDto(save);
@@ -58,14 +58,14 @@ public class BasicUserStatusService implements UserStatusService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserStatusDto> findAll() {
+  public List<UserStatusDTO> findAll() {
     List<UserStatus> saves = userStatusRepository.findAll();
     return userStatusMapper.toDto(saves);
   }
 
   @Override
   @Transactional
-  public UserStatusDto updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
+  public UserStatusDTO updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
     // 1. 호환성 체크
     UserStatus userStatus = userStatusRepository.findById(userStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 유저정보입니다."));
@@ -75,7 +75,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
-  public UserStatusDto updateByUserId(UUID userId, UserStatusUpdateRequest request) {
+  public UserStatusDTO updateByUserId(UUID userId, UserStatusUpdateRequest request) {
     // 1. userId로 특정 UserStatus를 찾는 호환성 체크
     UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(
         () -> new IllegalArgumentException("존재하지 않는 회원입니다."));

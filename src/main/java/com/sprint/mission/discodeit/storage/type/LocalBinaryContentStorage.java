@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.storage.type;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
+import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;

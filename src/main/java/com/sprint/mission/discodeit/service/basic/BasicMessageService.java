@@ -9,9 +9,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;

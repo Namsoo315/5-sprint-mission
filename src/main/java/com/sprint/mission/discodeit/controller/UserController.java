@@ -1,13 +1,10 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusDto;
-import com.sprint.mission.discodeit.dto.userstatus.UserStatusUpdateRequest;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
+import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.data.UserStatusDTO;
+import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,10 +37,10 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UserDto> registerUser(
+  public ResponseEntity<UserDTO> registerUser(
       @RequestPart UserCreateRequest userCreateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
-    UserDto user = userService.createUser(userCreateRequest, profile);
+    UserDTO user = userService.createUser(userCreateRequest, profile);
     return ResponseEntity.status(HttpStatus.CREATED).body(user); // 201 Created
   }
 
@@ -55,11 +52,11 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UserDto> modifyUser(
+  public ResponseEntity<UserDTO> modifyUser(
       @PathVariable UUID userId,
       @RequestPart UserUpdateRequest userUpdateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
-    UserDto user = userService.updateUser(userId, userUpdateRequest, profile);
+    UserDTO user = userService.updateUser(userId, userUpdateRequest, profile);
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -82,8 +79,8 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping("/{userId}")
-  public ResponseEntity<UserDto> findUser(@PathVariable UUID userId) {
-    UserDto user = userService.findByUserId(userId);
+  public ResponseEntity<UserDTO> findUser(@PathVariable UUID userId) {
+    UserDTO user = userService.findByUserId(userId);
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -93,8 +90,8 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
-  public ResponseEntity<List<UserDto>> findAllUser() {
-    List<UserDto> user = userService.findAll();
+  public ResponseEntity<List<UserDTO>> findAllUser() {
+    List<UserDTO> user = userService.findAll();
     return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
   }
 
@@ -106,10 +103,10 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping("/{userId}/userStatus")
-  public ResponseEntity<UserStatusDto> updateUserStatus(
+  public ResponseEntity<UserStatusDTO> updateUserStatus(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {
-    UserStatusDto userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+    UserStatusDTO userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(userStatus); // 200 OK
   }
 }

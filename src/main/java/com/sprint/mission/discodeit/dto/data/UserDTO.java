@@ -1,11 +1,10 @@
-package com.sprint.mission.discodeit.dto.user;
+package com.sprint.mission.discodeit.dto.data;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
 import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record UserDto(
+public record UserDTO(
     UUID id,
     String username,
     String email,
