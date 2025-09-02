@@ -1,23 +1,27 @@
 package com.sprint.mission.discodeit.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.data.MessageDTO;
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.Message;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MessageService {
-	Message createMessage(MessageCreateRequest messageCreateRequest, List<BinaryContentDTO> binaryContentDTO);
 
-	Optional<Message> findByMessageId(UUID messageId);
+  MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
+      List<MultipartFile> attachments) throws IOException;
 
-	List<Message> findAllByChannelId(UUID channelId);
+  MessageDTO findByMessageId(UUID messageId);
 
-	void updateMessage(MessageUpdateRequest request);
+  PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Pageable pageable);
 
-	void deleteMessage(UUID messageId);
+  MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request);
+
+  void deleteMessage(UUID messageId);
 
 }

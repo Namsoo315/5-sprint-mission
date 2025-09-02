@@ -1,52 +1,33 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@Table(name = "channels")
+@Entity
 @Getter
-public class Channel implements Serializable {
+@SuperBuilder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Channel extends BaseUpdatableEntity {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-	private final UUID channelId;
+  @Column(length = 100)
+  private String name;
 
-	private String name;
-	private String description;
-	private final ChannelType type;
+  @Column(length = 500)
+  private String description;
 
-	private final Instant createdAt;
-	private Instant updatedAt;
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "channel_type", nullable = false)
+  private ChannelType type;
 
-	public Channel(ChannelType type, String name, String description) {
-		this.channelId = UUID.randomUUID();
-		this.type = type;
-		this.name = name;
-		this.description = description;
-		this.createdAt = Instant.now();
-		this.updatedAt = createdAt;
-	}
-
-	public void update(String name, String description) {
-		this.name = name;
-		this.description = description;
-		this.updatedAt = Instant.now();
-	}
-
-	@Override
-	public String toString() {
-		return "Channel{" +
-			"channelId=" + channelId +
-			", name='" + name + '\'' +
-			", description='" + description + '\'' +
-			", type=" + type +
-			", createdAt=" + createdAt +
-			", updatedAt=" + updatedAt +
-			'}';
-	}
 }

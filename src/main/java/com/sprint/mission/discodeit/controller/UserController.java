@@ -1,100 +1,112 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
+import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.data.UserStatusDTO;
+import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
+import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import com.sprint.mission.discodeit.exception.ApiResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
-
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
+@Tag(name = "User", description = "유저 관련 API")
 public class UserController {
-	private final UserService userService;
-	private final BasicUserStatusService userStatusService;
 
-	//[ ] 사용자를 등록할 수 있다.
-	@RequestMapping(path = "/",
-		method = RequestMethod.POST,
-		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<User>> registerUser(@RequestPart UserCreateRequest userCreateRequest,
-													@RequestPart(required = false) MultipartFile profile) throws IOException {
+  private final UserService userService;
+  private final BasicUserStatusService userStatusService;
 
-		BinaryContentDTO binaryContentDTO = null;
+  // [ ] 사용자를 등록
+  @Operation(summary = "유저 생성 API", responses = {
+      @ApiResponse(responseCode = "201", description = "회원이 정상적으로 생성되었습니다."),
+      @ApiResponse(responseCode = "400", description = "요청 DTO가 잘못되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<UserDTO> registerUser(
+      @RequestPart UserCreateRequest userCreateRequest,
+      @RequestPart(required = false) MultipartFile profile) throws IOException {
+    UserDTO user = userService.createUser(userCreateRequest, profile);
+    return ResponseEntity.status(HttpStatus.CREATED).body(user); // 201 Created
+  }
 
-		if (profile != null) {
-			binaryContentDTO = new BinaryContentDTO(
-				profile.getOriginalFilename(),
-				profile.getContentType(),
-				profile.getSize(),
-				profile.getBytes());
-		}
+  // [ ] 사용자 정보 수정
+  @Operation(summary = "유저 수정 API", responses = {
+      @ApiResponse(responseCode = "200", description = "회원 정보가 정상적으로 수정되었습니다."),
+      @ApiResponse(responseCode = "400", description = "요청 DTO가 잘못되었습니다."),
+      @ApiResponse(responseCode = "404", description = "잘못된 사용자 ID가 포함되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<UserDTO> modifyUser(
+      @PathVariable UUID userId,
+      @RequestPart UserUpdateRequest userUpdateRequest,
+      @RequestPart(required = false) MultipartFile profile) throws IOException {
+    UserDTO user = userService.updateUser(userId, userUpdateRequest, profile);
+    return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
+  }
 
-		User response = userService.createUser(userCreateRequest, binaryContentDTO);
+  // [ ] 사용자 삭제
+  @Operation(summary = "유저 삭제 API", responses = {
+      @ApiResponse(responseCode = "204", description = "회원이 정상적으로 삭제되었습니다."),
+      @ApiResponse(responseCode = "404", description = "잘못된 사용자 ID가 포함되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @DeleteMapping("/{userId}")
+  public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+    userService.deleteUser(userId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 204 No Content
+  }
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "유저 생성 완료"));
-	}
+  // [ ] 단일 사용자 조회
+  @Operation(summary = "유저 단일 조회 API", responses = {
+      @ApiResponse(responseCode = "200", description = "회원이 정상적으로 조회되었습니다."),
+      @ApiResponse(responseCode = "404", description = "잘못된 사용자 ID가 포함되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @GetMapping("/{userId}")
+  public ResponseEntity<UserDTO> findUser(@PathVariable UUID userId) {
+    UserDTO user = userService.findByUserId(userId);
+    return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
+  }
 
-	// [ ] 사용자 정보를 수정할 수 있다.
-	@RequestMapping(path = "/modify",
-		method = RequestMethod.PATCH,
-		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<String>> modifyUser(@RequestPart UserUpdateRequest userUpdateRequest,
-		@RequestPart(required = false) MultipartFile profile) throws IOException {
+  // [ ] 모든 사용자 조회
+  @Operation(summary = "유저 전체 조회 API", responses = {
+      @ApiResponse(responseCode = "200", description = "회원 목록이 정상적으로 조회되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @GetMapping
+  public ResponseEntity<List<UserDTO>> findAllUser() {
+    List<UserDTO> user = userService.findAll();
+    return ResponseEntity.status(HttpStatus.OK).body(user); // 200 OK
+  }
 
-		BinaryContentDTO binaryContentDTO = null;
-		if (profile != null) {
-			binaryContentDTO = new BinaryContentDTO(
-				profile.getOriginalFilename(),
-				profile.getContentType(),
-				profile.getSize(),
-				profile.getBytes());
-		}
-
-		userService.updateUser(userUpdateRequest, binaryContentDTO);
-
-		return ResponseEntity.ok(ApiResponse.ok(userUpdateRequest.userId() + "님의 정보 수정 완료"));
-	}
-
-	// [ ] 사용자를 삭제할 수 있다.
-	@RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable("id") UUID userId) {
-		userService.deleteUser(userId);
-		return ResponseEntity.ok(ApiResponse.ok(userId + "님 삭제 완료"));
-	}
-
-	// [ ] 모든 사용자를 조회할 수 있다.
-	@RequestMapping(path = "/findAll", method = RequestMethod.GET)
-	public ResponseEntity<ApiResponse<List<UserDto>>> findAllUser() {
-		List<UserDto> response = userService.findAll();
-		return ResponseEntity.ok(ApiResponse.ok(response, "모든 사용자 조회 완료"));
-	}
-
-	// [ ] 사용자의 온라인 상태를 업데이트할 수 있다.
-	@RequestMapping(path = "/update/{id}", method = RequestMethod.PATCH)
-	public ResponseEntity<ApiResponse<String>> updateUserStatus(@PathVariable("id") UUID userId) {
-		userStatusService.updateByUserId(userId);
-
-		return ResponseEntity.ok(ApiResponse.ok(userId + "님의 온라인 상태 정보 업데이트 완료"));
-	}
+  // [ ] 사용자의 온라인 상태 업데이트
+  @Operation(summary = "유저 상태 업데이트 API", responses = {
+      @ApiResponse(responseCode = "200", description = "회원 상태가 정상적으로 수정되었습니다."),
+      @ApiResponse(responseCode = "400", description = "요청 DTO가 잘못되었습니다."),
+      @ApiResponse(responseCode = "404", description = "잘못된 사용자 ID가 포함되었습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PatchMapping("/{userId}/userStatus")
+  public ResponseEntity<UserStatusDTO> updateUserStatus(
+      @PathVariable UUID userId,
+      @RequestBody UserStatusUpdateRequest userStatusUpdateRequest) {
+    UserStatusDTO userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(userStatus); // 200 OK
+  }
 }

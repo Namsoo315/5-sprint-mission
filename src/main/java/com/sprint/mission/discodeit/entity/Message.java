@@ -1,52 +1,47 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.List;
-import java.util.UUID;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@Entity
+@Table(name = "messages")
 @Getter
-public class Message implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-	private final UUID messageId;
-	private final UUID userId;
-	private final UUID channelId;
-	private final List<UUID> attachmentIds;		// binaryContent
+@SuperBuilder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Message extends BaseUpdatableEntity {
 
-	private String content;
+  @Column
+  private String content;
 
-	private final Instant createdAt;
-	private Instant updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  @JoinColumn(name = "author_id") // nullable = true 필수
+  private User author;
 
-	public Message(UUID userId, UUID channelId, String content, List<UUID> attachmentIds) {
-		this.messageId = UUID.randomUUID();
-		this.userId = userId;
-		this.channelId = channelId;
-		this.content = content;
-		this.attachmentIds = attachmentIds;
-		this.createdAt = Instant.now();
-		this.updatedAt = createdAt;
-	}
 
-	public void update(String message) {
-		this.content = message;
-		this.updatedAt = Instant.now();
-	}
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  @JoinColumn(name = "channel_id", nullable = false)
+  private Channel channel;
 
-	@Override
-	public String toString() {
-		return "Message{" +
-			"messageId=" + messageId +
-			", userId=" + userId +
-			", channelId=" + channelId +
-			", attachmentIds=" + attachmentIds +
-			", message='" + content + '\'' +
-			", createdAt=" + createdAt +
-			", updatedAt=" + updatedAt +
-			'}';
-	}
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
+  @JoinTable(
+      name = "message_attachments",
+      joinColumns = @JoinColumn(name = "message_id"),
+      inverseJoinColumns = @JoinColumn(name = "attachment_id")
+  )
+  private List<BinaryContent> attachments;
 }

@@ -1,24 +1,14 @@
 package com.sprint.mission.discodeit.repository;
 
-import java.util.List;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.UserStatus;
+public interface UserStatusRepository extends JpaRepository<UserStatus, UUID> {
 
-public interface UserStatusRepository {
-	UserStatus save(UserStatus userStatus);
+  Optional<UserStatus> findByUserId(UUID userId);
 
-	Optional<UserStatus> findById(UUID userStatusId);
+  void deleteByUserId(UUID userId);
 
-	Optional<UserStatus> findByUserId(UUID userId);
-
-	List<UserStatus> findAll();
-
-	void delete(UUID userStatusId);
-
-	void deleteByUserId(UUID userId);
-
-	boolean existsById(UUID userStatusId);
 }

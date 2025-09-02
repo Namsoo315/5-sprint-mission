@@ -1,51 +1,50 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@Entity
+@Table(name = "user_statuses")
 @Getter
-public class UserStatus implements Serializable {
+@SuperBuilder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class UserStatus extends BaseUpdatableEntity {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+  @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-	private final UUID UserStatusId;
-	private final UUID userId;
+  @Column(name = "last_active_at", nullable = false)
+  private Instant lastActiveAt;
 
-	private boolean status;	// Online = true, Offline = false;
+  @Transient
+  public void updateLastActiveAt(Instant newLastActiveAt) {
+    if (newLastActiveAt != null && !newLastActiveAt.equals(this.lastActiveAt)) {
+      this.lastActiveAt = newLastActiveAt;
+    }
+  }
 
-	private final Instant createdAt;
-	private Instant updatedAt;
+  @Transient
+  private boolean online;
 
-	public UserStatus(UUID userId) {
-		this.UserStatusId = UUID.randomUUID();
-		this.userId = userId;
-		this.status = true;	// 생성 시 온라인상태로 가야한다
-		this.createdAt = Instant.now();
-		this.updatedAt = createdAt;
-	}
-
-	public void updateStatus () {
-		this.status = true;
-		this.updatedAt = Instant.now();
-	}
-
-	// 현재 시간 기준 5분 이내에 업데이트된 경우 온라인으로 간주;
-	public boolean isOnline() {
-		return updatedAt.isBefore(Instant.now().minusSeconds(300));
-	}
-
-	@Override
-	public String toString() {
-		return "UserStatus{" +
-			"UserStatusId=" + UserStatusId +
-			", userId=" + userId +
-			", createdAt=" + createdAt +
-			", updatedAt=" + updatedAt +
-			'}';
-	}
+  @Transient
+  public boolean isOnline() {
+    Instant fiveMinutesAgo = Instant.now().minus(Duration.ofMinutes(5));
+    return lastActiveAt.isAfter(fiveMinutesAgo);
+  }
 }

@@ -1,24 +1,23 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
+import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserFindRequest;
-import com.sprint.mission.discodeit.dto.user.UserFindResponse;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
-import com.sprint.mission.discodeit.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
-	User createUser(UserCreateRequest userCreateRequest, BinaryContentDTO binaryContentDTO);
 
-	UserFindResponse findByUserId(UserFindRequest request);
+  UserDTO createUser(UserCreateRequest userCreateRequest, MultipartFile profile) throws IOException;
 
-	List<UserDto> findAll();
+  UserDTO findByUserId(UUID userId);
 
-	void updateUser(UserUpdateRequest userUpdateRequest, BinaryContentDTO binaryContentDTO);
+  List<UserDTO> findAll();
 
-	void deleteUser(UUID userId);
+  UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
+      MultipartFile profile) throws IOException;
+
+  void deleteUser(UUID userId);
 }

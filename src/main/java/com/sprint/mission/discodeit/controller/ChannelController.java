@@ -1,74 +1,103 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.data.ChannelDTO;
+import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.service.ChannelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
-
-import com.sprint.mission.discodeit.exception.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.sprint.mission.discodeit.dto.channel.ChannelFindResponse;
-import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequest;
-import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
-import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.service.ChannelService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/channel")
+@RequestMapping("/api/channels")
+@Tag(name = "Channel", description = "채널 관련 API")
 public class ChannelController {
 
-	private final ChannelService channelService;
+  private final ChannelService channelService;
 
-	// [ ] 공개 채널을 생성할 수 있다.
-	@RequestMapping(path = "/public", method = RequestMethod.POST)
-	public ResponseEntity<ApiResponse<Channel>> publicChannel(@RequestBody PublicChannelCreateRequest request) {
-		Channel response = channelService.createPublicChannel(request);
+  // [ ] 공개 채널 생성
+  @Operation(summary = "공개 채널 생성 API", responses = {
+      @ApiResponse(responseCode = "201", description = "공개 채널이 정상적으로 생성되었습니다."),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PostMapping("/public")
+  public ResponseEntity<ChannelDTO> publicChannel(
+      @RequestBody PublicChannelCreateRequest publicChannelCreateRequest) {
+    ChannelDTO channel = channelService.createPublicChannel(publicChannelCreateRequest);
+    return ResponseEntity.status(HttpStatus.CREATED).body(channel);
+  }
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "공개 채널 생성 완료"));
-	}
+  // [ ] 비공개 채널 생성
+  @Operation(summary = "비공개 채널 생성 API", responses = {
+      @ApiResponse(responseCode = "201", description = "비공개 채널이 정상적으로 생성되었습니다."),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PostMapping("/private")
+  public ResponseEntity<ChannelDTO> privateChannel(
+      @RequestBody PrivateChannelCreateRequest privateChannelCreateRequest) {
 
-	// [ ] 비공개 채널을 생성할 수 있다.
-	@RequestMapping(path = "/private", method = RequestMethod.POST)
-	public ResponseEntity<ApiResponse<Channel>> privateChannel(@RequestBody PrivateChannelCreateRequest request) {
+    if (privateChannelCreateRequest.participantIds().size() < 2) {
+      throw new IllegalArgumentException("비공개 채널은 두 명 이상부터 생성 가능합니다.");
+    }
+    ChannelDTO channel = channelService.createPrivateChannel(privateChannelCreateRequest);
 
-		// 개인적으로 비공개 채널은 두명 이상? 은 반드시 필요해야 할 것 같아 두명 이상이어야만 하는 예외처리 생성함.
-		if (request.participantsUserIds().size() < 2) {
-			throw new IllegalArgumentException("비공개 채널은 두 명이상 부터 생성 가능합니다.");
-		}
-		Channel response = channelService.createPrivateChannel(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(channel);
+  }
 
-		return ResponseEntity.ok(ApiResponse.ok(response, "비공개 채널 생성 완료"));
-	}
+  // [ ] 공개 채널 정보 수정
+  @Operation(summary = "공개 채널 수정 API", responses = {
+      @ApiResponse(responseCode = "200", description = "공개 채널이 수정 완료되었습니다."),
+      @ApiResponse(responseCode = "400", description = "잘못된 인자값이 포함되어 있습니다."),
+      @ApiResponse(responseCode = "404", description = "채널 아이디를 찾을 수 없습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PatchMapping("/{channelId}")
+  public ResponseEntity<ChannelDTO> modifyPublicChannel(
+      @PathVariable UUID channelId,
+      @RequestBody ChannelUpdateRequest channelUpdateRequest) {
+    ChannelDTO dto = channelService.updateChannel(channelId, channelUpdateRequest);
+    return ResponseEntity.ok(dto);
+  }
 
-	// [ ] 공개 채널의 정보를 수정할 수 있다.
-	@RequestMapping(path = "/public/modify", method = RequestMethod.PATCH)
-	public ResponseEntity<ApiResponse<String>> modifyPublicChannel(@RequestBody ChannelUpdateRequest request) {
-		channelService.updateChannel(request);
+  // [ ] 채널 삭제
+  @Operation(summary = "채널 삭제 API", responses = {
+      @ApiResponse(responseCode = "204", description = "채널이 정상적으로 삭제되었습니다."),
+      @ApiResponse(responseCode = "404", description = "채널 아이디를 찾을 수 없습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @DeleteMapping("/{channelId}")
+  public ResponseEntity<Void> deleteChannel(@PathVariable UUID channelId) {
+    channelService.deleteChannel(channelId);
+    return ResponseEntity.noContent().build(); // 204 No Content
+  }
 
-		return ResponseEntity.ok(ApiResponse.ok(request.channelId() + "님의 채널 수정 완료"));
-	}
-
-	// [ ] 채널을 삭제할 수 있다.
-	@RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<ApiResponse<String>> deleteChannel(@PathVariable("id") UUID channelId) {
-		channelService.deleteChannel(channelId);
-		return ResponseEntity.ok(ApiResponse.ok(channelId + "님의 채널 삭제 완료"));
-	}
-
-	// [ ] 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
-	@RequestMapping(path = "/user/{id}", method =  RequestMethod.GET)
-	public ResponseEntity<ApiResponse<List<ChannelFindResponse>>> findChannelById(@PathVariable("id") UUID userId) {
-		List<ChannelFindResponse> responses = channelService.findAllByUserId(userId);
-
-		return ResponseEntity.ok(ApiResponse.ok(responses, userId + "님의 채널 조회 완료 (공개 채널 포함)"));
-	}
+  // [ ] 특정 사용자가 볼 수 있는 모든 채널 조회
+  @Operation(summary = "특정 사용자의 채널 조회 API", responses = {
+      @ApiResponse(responseCode = "200", description = "채널 목록을 성공적으로 조회했습니다."),
+      @ApiResponse(responseCode = "404", description = "해당 사용자의 채널을 찾을 수 없습니다."),
+      @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @GetMapping
+  public ResponseEntity<List<ChannelDTO>> findChannelById(@RequestParam UUID userId) {
+    List<ChannelDTO> channelFindResponses = channelService.findAllByUserId(userId);
+    return ResponseEntity.ok(channelFindResponses);
+  }
 }
