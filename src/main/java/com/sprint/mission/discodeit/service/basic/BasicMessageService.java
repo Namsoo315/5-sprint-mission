@@ -1,12 +1,18 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.MessageDTO;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
+import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
@@ -32,10 +38,12 @@ public class BasicMessageService implements MessageService {
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
+  private final MessageMapper messageMapper;
+  private final PageResponseMapper pageResponseMapper;
 
   @Override
   @Transactional
-  public Message createMessage(MessageCreateRequest messageCreateRequest,
+  public MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
       List<MultipartFile> attachments) {
 
     // 1. 호환성 체크
@@ -71,29 +79,35 @@ public class BasicMessageService implements MessageService {
         .build();
     messageRepository.save(message);
 
-    return message;
+    return messageMapper.toDto(message);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Message findByMessageId(UUID messageId) {
-    return messageRepository.findById(messageId).orElseThrow(
+  public MessageDTO findByMessageId(UUID messageId) {
+    Message save = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
+    return messageMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<Message> findAllByChannelId(UUID channelId) {
-    return messageRepository.findAllByChannelId(channelId);
+  public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Pageable pageable) {
+    Page<Message> page = messageRepository.findAllByChannelId(channelId, pageable);
+
+    List<MessageDTO> dtoList = page.getContent().stream()
+        .map(messageMapper::toDto)
+        .toList();
+    return pageResponseMapper.fromPage(page, dtoList);
   }
 
   @Override
   @Transactional
-  public Message updateMessage(UUID messageId, MessageUpdateRequest request) {
+  public MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
-
-    return messageRepository.save(message);
+    messageRepository.save(message);
+    return messageMapper.toDto(message);
   }
 
   @Override

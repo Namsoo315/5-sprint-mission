@@ -24,7 +24,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "users")
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseUpdatableEntity {

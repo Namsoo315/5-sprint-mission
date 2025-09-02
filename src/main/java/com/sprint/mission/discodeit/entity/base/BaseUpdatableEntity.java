@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 public abstract class BaseUpdatableEntity extends BaseEntity {
 

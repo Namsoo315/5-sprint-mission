@@ -1,21 +1,35 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.data.MessageDTO;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
-import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,11 +46,11 @@ public class MessageController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<Message> sendMessage(
+  public ResponseEntity<MessageDTO> sendMessage(
       @RequestPart MessageCreateRequest messageCreateRequest,
       @RequestPart(required = false) List<MultipartFile> attachments) {
 
-    Message message = messageService.createMessage(messageCreateRequest, attachments);
+    MessageDTO message = messageService.createMessage(messageCreateRequest, attachments);
     return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
   }
 
@@ -48,10 +62,10 @@ public class MessageController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping("/{messageId}")
-  public ResponseEntity<Message> modifyMessage(
+  public ResponseEntity<MessageDTO> modifyMessage(
       @PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest messageUpdateRequest) {
-    Message message = messageService.updateMessage(messageId, messageUpdateRequest);
+    MessageDTO message = messageService.updateMessage(messageId, messageUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(message); // 200 OK
   }
 
@@ -69,13 +83,21 @@ public class MessageController {
 
   // [ ] 특정 채널의 메시지 조회
   @Operation(summary = "채널별 메시지 조회 API", responses = {
-      @ApiResponse(responseCode = "200", description = "메시지가 정상적으로 조회되었습니다."),
+      @ApiResponse(responseCode = "200", description = "메시지가 정상적으로 조회되었습니다."
+          , content = @Content(schema = @Schema(implementation = MessageDTO.class))),
       @ApiResponse(responseCode = "404", description = "채널을 찾을 수 없습니다."),
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
-  public ResponseEntity<List<Message>> findMessageByChannelId(@RequestParam UUID channelId) {
-    List<Message> messages = messageService.findAllByChannelId(channelId);
+  public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelId(
+      @RequestParam UUID channelId,
+      @PageableDefault(
+          size = 10,
+          page = 0,
+          sort = "created_at",
+          direction = Direction.ASC
+      ) Pageable pageable) {
+    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, pageable);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
 }
