@@ -39,7 +39,3 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         jdbc.time_zone: UTC
-logging:
-  level:
-    org.hibernate.SQL: DEBUG       # SQL 로그
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # ?에 바인딩되는 값

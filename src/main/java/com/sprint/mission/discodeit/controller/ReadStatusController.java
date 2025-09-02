@@ -1,9 +1,8 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusDto;
-import com.sprint.mission.discodeit.dto.readstatus.ReadStatusUpdateRequest;
-import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.data.ReadStatusDTO;
+import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,9 +30,9 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping
-  public ResponseEntity<ReadStatusDto> createReadStatus(
+  public ResponseEntity<ReadStatusDTO> createReadStatus(
       @RequestBody ReadStatusCreateRequest readStatusCreateRequest) {
-    ReadStatusDto readStatus = readStatusService.createReadStatus(readStatusCreateRequest);
+    ReadStatusDTO readStatus = readStatusService.createReadStatus(readStatusCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(readStatus); // 201 Created
   }
 
@@ -45,10 +44,10 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping("/{readStatusId}")
-  public ResponseEntity<ReadStatusDto> modifyReadStatus(
+  public ResponseEntity<ReadStatusDTO> modifyReadStatus(
       @PathVariable UUID readStatusId,
       @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
-    ReadStatusDto readStatus = readStatusService.updateReadStatus(readStatusId,
+    ReadStatusDTO readStatus = readStatusService.updateReadStatus(readStatusId,
         readStatusUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(readStatus); // 200 OK
   }
@@ -60,8 +59,8 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
-  public ResponseEntity<List<ReadStatusDto>> findReadStatusByUserId(@RequestParam UUID userId) {
-    List<ReadStatusDto> readStatuses = readStatusService.findAllByUserId(userId);
+  public ResponseEntity<List<ReadStatusDTO>> findReadStatusByUserId(@RequestParam UUID userId) {
+    List<ReadStatusDTO> readStatuses = readStatusService.findAllByUserId(userId);
     return ResponseEntity.status(HttpStatus.OK).body(readStatuses); // 200 OK
   }
 }

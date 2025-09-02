@@ -1,10 +1,10 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelDto;
-import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequest;
-import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
-import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
+import com.sprint.mission.discodeit.dto.data.ChannelDTO;
+import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
@@ -39,7 +39,7 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional
-  public ChannelDto createPublicChannel(PublicChannelCreateRequest request) {
+  public ChannelDTO createPublicChannel(PublicChannelCreateRequest request) {
     // Public은 생성시 기존 로직을 유지.
     Channel channel = Channel.builder()
         .type(ChannelType.PUBLIC)
@@ -53,7 +53,7 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional
-  public ChannelDto createPrivateChannel(PrivateChannelCreateRequest request) {
+  public ChannelDTO createPrivateChannel(PrivateChannelCreateRequest request) {
     // Private 채널 생성 로직 (name, description 은 생략함.)
     Channel channel = Channel.builder()
         .type(ChannelType.PRIVATE)
@@ -78,7 +78,7 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional(readOnly = true)
-  public ChannelDto findByChannelId(UUID channelId) {
+  public ChannelDTO findByChannelId(UUID channelId) {
 
     // 1. 호환성 확인
     Channel channel = channelRepository.findById(channelId)
@@ -89,7 +89,7 @@ public class BasicChannelService implements ChannelService {
         .orElse(null);
 
     // 2-2. Private 채널인 경우 참여한 User의 Id 정보까지 포함시킴.
-    List<UserDto> participantsIds = new ArrayList<>();
+    List<UserDTO> participantsIds = new ArrayList<>();
 
     if (channel.getType() == ChannelType.PRIVATE) {
       participantsIds = readStatusRepository.findAllByChannelId(channelId).stream()
@@ -99,7 +99,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     // DTO를 통해
-    return ChannelDto.builder()
+    return ChannelDTO.builder()
         .id(channelId)
         .type(channel.getType())
         .name(channel.getName())
@@ -111,8 +111,8 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChannelDto> findAllByUserId(UUID userId) {
-    List<ChannelDto> responses = new ArrayList<>();
+  public List<ChannelDTO> findAllByUserId(UUID userId) {
+    List<ChannelDTO> responses = new ArrayList<>();
 
     // 호환성 체크
     userRepository.findById(userId)
@@ -132,14 +132,14 @@ public class BasicChannelService implements ChannelService {
             channel.getId()).orElse(null);
 
         // 3-2. 그 채널의 참여한 모든 UserId를 불러옴.
-        List<UserDto> participantsIds = readStatusRepository.findAllByChannelId(channel.getId())
+        List<UserDTO> participantsIds = readStatusRepository.findAllByChannelId(channel.getId())
             .stream()
             .map(ReadStatus::getUser)
             .map(userMapper::toDto)
             .toList();
 
         // 4. DTO에 값 추가.
-        responses.add(ChannelDto.builder().id(channel.getId()).type(channel.getType())
+        responses.add(ChannelDTO.builder().id(channel.getId()).type(channel.getType())
             .name(channel.getName()).description(channel.getDescription())
             .lastMessageAt(latestMessageTime != null ? latestMessageTime.getCreatedAt() : null)
             .participants(participantsIds)
@@ -152,7 +152,7 @@ public class BasicChannelService implements ChannelService {
 
   @Override
   @Transactional
-  public ChannelDto updateChannel(UUID channelId, ChannelUpdateRequest request) {
+  public ChannelDTO updateChannel(UUID channelId, ChannelUpdateRequest request) {
     // 1. 호환성 체크
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));

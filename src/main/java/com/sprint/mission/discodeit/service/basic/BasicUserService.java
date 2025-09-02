@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
+import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -34,7 +34,7 @@ public class BasicUserService implements UserService {
 
   @Override
   @Transactional
-  public UserDto createUser(UserCreateRequest userCreateRequest, MultipartFile profile)
+  public UserDTO createUser(UserCreateRequest userCreateRequest, MultipartFile profile)
       throws IOException {
 
     // 1. username, email 호환성 확인
@@ -81,7 +81,7 @@ public class BasicUserService implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public UserDto findByUserId(UUID userId) {
+  public UserDTO findByUserId(UUID userId) {
     // 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
     User save = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
@@ -90,33 +90,44 @@ public class BasicUserService implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserDto> findAll() {
+  public List<UserDTO> findAll() {
     List<User> saves = userRepository.findAll();
     return userMapper.toDto(saves);
   }
 
   @Override
   @Transactional
-  public UserDto updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
+  public UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
       MultipartFile profile) throws IOException {
 
+    BinaryContent savedContent = null;
     // 1. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
     if (profile != null && !profile.isEmpty()) {
-
       BinaryContent content = BinaryContent.builder()
           .fileName(profile.getOriginalFilename())
           .contentType(profile.getContentType())
           .size(profile.getSize())
           .build();
-      BinaryContent save = binaryContentRepository.save(content);
-      binaryContentStorage.put(save.getId(), profile.getBytes());
+      savedContent = binaryContentRepository.save(content);
+      binaryContentStorage.put(savedContent.getId(), profile.getBytes());
     }
 
     // 2. User 호환성 체크
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-    User save = userRepository.save(user);
+    // 3. Builder를 사용해서 profile 반영
+    User updatedUser = user.toBuilder()
+        .profile(savedContent != null ? savedContent : user.getProfile())
+        .username(userUpdateRequest.newUsername() != null ? userUpdateRequest.newUsername()
+            : user.getUsername())
+        .email(
+            userUpdateRequest.newEmail() != null ? userUpdateRequest.newEmail() : user.getEmail())
+        .password(userUpdateRequest.newPassword() != null ? userUpdateRequest.newPassword()
+            : user.getPassword())
+        .build();
+    User save = userRepository.save(updatedUser);
+
     return userMapper.toDto(save);
   }
 

@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelDto;
-import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequest;
-import com.sprint.mission.discodeit.dto.channel.PrivateChannelCreateRequest;
-import com.sprint.mission.discodeit.dto.channel.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.data.ChannelDTO;
+import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,9 +38,9 @@ public class ChannelController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping("/public")
-  public ResponseEntity<ChannelDto> publicChannel(
+  public ResponseEntity<ChannelDTO> publicChannel(
       @RequestBody PublicChannelCreateRequest publicChannelCreateRequest) {
-    ChannelDto channel = channelService.createPublicChannel(publicChannelCreateRequest);
+    ChannelDTO channel = channelService.createPublicChannel(publicChannelCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(channel);
   }
 
@@ -51,13 +51,13 @@ public class ChannelController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping("/private")
-  public ResponseEntity<ChannelDto> privateChannel(
+  public ResponseEntity<ChannelDTO> privateChannel(
       @RequestBody PrivateChannelCreateRequest privateChannelCreateRequest) {
 
     if (privateChannelCreateRequest.participantIds().size() < 2) {
       throw new IllegalArgumentException("비공개 채널은 두 명 이상부터 생성 가능합니다.");
     }
-    ChannelDto channel = channelService.createPrivateChannel(privateChannelCreateRequest);
+    ChannelDTO channel = channelService.createPrivateChannel(privateChannelCreateRequest);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(channel);
   }
@@ -70,10 +70,10 @@ public class ChannelController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PatchMapping("/{channelId}")
-  public ResponseEntity<ChannelDto> modifyPublicChannel(
+  public ResponseEntity<ChannelDTO> modifyPublicChannel(
       @PathVariable UUID channelId,
       @RequestBody ChannelUpdateRequest channelUpdateRequest) {
-    ChannelDto dto = channelService.updateChannel(channelId, channelUpdateRequest);
+    ChannelDTO dto = channelService.updateChannel(channelId, channelUpdateRequest);
     return ResponseEntity.ok(dto);
   }
 
@@ -96,8 +96,8 @@ public class ChannelController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
-  public ResponseEntity<List<ChannelDto>> findChannelById(@RequestParam UUID userId) {
-    List<ChannelDto> channelFindResponses = channelService.findAllByUserId(userId);
+  public ResponseEntity<List<ChannelDTO>> findChannelById(@RequestParam UUID userId) {
+    List<ChannelDTO> channelFindResponses = channelService.findAllByUserId(userId);
     return ResponseEntity.ok(channelFindResponses);
   }
 }

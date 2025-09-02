@@ -1,17 +1,24 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.MessageDTO;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
+import com.sprint.mission.discodeit.mapper.PageResponseMapper;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sprint.mission.discodeit.dto.binary.BinaryContentDTO;
-import com.sprint.mission.discodeit.dto.message.MessageCreateRequest;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -33,11 +40,14 @@ public class BasicMessageService implements MessageService {
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
+  private final BinaryContentStorage binaryContentStorage;
+  private final MessageMapper messageMapper;
+  private final PageResponseMapper pageResponseMapper;
 
   @Override
   @Transactional
-  public Message createMessage(MessageCreateRequest messageCreateRequest,
-      List<MultipartFile> attachments) {
+  public MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
+      List<MultipartFile> attachments) throws IOException {
 
     // 1. 호환성 체크
     User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(
@@ -58,7 +68,8 @@ public class BasicMessageService implements MessageService {
               .size(profile.getSize())
               .build();
           attachmentIds.add(content);
-          binaryContentRepository.save(content);
+          BinaryContent save = binaryContentRepository.save(content);
+          binaryContentStorage.put(save.getId(), profile.getBytes());
         }
       }
     }
@@ -72,29 +83,36 @@ public class BasicMessageService implements MessageService {
         .build();
     messageRepository.save(message);
 
-    return message;
+    return messageMapper.toDto(message);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Message findByMessageId(UUID messageId) {
-    return messageRepository.findById(messageId).orElseThrow(
+  public MessageDTO findByMessageId(UUID messageId) {
+    Message save = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
+    return messageMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<Message> findAllByChannelId(UUID channelId) {
-    return messageRepository.findAllByChannelId(channelId);
+  public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Pageable pageable) {
+    Page<Message> page = messageRepository.findAllByChannelId(channelId, pageable);
+
+    List<MessageDTO> dtoList = page.getContent().stream()
+        .map(messageMapper::toDto)
+        .toList();
+
+    return pageResponseMapper.fromPage(page, dtoList);
   }
 
   @Override
   @Transactional
-  public Message updateMessage(UUID messageId, MessageUpdateRequest request) {
+  public MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request) {
     Message message = messageRepository.findById(messageId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 메시지입니다."));
-
-    return messageRepository.save(message);
+    messageRepository.save(message);
+    return messageMapper.toDto(message);
   }
 
   @Override
