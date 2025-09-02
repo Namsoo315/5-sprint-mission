@@ -79,6 +79,7 @@ public class BasicUserStatusService implements UserStatusService {
     // 1. userId로 특정 UserStatus를 찾는 호환성 체크
     UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(
         () -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    userStatus.updateLastActiveAt(request.newLastActiveAt());
     UserStatus save = userStatusRepository.save(userStatus);
     return userStatusMapper.toDto(save);
   }

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,7 @@ public class MessageController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<MessageDTO> sendMessage(
       @RequestPart MessageCreateRequest messageCreateRequest,
-      @RequestPart(required = false) List<MultipartFile> attachments) {
+      @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
 
     MessageDTO message = messageService.createMessage(messageCreateRequest, attachments);
     return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created

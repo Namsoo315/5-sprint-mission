@@ -6,6 +6,8 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -38,13 +40,14 @@ public class BasicMessageService implements MessageService {
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
+  private final BinaryContentStorage binaryContentStorage;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
 
   @Override
   @Transactional
   public MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
-      List<MultipartFile> attachments) {
+      List<MultipartFile> attachments) throws IOException {
 
     // 1. 호환성 체크
     User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(
@@ -65,7 +68,8 @@ public class BasicMessageService implements MessageService {
               .size(profile.getSize())
               .build();
           attachmentIds.add(content);
-          binaryContentRepository.save(content);
+          BinaryContent save = binaryContentRepository.save(content);
+          binaryContentStorage.put(save.getId(), profile.getBytes());
         }
       }
     }
@@ -98,6 +102,7 @@ public class BasicMessageService implements MessageService {
     List<MessageDTO> dtoList = page.getContent().stream()
         .map(messageMapper::toDto)
         .toList();
+
     return pageResponseMapper.fromPage(page, dtoList);
   }
 

@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
@@ -27,16 +28,16 @@ public class Message extends BaseUpdatableEntity {
   @Column
   private String content;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "author_id") // nullable = true 필수
   private User author;
 
 
-  @ManyToOne(cascade = CascadeType.REMOVE)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "channel_id", nullable = false)
   private Channel channel;
 
-  @OneToMany(cascade = CascadeType.REMOVE)
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
   @JoinTable(
       name = "message_attachments",
       joinColumns = @JoinColumn(name = "message_id"),

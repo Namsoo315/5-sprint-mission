@@ -75,7 +75,9 @@ public class BasicReadStatusService implements ReadStatusService {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
 
-    // 2. 상태정보 업데이트 후 Repository save(update)
+    readStatus.updateLastReadAt(request.newLastReadAt());
+
+    // 2. 상태정보 업데이트 후 Repository save(update)R
     ReadStatus save = readStatusRepository.save(readStatus);
 
     return readStatusMapper.toDto(save);
