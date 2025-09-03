@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
@@ -97,13 +98,13 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Pageable pageable) {
-    Page<Message> page = messageRepository.findAllByChannelId(channelId, pageable);
+    Slice<Message> slice = messageRepository.findAllByChannelId(channelId, pageable);
 
-    List<MessageDTO> dtoList = page.getContent().stream()
+    List<MessageDTO> dtoList = slice.getContent().stream()
         .map(messageMapper::toDto)
         .toList();
 
-    return pageResponseMapper.fromPage(page, dtoList);
+    return pageResponseMapper.fromSlice(slice, dtoList);
   }
 
   @Override
