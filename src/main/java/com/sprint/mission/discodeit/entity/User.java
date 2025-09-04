@@ -43,7 +43,4 @@ public class User extends BaseUpdatableEntity {
   @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "profile_id")
   private BinaryContent profile;
-
-  @Transient
-  private UserStatus status;
 }

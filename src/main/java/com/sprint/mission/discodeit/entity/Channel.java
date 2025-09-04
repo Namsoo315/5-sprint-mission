@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,5 +32,4 @@ public class Channel extends BaseUpdatableEntity {
   @Enumerated(EnumType.STRING)
   @Column(columnDefinition = "channel_type", nullable = false)
   private ChannelType type;
-
 }

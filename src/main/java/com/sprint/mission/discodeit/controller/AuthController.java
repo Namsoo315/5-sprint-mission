@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.AuthLoginRequest;
 import com.sprint.mission.discodeit.dto.response.AuthLoginResponse;
 import com.sprint.mission.discodeit.service.AuthService;
@@ -30,9 +31,9 @@ public class AuthController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @PostMapping("/login")
-  public ResponseEntity<AuthLoginResponse> login(
+  public ResponseEntity<UserDTO> login(
       @RequestBody AuthLoginRequest authLoginRequest) {
-    AuthLoginResponse authLoginResponse = authService.login(authLoginRequest);
+    UserDTO authLoginResponse = authService.login(authLoginRequest);
 
     return ResponseEntity
         .status(HttpStatus.OK)

@@ -3,15 +3,15 @@ package com.sprint.mission.discodeit.mapper.helper;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.Named;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class UserStatusHelper {
 
-  @Autowired
-  private UserStatusRepository userStatusRepository;
+  private final UserStatusRepository userStatusRepository;
 
   @Named("getOnlineStatus")
   public Boolean getOnlineStatus(User user) {

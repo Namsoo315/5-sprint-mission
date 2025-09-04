@@ -15,4 +15,5 @@ public interface ChannelMapper {
   @Mapping(target = "participants", ignore = true)
   @Mapping(target = "lastMessageAt", ignore = true)
   ChannelDTO toDto(Channel channel);
+
 }

@@ -11,12 +11,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -85,20 +89,23 @@ public class MessageController {
   // [ ] 특정 채널의 메시지 조회
   @Operation(summary = "채널별 메시지 조회 API", responses = {
       @ApiResponse(responseCode = "200", description = "메시지가 정상적으로 조회되었습니다."
-          , content = @Content(schema = @Schema(implementation = MessageDTO.class))),
+          , content = @Content(schema = @Schema(implementation = PageResponse.class))),
       @ApiResponse(responseCode = "404", description = "채널을 찾을 수 없습니다."),
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
+
   @GetMapping
   public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelId(
       @RequestParam UUID channelId,
+      @RequestParam(required = false) Instant cursor,
       @PageableDefault(
           size = 10,
           page = 0,
-          sort = "created_at",
+          sort = "createdAt",
           direction = Direction.ASC
       ) Pageable pageable) {
-    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, pageable);
+    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, cursor,
+        pageable);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
 }

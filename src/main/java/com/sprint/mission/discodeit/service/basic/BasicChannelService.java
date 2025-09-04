@@ -19,6 +19,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -54,27 +55,42 @@ public class BasicChannelService implements ChannelService {
   @Override
   @Transactional
   public ChannelDTO createPrivateChannel(PrivateChannelCreateRequest request) {
-    // Private 채널 생성 로직 (name, description 은 생략함.)
+    // Private 채널 생성
     Channel channel = Channel.builder()
         .type(ChannelType.PRIVATE)
         .build();
     channelRepository.save(channel);
 
-// 1. Channel에 참여하려는 User의 정보를 DTO를 통해서 받아 user 별 ReadStatus 정보를 생성한다.
+    // 참여자 ReadStatus 생성 및 UserDTO 리스트 생성
+    List<UserDTO> participantDTOs = new ArrayList<>();
     for (UUID userId : request.participantIds()) {
       User user = userRepository.findById(userId)
           .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
+      // ReadStatus 생성
       ReadStatus readStatus = ReadStatus.builder()
           .user(user)
           .channel(channel)
-          .lastReadAt(Instant.now()) // 필요하면 초기값
+          .lastReadAt(Instant.now())
           .build();
       readStatusRepository.save(readStatus);
+
+      // UserDTO 변환
+      UserDTO userDTO = UserDTO.builder()
+          .id(user.getId())
+          .username(user.getUsername())
+          .email(user.getEmail())
+          .build();
+      participantDTOs.add(userDTO);
     }
 
-    return channelMapper.toDto(channel);
+    return ChannelDTO.builder()
+        .id(channel.getId())
+        .type(channel.getType())
+        .participants(participantDTOs)
+        .build();
   }
+
 
   @Override
   @Transactional(readOnly = true)
@@ -166,7 +182,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public void deleteChannel(UUID channelId) {
 
     // 관련 도메인 같이 삭제 Channel, Message, ReadStatus

@@ -85,7 +85,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public void delete(UUID userStatusId) {
     if (!userStatusRepository.existsById(userStatusId)) {
       throw new NoSuchElementException("존재하지 않는 유저정보입니다.");

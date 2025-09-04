@@ -32,15 +32,13 @@ public class BasicBinaryContentService implements BinaryContentService {
         .build();
 
     BinaryContent save = binaryContentRepository.save(binaryContent);
-    if (request.bytes() != null && request.bytes().length > 0) {
-      binaryContentStorage.put(save.getId(), request.bytes());
-    }
+    binaryContentStorage.put(save.getId(), request.bytes());
 
     return binaryContentMapper.toDto(save);
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public BinaryContentDTO findByBinaryContentId(UUID binaryContentId) {
     BinaryContent save = binaryContentRepository.findById(binaryContentId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 파일입니다."));
