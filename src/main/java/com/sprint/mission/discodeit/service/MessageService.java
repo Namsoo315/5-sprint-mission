@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.dto.data.MessageDTO;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
-import com.sprint.mission.discodeit.entity.Message;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;

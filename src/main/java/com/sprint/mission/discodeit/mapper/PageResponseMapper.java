@@ -12,7 +12,7 @@ public interface PageResponseMapper {
   default <T> PageResponse<T> fromSlice(Slice<T> slice) {
     return PageResponse.<T>builder()
         .content(slice.getContent())
-        .number(slice.getNumber())
+        .nextCursor(slice.hasNext() ? slice.getNumber() + 1 : null)
         .size(slice.getSize())
         .hasNext(slice.hasNext())
         .build();
@@ -22,7 +22,7 @@ public interface PageResponseMapper {
   default <T, R> PageResponse<R> fromSlice(Slice<T> slice, List<R> items) {
     return PageResponse.<R>builder()
         .content(items)
-        .number(slice.getNumber() + 1)
+        .nextCursor(slice.hasNext() ? slice.getNumber() + 1 : null)
         .size(slice.getSize())
         .hasNext(slice.hasNext())
         .build();
@@ -32,7 +32,7 @@ public interface PageResponseMapper {
   default <T> PageResponse<T> fromPage(Page<T> page) {
     return PageResponse.<T>builder()
         .content(page.getContent())
-        .number(page.getNumber() + 1)
+        .nextCursor(page.hasNext() ? page.getNumber() + 1 : null)
         .size(page.getSize())
         .hasNext(page.hasNext())
         .totalElements(page.getTotalElements())
@@ -43,7 +43,7 @@ public interface PageResponseMapper {
   default <T, R> PageResponse<R> fromPage(Page<T> page, List<R> items) {
     return PageResponse.<R>builder()
         .content(items)
-        .number(page.getNumber() + 1)
+        .nextCursor(page.hasNext() ? page.getNumber() + 1 : null)
         .size(page.getSize())
         .hasNext(page.hasNext())
         .totalElements(page.getTotalElements())
