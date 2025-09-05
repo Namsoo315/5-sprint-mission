@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.request.UserStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.data.UserStatusDTO;
+import com.sprint.mission.discodeit.dto.request.UserStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -85,7 +85,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public void delete(UUID userStatusId) {
     if (!userStatusRepository.existsById(userStatusId)) {
       throw new NoSuchElementException("존재하지 않는 유저정보입니다.");
