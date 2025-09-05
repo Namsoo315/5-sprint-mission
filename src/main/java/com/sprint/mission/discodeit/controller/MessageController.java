@@ -96,8 +96,7 @@ public class MessageController {
       @RequestParam UUID channelId,
       @RequestParam(required = false) Instant cursor,
       @PageableDefault(
-          size = 10,
-          page = 0,
+          // size = 10, page = 0 default
           sort = "createdAt",
           direction = Direction.ASC
       ) Pageable pageable) {

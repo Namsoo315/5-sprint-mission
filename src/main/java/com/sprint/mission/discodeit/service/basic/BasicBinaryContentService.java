@@ -38,7 +38,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public BinaryContentDTO findByBinaryContentId(UUID binaryContentId) {
     BinaryContent save = binaryContentRepository.findById(binaryContentId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 파일입니다."));
@@ -54,7 +54,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public void delete(UUID binaryContentId) {
     if (!binaryContentRepository.existsById(binaryContentId)) {
       throw new NoSuchElementException("존재하지 않는 파일입니다.");

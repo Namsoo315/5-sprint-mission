@@ -43,7 +43,7 @@ class MessageControllerTest {
   @Test
   @Transactional
   void findMessageByChannelId() throws Exception {
-    UUID channelId = UUID.fromString("984ae06e-385f-4417-9530-0a2cb6c0d8c8");
+    UUID channelId = UUID.fromString("c84e32df-b7aa-4452-820c-b5edbadbb824");
 
     // 테스트용 채널, 유저 조회
     Channel channel = channelRepository.findById(channelId).orElseThrow();
@@ -78,7 +78,5 @@ class MessageControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(5)))
         .andExpect(jsonPath("$.content[0].createdAt").value(greaterThan(cursorInstant.toString())));
-
-    // 테스트용 메시지는 @Transactional 덕분에 테스트 종료 후 롤백되어 자동 삭제
   }
 }
