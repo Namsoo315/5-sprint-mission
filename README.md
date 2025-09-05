@@ -1,4 +1,4 @@
-# Discodeit Backend
+<img width="887" height="313" alt="{0BC60DF2-4B79-4281-B893-123CCA9AE432}" src="https://github.com/user-attachments/assets/6895141e-4d92-4e14-b4df-23763e9d6867" /># Discodeit Backend
 
 스프린트 미션: **Discodeit** 백엔드 서버 구현
 
@@ -176,6 +176,9 @@
 
 - [x] **N+1 문제**  
   - N+1 문제가 발생하는 쿼리를 찾고 해결  
+<img width="880" height="133" alt="{68AA7003-6054-4544-9E69-E7BB196F7839}" src="https://github.com/user-attachments/assets/7dcee103-93eb-4dcf-be4f-1baae318ede1" />
+MessageEntity에서는 User, Channel, BinaryContent 등 여러 참조하는 값이 많다.
+그렇기에 N + 1 문제가 발생할 수 있게되는데 fetchJoin을 사용하여 별도의 쿼리로 미리 연관데이터를 전부 조회하여 N+1 문제를 회피한다.
 
 - [x] **읽기 전용 트랜잭션 활용**  
   - OSIV(false) 환경에서 서비스 레이어 조회 시 발생 가능한 문제를 식별하고,  
@@ -192,9 +195,27 @@ spring:
   * 오프셋 페이지네이션과 커서 페이지네이션 방식의 차이를 정리
   * 기존 오프셋 페이지네이션을 커서 페이지네이션으로 리팩토링
   * `PageResponse` 구조 변경
+<img width="1187" height="869" alt="{C76F6273-4209-48D0-8D10-026859DA7F1C}" src="https://github.com/user-attachments/assets/4c80a6c1-9025-4133-90b9-45d54c1683b8" /><br>
+위 사진처럼 response받는 객체를 Slice를 통해서 받게 만듬.
+오프셋 페이지네이션을 사용하는것은 말 그대로 쿼리의 OFFSET과 LIMIT을 사용하게 하는것이다.
+```sql
+select *
+from post
+order by create_at desc
+limit [페이지사이즈]
+offset [페이지번호];
+````
+위 처럼 가져올 데이터 숫자(limit = size)
+가져올 데이터 숫자로 전체 데이터를 limit만큼 나눈 값을 0부터 번호를 매긴 페이지 번호
+
+직관적이고 편하고 간단하다. 그냥 숫자만 넣으면 되는거다.
+<img width="887" height="313" alt="{0BC60DF2-4B79-4281-B893-123CCA9AE432}" src="https://github.com/user-attachments/assets/d1b802bb-bbfc-4f76-9941-8b76f26b519f" />
+이런식으로 넣고 Pageable을 사용하여 페이징만 잘 처리하면 바로 사용이 가능하다.
+
+하지만 데이터를 OFFSET만큼 읽는데 성능이 많이 느려지고, 중복이 발생할 수 있다.
+전체 데이터를 찾아오고 OFFSET을 사용하니 무조건적으로 성능이 느려질 수 밖에 없고
+데이터가 추가될때 페이지를 옮기게 되면 똑같은 글이 다른 페이지에서도 보일 수 있다.
 
 * [x] **MapStruct 적용**
 
   * Entity ↔ DTO 매핑 보일러플레이트 코드 간소화
-
-```
