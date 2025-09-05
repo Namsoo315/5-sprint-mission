@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.dto.response;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 

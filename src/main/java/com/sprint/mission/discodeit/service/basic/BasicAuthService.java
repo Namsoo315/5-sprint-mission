@@ -1,18 +1,14 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
-import com.sprint.mission.discodeit.mapper.UserMapper;
-import java.util.NoSuchElementException;
-
-import org.springframework.stereotype.Service;
-
 import com.sprint.mission.discodeit.dto.request.AuthLoginRequest;
-import com.sprint.mission.discodeit.dto.response.AuthLoginResponse;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.AuthService;
-
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service

@@ -19,7 +19,6 @@ import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -96,8 +95,8 @@ public class BasicMessageService implements MessageService {
   public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
     channelRepository.findById(channelId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 채널입니다.")
-    );
+        () -> new NoSuchElementException("존재하지 않는 채널입니다."));
+
     Slice<Message> slice = (cursor != null)
         ? messageRepository.findAllByChannelIdAndCreatedAtAfter(channelId, cursor, pageable)
         : messageRepository.findAllByChannelId(channelId, pageable);
