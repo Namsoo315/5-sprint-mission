@@ -28,11 +28,10 @@ public class Message extends BaseUpdatableEntity {
   @Column
   private String content;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "author_id") // nullable = true default
   private User author;
-
-
+  
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "channel_id", nullable = false)
   private Channel channel;

@@ -98,8 +98,8 @@ public class BasicMessageService implements MessageService {
         () -> new NoSuchElementException("존재하지 않는 채널입니다."));
 
     Slice<Message> slice = (cursor != null)
-        ? messageRepository.findAllByChannelIdAndCreatedAtAfter(channelId, cursor, pageable)
-        : messageRepository.findAllByChannelId(channelId, pageable);
+        ? messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId, cursor, pageable)
+        : messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId, null, pageable);
 
     List<MessageDTO> dtoList = slice.getContent().stream().map(messageMapper::toDto).toList();
 
