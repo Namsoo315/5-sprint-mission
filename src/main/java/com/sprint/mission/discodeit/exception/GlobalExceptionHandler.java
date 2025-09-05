@@ -14,24 +14,24 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleException(Exception e) {
     // 500 Internal Server Error
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage() + "오류");
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
     // 400 Bad Request
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage() + "오류");
   }
 
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException e) {
     // 404 Not Found
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage() + "오류");
   }
 
   @ExceptionHandler(FileNotFoundException.class)
   public ResponseEntity<String> handleFileNotFoundException(FileNotFoundException e) {
     // 404 Not Found
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage() + "오류");
   }
 }
