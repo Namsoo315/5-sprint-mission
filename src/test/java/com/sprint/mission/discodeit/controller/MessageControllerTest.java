@@ -13,10 +13,10 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,43 +40,60 @@ class MessageControllerTest {
   @Autowired
   private UserRepository userRepository;
 
-  @Test
-  @Transactional
-  void findMessageByChannelId() throws Exception {
-    UUID channelId = UUID.fromString("c84e32df-b7aa-4452-820c-b5edbadbb824");
+  private UUID channelId;
 
-    // 테스트용 채널, 유저 조회
+  @BeforeEach
+  void setup() {
+    channelId = UUID.fromString("2a027fc5-a0bd-4b36-9baa-7a4c6610e4f0");
+
     Channel channel = channelRepository.findById(channelId).orElseThrow();
     User author = userRepository.findAll().stream().findFirst().orElseThrow();
 
-    // 1. 기본 조회
-    mockMvc.perform(get("/api/messages")
-            .param("channelId", channelId.toString())
-            .param("size", "5"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(5)))
-        .andExpect(jsonPath("$.hasNext").isBoolean());
+    // 테스트 전 메시지 초기화 후 대량 삽입
+    messageRepository.deleteByChannelId(channelId);
 
-    // 2. cursor 지정 후 조회
-    LocalDateTime cursorLdt = LocalDateTime.now().minusDays(1);
-    Instant cursorInstant = cursorLdt.atZone(ZoneId.systemDefault()).toInstant();
+    IntStream.range(0, 10_000).forEach(i -> {
+      Message m = Message.builder()
+          .channel(channel)
+          .author(author)
+          .content("bulk message " + i)
+          .createdAt(Instant.now().plusMillis(i)) // 순차 증가
+          .updatedAt(Instant.now().plusMillis(i))
+          .build();
+      messageRepository.save(m);
+    });
+  }
 
-    // 테스트용 메시지 생성 (cursor 이후에 생성되도록)
-    Message testMessage = Message.builder()
-        .channel(channel)
-        .author(author)
-        .content("테스트 메시지")
-        .createdAt(Instant.now()) // 현재 시각
-        .updatedAt(Instant.now())
-        .build();
-    messageRepository.save(testMessage);
+  @Test
+  @Transactional
+  void cursorPagingPerformance() throws Exception {
+    Instant cursorInstant = Instant.now().minusSeconds(3);
 
-    mockMvc.perform(get("/api/messages")
+    long start = System.currentTimeMillis();
+    mockMvc.perform(get("/api/messages/cursor")   // ✅ 커서 전용 엔드포인트
             .param("channelId", channelId.toString())
             .param("cursor", cursorInstant.toString())
-            .param("size", "5"))
+            .param("size", "50"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(5)))
+        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(50)))
         .andExpect(jsonPath("$.content[0].createdAt").value(greaterThan(cursorInstant.toString())));
+    long end = System.currentTimeMillis();
+
+    System.out.println("커서 페이징 실행 시간: " + (end - start) + "ms");
+  }
+
+  @Test
+  @Transactional
+  void offsetPagingPerformance() throws Exception {
+    long start = System.currentTimeMillis();
+    mockMvc.perform(get("/api/messages/page")   // ✅ 페이지 전용 엔드포인트
+            .param("channelId", channelId.toString())
+            .param("size", "50")
+            .param("page", "100"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(50)));
+    long end = System.currentTimeMillis();
+
+    System.out.println("기본 OFFSET 페이징 실행 시간: " + (end - start) + "ms");
   }
 }

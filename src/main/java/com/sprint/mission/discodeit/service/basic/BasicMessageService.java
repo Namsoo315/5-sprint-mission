@@ -99,7 +99,7 @@ public class BasicMessageService implements MessageService {
 
     Slice<Message> slice = (cursor != null)
         ? messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId, cursor, pageable)
-        : messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId, null, pageable);
+        : messageRepository.findAllByChannelIdWithPageable(channelId, pageable);
 
     List<MessageDTO> dtoList = slice.getContent().stream().map(messageMapper::toDto).toList();
 

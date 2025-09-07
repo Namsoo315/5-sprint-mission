@@ -19,7 +19,7 @@ public interface MessageService {
   MessageDTO findByMessageId(UUID messageId);
 
   PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor, Pageable pageable);
-
+  
   MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request);
 
   void deleteMessage(UUID messageId);
