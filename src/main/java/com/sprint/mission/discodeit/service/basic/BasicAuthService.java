@@ -19,7 +19,7 @@ public class BasicAuthService implements AuthService {
   private final UserMapper userMapper;
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public UserDTO login(AuthLoginRequest request) {
 
     // 1-1. username과 일치하는 유저가 있는지 확인
