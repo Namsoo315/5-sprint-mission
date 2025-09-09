@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -85,20 +86,51 @@ public class MessageController {
   // [ ] 특정 채널의 메시지 조회
   @Operation(summary = "채널별 메시지 조회 API", responses = {
       @ApiResponse(responseCode = "200", description = "메시지가 정상적으로 조회되었습니다."
-          , content = @Content(schema = @Schema(implementation = MessageDTO.class))),
+          , content = @Content(schema = @Schema(implementation = PageResponse.class))),
       @ApiResponse(responseCode = "404", description = "채널을 찾을 수 없습니다."),
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @GetMapping
   public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelId(
       @RequestParam UUID channelId,
+      @RequestParam(required = false) Instant cursor,
       @PageableDefault(
-          size = 10,
-          page = 0,
-          sort = "created_at",
+          // size = 10, page = 0 default
+          sort = "createdAt",
           direction = Direction.ASC
       ) Pageable pageable) {
-    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, pageable);
+    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, cursor,
+        pageable);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
+
+/*  // 테스트용 컨트롤러
+  @GetMapping("/cursor")
+  public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelIdCursor(
+      @RequestParam UUID channelId,
+      @RequestParam(required = false) Instant cursor,
+      @PageableDefault(
+          // size = 10, page = 0 default
+          sort = "createdAt",
+          direction = Direction.ASC
+      ) Pageable pageable) {
+    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, cursor,
+        pageable);
+    return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
+  }
+
+  @GetMapping("/page")
+  public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelIdPage(
+      @RequestParam UUID channelId,
+      @PageableDefault(
+          // size = 10, page = 0 default
+          sort = "createdAt",
+          direction = Direction.ASC
+      ) Pageable pageable) {
+    PageResponse<MessageDTO> messages = messageService.findAllByChannelId(channelId, null,
+        pageable);
+    return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
+  }
+
+  */
 }

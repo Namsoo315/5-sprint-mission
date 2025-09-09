@@ -6,16 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.UUID;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,7 +35,4 @@ public class User extends BaseUpdatableEntity {
   @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "profile_id")
   private BinaryContent profile;
-
-  @Transient
-  private UserStatus status;
 }

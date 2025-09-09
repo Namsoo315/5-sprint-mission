@@ -13,6 +13,7 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,8 +35,7 @@ public class BasicUserService implements UserService {
 
   @Override
   @Transactional
-  public UserDTO createUser(UserCreateRequest userCreateRequest, MultipartFile profile)
-      throws IOException {
+  public UserDTO createUser(UserCreateRequest userCreateRequest, MultipartFile profile) {
 
     // 1. username, email 호환성 확인
     if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
@@ -49,14 +49,18 @@ public class BasicUserService implements UserService {
     BinaryContent content = null;
     // 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
     if (profile != null && !profile.isEmpty()) {
-
       content = BinaryContent.builder()
           .fileName(profile.getOriginalFilename())
           .contentType(profile.getContentType())
           .size(profile.getSize())
           .build();
+
       BinaryContent save = binaryContentRepository.save(content);
-      binaryContentStorage.put(save.getId(), profile.getBytes());
+      try {
+        binaryContentStorage.put(save.getId(), profile.getBytes());
+      } catch (IOException e) {
+        throw new UncheckedIOException("스토리지에 추가할 수 없습니다: " + e.getMessage(), e);
+      }
     }
 
     // 3. user, userStatus 같이 생성.
@@ -132,7 +136,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public void deleteUser(UUID userId) {
 
     // 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent

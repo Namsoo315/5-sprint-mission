@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.data.ReadStatusDTO;
+import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -54,7 +54,7 @@ public class BasicReadStatusService implements ReadStatusService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public ReadStatusDTO findByReadStatusId(UUID readStatusId) {
     ReadStatus save = readStatusRepository.findById(readStatusId).orElseThrow(
         () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
@@ -62,7 +62,7 @@ public class BasicReadStatusService implements ReadStatusService {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public List<ReadStatusDTO> findAllByUserId(UUID userId) {
     List<ReadStatus> saves = readStatusRepository.findAllByUserId(userId);
     return readStatusMapper.toDto(saves);

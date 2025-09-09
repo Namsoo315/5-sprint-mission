@@ -38,10 +38,7 @@ public class UserStatus extends BaseUpdatableEntity {
       this.lastActiveAt = newLastActiveAt;
     }
   }
-
-  @Transient
-  private boolean online;
-
+  
   @Transient
   public boolean isOnline() {
     Instant fiveMinutesAgo = Instant.now().minus(Duration.ofMinutes(5));
