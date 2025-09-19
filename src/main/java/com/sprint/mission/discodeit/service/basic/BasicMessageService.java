@@ -67,7 +67,7 @@ public class BasicMessageService implements MessageService {
 
           BinaryContent saved = binaryContentRepository.save(content);
           try {
-            binaryContentStorage.put(saved.getId(), file.getBytes());
+            binaryContentStorage.save(saved.getId(), file.getBytes());
           } catch (IOException e) {
             throw new UncheckedIOException("스토리지에 추가할 수 없습니다 : " + e.getMessage(), e);
           }

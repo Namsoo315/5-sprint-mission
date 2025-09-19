@@ -24,7 +24,9 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
       Pageable pageable);
 
   // 자동으로 결과를 1개만 가져오도록 강제함.
-  Optional<Message> findTop1ByChannelIdOrderByCreatedAtDesc(UUID channelId);
+  @Query("SELECT m.createdAt FROM Message m WHERE m.channel.id = :channleId "
+      + "ORDER BY m.createdAt DESC LIMIT 1")
+  Optional<Message> findLastMessageAtByChannelId(@Param("channelId") UUID channelId);
 
   void deleteByChannelId(UUID channelId);
 

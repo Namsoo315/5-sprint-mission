@@ -32,7 +32,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         .build();
 
     BinaryContent save = binaryContentRepository.save(binaryContent);
-    binaryContentStorage.put(save.getId(), request.bytes());
+    binaryContentStorage.save(save.getId(), request.bytes());
 
     return binaryContentMapper.toDto(save);
   }

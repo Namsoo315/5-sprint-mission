@@ -35,4 +35,7 @@ public class User extends BaseUpdatableEntity {
   @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "profile_id")
   private BinaryContent profile;
+
+  @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private UserStatus status;
 }
