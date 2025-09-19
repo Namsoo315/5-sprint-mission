@@ -57,7 +57,7 @@ public class BasicUserService implements UserService {
 
       BinaryContent save = binaryContentRepository.save(content);
       try {
-        binaryContentStorage.put(save.getId(), profile.getBytes());
+        binaryContentStorage.save(save.getId(), profile.getBytes());
       } catch (IOException e) {
         throw new UncheckedIOException("스토리지에 추가할 수 없습니다: " + e.getMessage(), e);
       }
@@ -113,7 +113,7 @@ public class BasicUserService implements UserService {
           .size(profile.getSize())
           .build();
       savedContent = binaryContentRepository.save(content);
-      binaryContentStorage.put(savedContent.getId(), profile.getBytes());
+      binaryContentStorage.save(savedContent.getId(), profile.getBytes());
     }
 
     // 2. User 호환성 체크

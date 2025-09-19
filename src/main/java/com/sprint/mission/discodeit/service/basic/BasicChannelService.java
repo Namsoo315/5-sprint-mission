@@ -8,7 +8,6 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
-import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -31,7 +30,6 @@ public class BasicChannelService implements ChannelService {
   private final ReadStatusRepository readStatusRepository;
   private final MessageRepository messageRepository;
   private final ChannelMapper channelMapper;
-  private final UserMapper userMapper;
 
   @Override
   @Transactional
@@ -87,6 +85,7 @@ public class BasicChannelService implements ChannelService {
     // 호환성 체크
     userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+
     // 1. Private 채널은 User가 참여한 채널만 조회하기 위한 ChannelId를 List화 시킴.
     List<Channel> subscribeChannels = readStatusRepository.findAllByUserId(userId).stream()
         .map(ReadStatus::getChannel)

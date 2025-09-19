@@ -32,7 +32,7 @@ public class ChannelHelper {
 
   @Named("getLastMessageAt")
   public Instant getLastMessageAt(Channel channel) {
-    return messageRepository.findTop1ByChannelIdOrderByCreatedAtDesc(channel.getId())
+    return messageRepository.findLastMessageAtByChannelId(channel.getId())
         .map(Message::getCreatedAt)
         .orElse(null);
   }
