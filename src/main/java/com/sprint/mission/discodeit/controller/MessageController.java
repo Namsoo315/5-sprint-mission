@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -37,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
 @Tag(name = "Message", description = "메시지 관련 API")
+@Slf4j
 public class MessageController {
 
   private final MessageService messageService;

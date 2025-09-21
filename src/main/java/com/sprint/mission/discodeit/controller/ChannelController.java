@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/channels")
 @Tag(name = "Channel", description = "채널 관련 API")
+@Slf4j
 public class ChannelController {
 
   private final ChannelService channelService;
