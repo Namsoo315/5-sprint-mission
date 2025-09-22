@@ -79,7 +79,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
     readStatus.updateLastReadAt(request.newLastReadAt());
 
-    // 2. 상태정보 업데이트 후 Repository save(update)R
+    // 2. 상태정보 업데이트 후 Repository save(update)
     ReadStatus save = readStatusRepository.save(readStatus);
 
     return readStatusMapper.toDto(save);

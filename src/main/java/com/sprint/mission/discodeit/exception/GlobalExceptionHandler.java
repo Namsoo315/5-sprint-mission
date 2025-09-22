@@ -20,24 +20,28 @@ public class GlobalExceptionHandler {
   // 전역 예외 처리
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
+    log.error("예외 발생 : code={}, message={}", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     ErrorResponse errorResponse = new ErrorResponse(e, 500);
     return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.error("예외 발생 : code={}, message={}", HttpStatus.BAD_REQUEST, e.getMessage());
     ErrorResponse errorResponse = new ErrorResponse(e, 400);
     return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
   }
 
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException e) {
+    log.error("예외 발생 : code={}, message={}", HttpStatus.NOT_FOUND, e.getMessage());
     ErrorResponse errorResponse = new ErrorResponse(e, 404);
     return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
   }
 
   @ExceptionHandler(FileNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleFileNotFoundException(FileNotFoundException e) {
+    log.error("예외 발생 : code={}, message={}", HttpStatus.NOT_FOUND, e.getMessage());
     ErrorResponse errorResponse = new ErrorResponse(e, 404);
     return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
   }
@@ -98,7 +102,7 @@ public class GlobalExceptionHandler {
       validationErrors.put(fieldName, errorMessage);
     });
 
-    ErrorResponse response = new ErrorResponse(
+    ErrorResponse errorResponse = new ErrorResponse(
         Instant.now(),
         "VALIDATION_ERROR",
         "요청 데이터 유효성 검사에 실패했습니다",
@@ -108,7 +112,7 @@ public class GlobalExceptionHandler {
     );
 
     return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(response);
+        .status(errorResponse.getStatus())
+        .body(errorResponse);
   }
 }

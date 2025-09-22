@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class AuthController {
   })
   @PostMapping("/login")
   public ResponseEntity<UserDTO> login(
-      @RequestBody AuthLoginRequest authLoginRequest) {
+      @RequestBody @Valid AuthLoginRequest authLoginRequest) {
     UserDTO authLoginResponse = authService.login(authLoginRequest);
 
     return ResponseEntity

@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +46,8 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "요청 DTO가 잘못되었습니다."),
       @ApiResponse(responseCode = "500", description = "서버 오류")})
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<UserDTO> registerUser(@RequestPart UserCreateRequest userCreateRequest,
+  public ResponseEntity<UserDTO> registerUser(
+      @RequestPart @Valid UserCreateRequest userCreateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
     log.info("유저 생성 요청 수신: username={}, email={}", userCreateRequest.username(),
         userCreateRequest.email());
@@ -61,7 +63,7 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "서버 오류")})
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UserDTO> modifyUser(@PathVariable UUID userId,
-      @RequestPart UserUpdateRequest userUpdateRequest,
+      @RequestPart @Valid UserUpdateRequest userUpdateRequest,
       @RequestPart(required = false) MultipartFile profile) throws IOException {
     log.info("유저 업데이트 요청 수신");
     UserDTO user = userService.updateUser(userId, userUpdateRequest, profile);

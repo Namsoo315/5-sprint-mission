@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class ChannelController {
   })
   @PostMapping("/public")
   public ResponseEntity<ChannelDTO> publicChannel(
-      @RequestBody PublicChannelCreateRequest publicChannelCreateRequest) {
+      @RequestBody @Valid PublicChannelCreateRequest publicChannelCreateRequest) {
     ChannelDTO channel = channelService.createPublicChannel(publicChannelCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(channel);
   }
@@ -54,7 +55,7 @@ public class ChannelController {
   })
   @PostMapping("/private")
   public ResponseEntity<ChannelDTO> privateChannel(
-      @RequestBody PrivateChannelCreateRequest privateChannelCreateRequest) {
+      @RequestBody @Valid PrivateChannelCreateRequest privateChannelCreateRequest) {
 
     if (privateChannelCreateRequest.participantIds().size() < 2) {
       throw new IllegalArgumentException("비공개 채널은 두 명 이상부터 생성 가능합니다.");
@@ -74,7 +75,7 @@ public class ChannelController {
   @PatchMapping("/{channelId}")
   public ResponseEntity<ChannelDTO> modifyPublicChannel(
       @PathVariable UUID channelId,
-      @RequestBody ChannelUpdateRequest channelUpdateRequest) {
+      @RequestBody @Valid ChannelUpdateRequest channelUpdateRequest) {
     ChannelDTO dto = channelService.updateChannel(channelId, channelUpdateRequest);
     return ResponseEntity.ok(dto);
   }
