@@ -50,13 +50,17 @@ public class BasicMessageService implements MessageService {
   @Transactional
   public MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
       List<MultipartFile> attachments) {
-
     // 1. 호환성 체크
-    User user = userRepository.findById(messageCreateRequest.authorId())
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+    User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(() -> {
+      log.warn("존재하지 않는 회원 메시지 생성 시도");
+      return new NoSuchElementException("존재하지 않는 회원입니다.");
+    });
 
     Channel channel = channelRepository.findById(messageCreateRequest.channelId())
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
+        .orElseThrow(() -> {
+          log.warn("존재하지 않는 채널 메시지 생성 시도");
+          return new NoSuchElementException("존재하지 않는 채널입니다.");
+        });
 
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     List<BinaryContent> attachmentIds = attachments == null ? List.of()
@@ -76,12 +80,22 @@ public class BasicMessageService implements MessageService {
           return saved;
         }).toList();
 
-    // 2. 메시지 생성
-    Message message = Message.builder().author(user).channel(channel)
-        .content(messageCreateRequest.content()).attachments(attachmentIds).build();
-    messageRepository.save(message);
+    Message message = Message.builder()
+        .author(user)
+        .channel(channel)
+        .content(messageCreateRequest.content())
+        .attachments(attachmentIds)
+        .build();
 
-    return messageMapper.toDto(message);
+    log.info("생성할 메시지 내용='{}'", message.getContent());
+    try {
+      Message save = messageRepository.save(message);
+      log.debug("메시지 생성 완료 아이디='{}'", save.getId());
+      return messageMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("메시지 생성 실패 내용='{}'", message.getContent(), e);
+      throw new IllegalArgumentException(e.getMessage());
+    }
   }
 
   @Override
@@ -111,20 +125,45 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional
   public MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request) {
-    Message message = messageRepository.findById(messageId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 메시지입니다."));
-    messageRepository.save(message);
-    return messageMapper.toDto(message);
+    Message message = messageRepository.findById(messageId).orElseThrow(() -> {
+      log.warn("존재하지 않는 메시지 업데이트 시도");
+      return new NoSuchElementException("존재하지 않는 메시지입니다.");
+    });
+
+    log.info("업데이트할 메시지 내용='{}'", message.getContent());
+
+    // 실제 업데이트 로직
+    Message updateMessage = message.toBuilder()
+        .content(request.newContent() != null ? request.newContent() : message.getContent())
+        .build();
+
+    try {
+      Message save = messageRepository.save(updateMessage);
+      log.debug("업데이트된 메시지 내용='{}'", save.getContent());
+      return messageMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("메시지 업데이트 실패 내용='{}'", message.getContent(), e);
+      throw new IllegalArgumentException(e.getMessage());
+    }
   }
 
   @Override
   @Transactional
   public void deleteMessage(UUID messageId) {
-    Message message = messageRepository.findById(messageId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 메시지입니다."));
+    Message message = messageRepository.findById(messageId).orElseThrow(() -> {
+      log.warn("존재하지 않는 메시지 삭제 시도");
+      return new NoSuchElementException("존재하지 않는 메시지입니다.");
+    });
 
-    binaryContentRepository.deleteAll(message.getAttachments());
+    log.info("삭제할 메시지 내용='{}'", message.getContent());
 
-    messageRepository.deleteById(messageId);
+    try {
+      binaryContentRepository.deleteAll(message.getAttachments());
+      messageRepository.deleteById(messageId);
+      log.debug("메시지 삭제 완료 아이디='{}'", message.getId());
+    } catch (Exception e) {
+      log.error("메시지 삭제 실패", e);
+      throw new IllegalArgumentException(e.getMessage());
+    }
   }
 }

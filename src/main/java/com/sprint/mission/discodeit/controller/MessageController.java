@@ -53,7 +53,7 @@ public class MessageController {
   public ResponseEntity<MessageDTO> sendMessage(
       @RequestPart MessageCreateRequest messageCreateRequest,
       @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
-
+    log.info("메시지 전송 요청 수신 message={}", messageCreateRequest.content());
     MessageDTO message = messageService.createMessage(messageCreateRequest, attachments);
     return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
   }
@@ -69,6 +69,7 @@ public class MessageController {
   public ResponseEntity<MessageDTO> modifyMessage(
       @PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest messageUpdateRequest) {
+    log.info("메시지 수정 요청 수신");
     MessageDTO message = messageService.updateMessage(messageId, messageUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(message); // 200 OK
   }
@@ -81,6 +82,7 @@ public class MessageController {
   })
   @DeleteMapping("/{messageId}")
   public ResponseEntity<Void> deleteMessage(@PathVariable UUID messageId) {
+    log.info("메시지 삭제 요청 수신");
     messageService.deleteMessage(messageId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 204 No Content
   }

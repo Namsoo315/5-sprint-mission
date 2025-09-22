@@ -17,21 +17,21 @@
 
 ### 프로파일 기반 설정 관리
 
-* [ ] 개발(`dev`), 운영(`prod`) 환경에 대한 프로파일을 구성하세요.
-* [ ] `application-dev.yaml`, `application-prod.yaml` 파일을 생성하세요.
-* [ ] 데이터베이스 연결 정보, 서버 포트를 프로파일별로 분리하세요.
+* [x] 개발(`dev`), 운영(`prod`) 환경에 대한 프로파일을 구성하세요.
+* [x] `application-dev.yaml`, `application-prod.yaml` 파일을 생성하세요.
+* [x] 데이터베이스 연결 정보, 서버 포트를 프로파일별로 분리하세요.
 
 ---
 
 ### 로그 관리
 
-* [ ] Lombok의 `@Slf4j` 어노테이션을 활용해 로깅을 구성하세요.
-* [ ] `application.yaml`에 기본 로깅 레벨(`info`)을 설정하세요.
-* [ ] 환경별 로깅 레벨:
+* [x] Lombok의 `@Slf4j` 어노테이션을 활용해 로깅을 구성하세요.
+* [x] `application.yaml`에 기본 로깅 레벨(`info`)을 설정하세요.
+* [x] 환경별 로깅 레벨:
 
     * 개발 환경: `debug`
     * 운영 환경: `info`
-* [ ] `logback-spring.xml` 파일을 생성하고, 로그 패턴과 출력 방식을 커스터마이징하세요.
+* [x] `logback-spring.xml` 파일을 생성하고, 로그 패턴과 출력 방식을 커스터마이징하세요.
 
 **로그 패턴 예시**
 
@@ -45,10 +45,10 @@
 25-01-01 10:33:55.740 [main] DEBUG c.s.m.discodeit.DiscodeitApplication - Running with Spring Boot v3.4.0, Spring v6.2.0
 ```
 
-* [ ] 콘솔과 파일에 동시에 로그 기록
-* [ ] 로그 파일 저장 경로: `{프로젝트 루트}/.logs`
-* [ ] 로그 파일은 **일자별 롤링** 및 **30일 보관**
-* [ ] 서비스/컨트롤러 주요 메소드에 로깅 추가
+* [x] 콘솔과 파일에 동시에 로그 기록
+* [x] 로그 파일 저장 경로: `{프로젝트 루트}/.logs`
+* [x] 로그 파일은 **일자별 롤링** 및 **30일 보관**
+* [x] 서비스/컨트롤러 주요 메소드에 로깅 추가
 
     * 사용자 생성/수정/삭제
     * 채널 생성/수정/삭제
@@ -59,14 +59,14 @@
 
 ### 예외 처리 고도화
 
-* [ ] 패키지: `com.sprint.mission.discodeit.exception[.{도메인}]`
-* [ ] `ErrorCode` Enum 클래스를 통해 예외 코드와 메시지 정의
-* [ ] 기본 예외 클래스: `DiscodeitException`
-* [ ] 도메인별 예외 클래스 정의 (`UserException`, `ChannelException` 등)
-* [ ] 구체 예외 정의 (`UserNotFoundException`, `UserAlreadyExistException` 등)
-* [ ] 기존 표준 예외 (`NoSuchElementException`, `IllegalArgumentException`) → 커스텀 예외로 대체
-* [ ] 일관된 예외 응답(`ErrorResponse`) 설계
-* [ ] `@RestControllerAdvice` 기반 예외 핸들러 구현
+* [x] 패키지: `com.sprint.mission.discodeit.exception[.{도메인}]`
+* [x] `ErrorCode` Enum 클래스를 통해 예외 코드와 메시지 정의
+* [x] 기본 예외 클래스: `DiscodeitException`
+* [x] 도메인별 예외 클래스 정의 (`UserException`, `ChannelException` 등)
+* [x] 구체 예외 정의 (`UserNotFoundException`, `UserAlreadyExistException` 등)
+* [x] 기존 표준 예외 (`NoSuchElementException`, `IllegalArgumentException`) → 커스텀 예외로 대체
+* [x] 일관된 예외 응답(`ErrorResponse`) 설계
+* [x] `@RestControllerAdvice` 기반 예외 핸들러 구현
 
 ---
 
