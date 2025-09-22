@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.mapper.helper;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -32,7 +31,7 @@ public class ChannelHelper {
 
   @Named("getLastMessageAt")
   public Instant getLastMessageAt(Channel channel) {
-    return messageRepository.findLastMessageAtByChannelId(channel.getId())
+    return messageRepository.findTopByChannelIdOrderByCreatedAtDesc(channel.getId())
         .orElse(null);
   }
 }

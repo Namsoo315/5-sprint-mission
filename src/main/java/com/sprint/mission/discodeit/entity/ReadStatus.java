@@ -34,8 +34,7 @@ public class ReadStatus extends BaseUpdatableEntity {
 
   @Column(name = "last_read_at", nullable = false)
   private Instant lastReadAt;
-
-  @Transient
+  
   public void updateLastReadAt(Instant newLastReadAt) {
     if (newLastReadAt != null && !newLastReadAt.equals(this.lastReadAt)) {
       this.lastReadAt = newLastReadAt;
