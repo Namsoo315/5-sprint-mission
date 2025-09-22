@@ -64,9 +64,6 @@ public class BasicChannelService implements ChannelService {
         .build();
 
     log.info("생성할 Private 채널 이름={}", channel.getName());
-
-    channelRepository.save(channel);
-
     try {
       Channel save = channelRepository.save(channel);
 
