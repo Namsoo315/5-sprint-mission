@@ -6,6 +6,10 @@ import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusNotFoundException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusSaveFailedException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -35,31 +39,32 @@ public class BasicReadStatusService implements ReadStatusService {
   public ReadStatusDTO createReadStatus(ReadStatusCreateRequest request) {
 
     // 1. 호환성 체크 User, Channel 체크
-    User user = userRepository.findById(request.userId()).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 회원입니다."));
+    User user = userRepository.findById(request.userId()).orElseThrow(UserNotFoundException::new);
 
-    Channel channel = channelRepository.findById(request.channelId()).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 채널입니다."));
+    Channel channel = channelRepository.findById(request.channelId())
+        .orElseThrow(ChannelNotFoundException::new);
 
     // 2.이미 존재하면 새로 생성하지 않고 반환
-    ReadStatus save = readStatusRepository.findByUserIdAndChannelId(user.getId(),
-            channel.getId())
-        .orElseGet(() -> {
-          ReadStatus rs = ReadStatus.builder()
-              .user(user)
-              .channel(channel)
-              .lastReadAt(Instant.now())
-              .build();
-          return readStatusRepository.save(rs);
-        });
+    ReadStatus save = null;
+    try {
+      save = readStatusRepository.findByUserIdAndChannelId(user.getId(), channel.getId())
+          .orElseGet(() -> {
+            ReadStatus rs = ReadStatus.builder().user(user).channel(channel)
+                .lastReadAt(Instant.now())
+                .build();
+            return readStatusRepository.save(rs);
+          });
+    } catch (Exception e) {
+      throw ReadStatusSaveFailedException.withMessage(e.getMessage());
+    }
     return readStatusMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
   public ReadStatusDTO findByReadStatusId(UUID readStatusId) {
-    ReadStatus save = readStatusRepository.findById(readStatusId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
+    ReadStatus save = readStatusRepository.findById(readStatusId)
+        .orElseThrow(ReadStatusNotFoundException::new);
     return readStatusMapper.toDto(save);
   }
 
@@ -74,8 +79,8 @@ public class BasicReadStatusService implements ReadStatusService {
   @Transactional
   public ReadStatusDTO updateReadStatus(UUID readStatusId, ReadStatusUpdateRequest request) {
     // 1. 호환성 체크
-    ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 상태정보입니다."));
+    ReadStatus readStatus = readStatusRepository.findById(readStatusId)
+        .orElseThrow(ReadStatusNotFoundException::new);
 
     readStatus.updateLastReadAt(request.newLastReadAt());
 
@@ -89,7 +94,7 @@ public class BasicReadStatusService implements ReadStatusService {
   @Transactional
   public void delete(UUID readStatusId) {
     if (!readStatusRepository.existsById(readStatusId)) {
-      throw new NoSuchElementException("존재하지 않는 상태정보입니다.");
+      throw new ReadStatusNotFoundException();
     }
     readStatusRepository.deleteById(readStatusId);
   }

@@ -8,6 +8,11 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.message.InvalidMessageParameterException;
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -53,39 +58,32 @@ public class BasicMessageService implements MessageService {
     // 1. 호환성 체크
     User user = userRepository.findById(messageCreateRequest.authorId()).orElseThrow(() -> {
       log.warn("존재하지 않는 회원 메시지 생성 시도");
-      return new NoSuchElementException("존재하지 않는 회원입니다.");
+      return new UserNotFoundException();
     });
 
     Channel channel = channelRepository.findById(messageCreateRequest.channelId())
         .orElseThrow(() -> {
           log.warn("존재하지 않는 채널 메시지 생성 시도");
-          return new NoSuchElementException("존재하지 않는 채널입니다.");
+          return new ChannelNotFoundException();
         });
 
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
     List<BinaryContent> attachmentIds = attachments == null ? List.of()
         : attachments.stream().filter(file -> file != null && !file.isEmpty()).map(file -> {
-          BinaryContent content = BinaryContent.builder()
-              .fileName(file.getOriginalFilename())
-              .contentType(file.getContentType())
-              .size(file.getSize())
-              .build();
+          BinaryContent content = BinaryContent.builder().fileName(file.getOriginalFilename())
+              .contentType(file.getContentType()).size(file.getSize()).build();
 
           BinaryContent saved = binaryContentRepository.save(content);
           try {
             binaryContentStorage.save(saved.getId(), file.getBytes());
           } catch (IOException e) {
-            throw new UncheckedIOException("스토리지에 추가할 수 없습니다 : " + e.getMessage(), e);
+            throw BinaryContentSaveFailedException.withMessage(e.getMessage());
           }
           return saved;
         }).toList();
 
-    Message message = Message.builder()
-        .author(user)
-        .channel(channel)
-        .content(messageCreateRequest.content())
-        .attachments(attachmentIds)
-        .build();
+    Message message = Message.builder().author(user).channel(channel)
+        .content(messageCreateRequest.content()).attachments(attachmentIds).build();
 
     log.info("생성할 메시지 내용='{}'", message.getContent());
     try {
@@ -94,15 +92,14 @@ public class BasicMessageService implements MessageService {
       return messageMapper.toDto(save);
     } catch (Exception e) {
       log.error("메시지 생성 실패 내용='{}'", message.getContent(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidMessageParameterException.withMessage(e.getMessage());
     }
   }
 
   @Override
   @Transactional(readOnly = true)
   public MessageDTO findByMessageId(UUID messageId) {
-    Message save = messageRepository.findById(messageId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 메시지입니다."));
+    Message save = messageRepository.findById(messageId).orElseThrow(MessageNotFoundException::new);
     return messageMapper.toDto(save);
   }
 
@@ -110,12 +107,12 @@ public class BasicMessageService implements MessageService {
   @Transactional(readOnly = true)
   public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
-    channelRepository.findById(channelId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 채널입니다."));
+    channelRepository.findById(channelId).orElseThrow(MessageNotFoundException::new);
 
-    Slice<Message> slice = (cursor != null)
-        ? messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId, cursor, pageable)
-        : messageRepository.findAllByChannelIdWithPageable(channelId, pageable);
+    Slice<Message> slice =
+        (cursor != null) ? messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId,
+            cursor, pageable)
+            : messageRepository.findAllByChannelIdWithPageable(channelId, pageable);
 
     List<MessageDTO> dtoList = slice.getContent().stream().map(messageMapper::toDto).toList();
 
@@ -143,7 +140,7 @@ public class BasicMessageService implements MessageService {
       return messageMapper.toDto(save);
     } catch (Exception e) {
       log.error("메시지 업데이트 실패 내용='{}'", message.getContent(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidMessageParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -163,7 +160,7 @@ public class BasicMessageService implements MessageService {
       log.debug("메시지 삭제 완료 아이디='{}'", message.getId());
     } catch (Exception e) {
       log.error("메시지 삭제 실패", e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidMessageParameterException.withMessage(e.getMessage());
     }
   }
 }

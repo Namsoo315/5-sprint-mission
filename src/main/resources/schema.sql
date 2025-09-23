@@ -105,12 +105,12 @@ CREATE TABLE message_attachments
             ON DELETE CASCADE
 );
 
--- 1. 기존 데이터 삭제 (초기화)
--- ===============================
-TRUNCATE TABLE message_attachments CASCADE;
-TRUNCATE TABLE messages CASCADE;
-TRUNCATE TABLE read_statuses CASCADE;
-TRUNCATE TABLE channels CASCADE;
-TRUNCATE TABLE user_statuses CASCADE;
+-- -- 1. 기존 데이터 삭제 (초기화)
+-- -- ===============================
+-- TRUNCATE TABLE message_attachments CASCADE;
+-- TRUNCATE TABLE messages CASCADE;
+-- TRUNCATE TABLE read_statuses CASCADE;
+-- TRUNCATE TABLE channels CASCADE;
+-- TRUNCATE TABLE user_statuses CASCADE;
 TRUNCATE TABLE users CASCADE;
 TRUNCATE TABLE binary_contents CASCADE;

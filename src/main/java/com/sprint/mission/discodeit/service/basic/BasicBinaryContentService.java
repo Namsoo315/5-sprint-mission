@@ -3,6 +3,10 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.request.BinaryCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentDeleteFailedException;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoundException;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -33,8 +37,13 @@ public class BasicBinaryContentService implements BinaryContentService {
         .size(request.size())
         .build();
 
-    BinaryContent save = binaryContentRepository.save(binaryContent);
-    binaryContentStorage.save(save.getId(), request.bytes());
+    BinaryContent save = null;
+    try {
+      save = binaryContentRepository.save(binaryContent);
+      binaryContentStorage.save(save.getId(), request.bytes());
+    } catch (Exception e) {
+      throw BinaryContentSaveFailedException.withMessage(e.getMessage());
+    }
 
     return binaryContentMapper.toDto(save);
   }
@@ -42,8 +51,8 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Override
   @Transactional(readOnly = true)
   public BinaryContentDTO findByBinaryContentId(UUID binaryContentId) {
-    BinaryContent save = binaryContentRepository.findById(binaryContentId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 파일입니다."));
+    BinaryContent save = binaryContentRepository.findById(binaryContentId)
+        .orElseThrow(BinaryContentNotFoundException::new);
     return binaryContentMapper.toDto(save);
 
   }
@@ -59,7 +68,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Transactional
   public void delete(UUID binaryContentId) {
     if (!binaryContentRepository.existsById(binaryContentId)) {
-      throw new NoSuchElementException("존재하지 않는 파일입니다.");
+      throw new BinaryContentDeleteFailedException();
     }
     binaryContentRepository.deleteById(binaryContentId);
   }

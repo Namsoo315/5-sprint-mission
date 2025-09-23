@@ -7,6 +7,10 @@ import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.InvalidChannelParameterException;
+import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateForbiddenException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -51,7 +55,7 @@ public class BasicChannelService implements ChannelService {
       return channelMapper.toDto(save);
     } catch (Exception e) {
       log.error("Public 채널 생성 실패 이름={}", channel.getName(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidChannelParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -81,7 +85,7 @@ public class BasicChannelService implements ChannelService {
       return channelMapper.toDto(save);
     } catch (Exception e) {
       log.error("Private 채널 생성 실패 이름={}", channel.getName(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidChannelParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -91,8 +95,7 @@ public class BasicChannelService implements ChannelService {
   public ChannelDTO findByChannelId(UUID channelId) {
     // 1. 호환성 확인
     Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 채널입니다."));
-
+        .orElseThrow(InvalidChannelParameterException::new);
     return channelMapper.toDto(channel);
   }
 
@@ -101,7 +104,7 @@ public class BasicChannelService implements ChannelService {
   public List<ChannelDTO> findAllByUserId(UUID userId) {
     // 호환성 체크
     userRepository.findById(userId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+        .orElseThrow(UserNotFoundException::new);
 
     // 1. Private 채널은 User가 참여한 채널만 조회하기 위한 ChannelId를 List화 시킴.
     List<Channel> subscribeChannels = readStatusRepository.findAllByUserId(userId).stream()
@@ -120,11 +123,11 @@ public class BasicChannelService implements ChannelService {
   public ChannelDTO updateChannel(UUID channelId, ChannelUpdateRequest request) {
     Channel channel = channelRepository.findById(channelId).orElseThrow(() -> {
       log.warn("존재하지 않는 채널 업데이트 시도 이름={}", request.newName());
-      return new NoSuchElementException("존재하지 않는 채널입니다.");
+      return new ChannelNotFoundException();
     });
 
     if (channel.getType() == ChannelType.PRIVATE) {
-      throw new IllegalArgumentException("PRIVATE 채널은 수정할 수 없습니다.");
+      throw new PrivateChannelUpdateForbiddenException();
     }
 
     log.info("업데이트할 Public 채널 이름={}", channel.getName());
@@ -141,7 +144,7 @@ public class BasicChannelService implements ChannelService {
       return channelMapper.toDto(save);
     } catch (Exception e) {
       log.error("Public 채널 업데이트 실패 이름={}", channel.getName(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidChannelParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -152,7 +155,7 @@ public class BasicChannelService implements ChannelService {
     // 관련 도메인 같이 삭제 Channel, Message, ReadStatus
     if (!channelRepository.existsById(channelId)) {
       log.warn("존재하지 않는 채널 삭제 시도");
-      throw new NoSuchElementException("존재하지 않는 채널 입니다");
+      throw new ChannelNotFoundException();
     }
 
     log.info("삭제 시도중...");
@@ -163,7 +166,7 @@ public class BasicChannelService implements ChannelService {
       log.debug("채널 삭제 완료 아이디 ={}", channelId);
     } catch (Exception e) {
       log.error("채널 삭제 실패", e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidChannelParameterException.withMessage(e.getMessage());
     }
   }
 }

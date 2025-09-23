@@ -3,10 +3,10 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.AuthLoginRequest;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.AuthService;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,11 @@ public class BasicAuthService implements AuthService {
 
     // 1-1. username과 일치하는 유저가 있는지 확인
     User user = userRepository.findByUsername(request.username()).orElseThrow(
-        () -> new NoSuchElementException("아이디가 일치하지 않습니다."));
+        () -> InvalidUserCredentialsException.wrongUsername(request.username()));
 
     // 1-2. password과 일치하는지 확인
     if (!user.getPassword().equals(request.password())) {
-      throw new NoSuchElementException("비밀번호가 일치하지 않습니다.");
+      throw InvalidUserCredentialsException.wrongPassword(request.password());
     }
 
     // 2. DTO를 통한 username, email 보내줌.
