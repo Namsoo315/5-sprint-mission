@@ -14,8 +14,7 @@ public enum ErrorCode {
   INVALID_USER_PARAMETER("잘못된 사용자 파라미터입니다."),
 
   // Channel 관련 에러 코드
-  PUBLIC_CHANNEL_NOT_FOUND("Public 채널을 찾을 수 없습니다."),
-  PRIVATE_CHANNEL_NOT_FOUND("Private 채널을 찾을 수 없습니다."),
+  CHANNEL_NOT_FOUND("채널을 찾을 수 없습니다."),
   DUPLICATE_CHANNEL("이미 존재하는 채널입니다."),
   INVALID_CHANNEL_PARAMETER("잘못된 채널 파라미터입니다."),
   PRIVATE_CHANNEL_UPDATE_FORBIDDEN("Private 채널은 수정할 수 없습니다."),

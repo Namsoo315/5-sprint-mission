@@ -4,7 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record UserCreateRequest(
     @NotBlank(message = "사용자 이름은 필수입니다.")
     @Size(min = 4, max = 20, message = "사용자 아이디는 최소 4자에서 최대 20자까지 가능합니다.")

@@ -6,6 +6,11 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
+import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
+import com.sprint.mission.discodeit.exception.user.InvalidUserParameterException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -42,12 +47,12 @@ public class BasicUserService implements UserService {
     // 1. username, email 호환성 확인
     if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
       log.warn("이미 같은 아이디가 존재합니다. username={}", userCreateRequest.username());
-      throw new IllegalArgumentException("같은 아이디가 존재합니다.");
+      throw DuplicateUserException.withUsername(userCreateRequest.username());
     }
 
     if (userRepository.findByEmail(userCreateRequest.email()).isPresent()) {
       log.warn("이미 같은 이메일이 존재합니다. email={}", userCreateRequest.email());
-      throw new IllegalArgumentException("같은 이메일이 존재합니다.");
+      throw DuplicateUserException.withEmail(userCreateRequest.email());
     }
 
     BinaryContent content = null;
@@ -63,7 +68,7 @@ public class BasicUserService implements UserService {
       try {
         binaryContentStorage.save(save.getId(), profile.getBytes());
       } catch (IOException e) {
-        throw new UncheckedIOException("스토리지에 추가할 수 없습니다: " + e.getMessage(), e);
+        throw BinaryContentSaveFailedException.withMessage(e.getMessage());
       }
     }
 
@@ -91,7 +96,7 @@ public class BasicUserService implements UserService {
       return userMapper.toDto(save);
     } catch (Exception e) {
       log.error("계정 생성에 실패하였습니다. ={}", result.getUsername(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidUserParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -100,15 +105,15 @@ public class BasicUserService implements UserService {
   public UserDTO findByUserId(UUID userId) {
     // 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
     User save = userRepository.findById(userId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+        .orElseThrow(UserNotFoundException::new);
     return userMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<UserDTO> findAll() {
-    List<User> saves = userRepository.findAll();
-    return userMapper.toDto(saves);
+    List<User> find = userRepository.findAll();
+    return userMapper.toDto(find);
   }
 
   @Override
@@ -118,7 +123,7 @@ public class BasicUserService implements UserService {
     // 1. User 호환성 체크
     User user = userRepository.findById(userId).orElseThrow(() -> {
       log.warn("존재하지 않는 회원 업데이트 시도 userId={}", userId);
-      return new NoSuchElementException("존재하지 않는 회원입니다.");
+      return new UserNotFoundException();
     });
 
     BinaryContent savedContent = null;
@@ -151,7 +156,7 @@ public class BasicUserService implements UserService {
       return userMapper.toDto(save);
     } catch (Exception e) {
       log.error("계정 업데이트에 실패하였습니다. ={}", user.getUsername(), e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidUserParameterException.withMessage(e.getMessage());
     }
   }
 
@@ -176,7 +181,7 @@ public class BasicUserService implements UserService {
       log.debug("계정 삭제 완료 username={}", user.getId());
     } catch (Exception e) {
       log.error("계정 삭제 실패 ", e);
-      throw new IllegalArgumentException(e.getMessage());
+      throw InvalidUserCredentialsException.withMessage(e.getMessage());
     }
   }
 }

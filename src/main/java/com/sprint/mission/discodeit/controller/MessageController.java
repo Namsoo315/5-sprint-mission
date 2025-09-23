@@ -109,7 +109,7 @@ public class MessageController {
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
 
-/*  // 테스트용 컨트롤러
+  // 테스트용 컨트롤러
   @GetMapping("/cursor")
   public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelIdCursor(
       @RequestParam UUID channelId,
@@ -136,6 +136,4 @@ public class MessageController {
         pageable);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
-
-  */
 }
