@@ -23,6 +23,8 @@ class ChannelRepositoryTest {
 
   @BeforeEach
   void setUp() {
+    channelRepository.deleteAll();
+    
     testChannel = Channel.builder()
         .name("testChannel")
         .description("테스트 채널")

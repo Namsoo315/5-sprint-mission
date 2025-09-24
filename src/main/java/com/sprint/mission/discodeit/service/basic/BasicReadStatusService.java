@@ -62,14 +62,6 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   @Transactional(readOnly = true)
-  public ReadStatusDTO findByReadStatusId(UUID readStatusId) {
-    ReadStatus save = readStatusRepository.findById(readStatusId)
-        .orElseThrow(ReadStatusNotFoundException::new);
-    return readStatusMapper.toDto(save);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
   public List<ReadStatusDTO> findAllByUserId(UUID userId) {
     List<ReadStatus> saves = readStatusRepository.findAllByUserId(userId);
     return readStatusMapper.toDto(saves);

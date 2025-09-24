@@ -16,10 +16,8 @@ public interface MessageService {
   MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
       List<MultipartFile> attachments) throws IOException;
 
-  MessageDTO findByMessageId(UUID messageId);
-
   PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor, Pageable pageable);
-  
+
   MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request);
 
   void deleteMessage(UUID messageId);
