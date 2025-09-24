@@ -16,15 +16,15 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import java.time.Instant;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class MessageControllerTest {
@@ -76,12 +76,12 @@ class MessageControllerTest {
 
 
   @Test
-  @Transactional
+  @DisplayName("10000개의 더미데이터로 페이징 ")
   void cursorPagingPerformance() throws Exception {
     Instant cursorInstant = Instant.now().minusSeconds(3);
 
     long start = System.currentTimeMillis();
-    mockMvc.perform(get("/api/messages")   // ✅ 커서 전용 엔드포인트
+    mockMvc.perform(get("/api/messages")
             .param("channelId", channel.getId().toString())
             .param("cursor", cursorInstant.toString())
             .param("size", "50"))

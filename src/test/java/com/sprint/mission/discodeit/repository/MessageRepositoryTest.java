@@ -35,6 +35,7 @@ class MessageRepositoryTest {
 
   @BeforeEach
   void setUp() {
+    messageRepository.deleteAll();
     // 1. 테스트용 User 생성
     testUser1 = User.builder()
         .username("testUser1")

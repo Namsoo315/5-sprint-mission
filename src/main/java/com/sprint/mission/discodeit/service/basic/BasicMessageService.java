@@ -107,7 +107,7 @@ public class BasicMessageService implements MessageService {
   @Transactional(readOnly = true)
   public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
-    channelRepository.findById(channelId).orElseThrow(MessageNotFoundException::new);
+    channelRepository.findById(channelId).orElseThrow(ChannelNotFoundException::new);
 
     Slice<Message> slice =
         (cursor != null) ? messageRepository.findAllByChannelIdWithAuthorAndAttachments(channelId,

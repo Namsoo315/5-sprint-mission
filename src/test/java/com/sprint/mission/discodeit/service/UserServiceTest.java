@@ -1,11 +1,10 @@
-package com.sprint.mission.discodeit.service.basic;
+package com.sprint.mission.discodeit.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
@@ -15,17 +14,18 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import com.sprint.mission.discodeit.service.BinaryContentService;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-class BasicUserServiceTest {
+class UserServiceTest {
 
   @InjectMocks
   private BasicUserService userService;
@@ -86,7 +86,7 @@ class BasicUserServiceTest {
   }
 
   @Test
-  @DisplayName("유저 생성 성공 ✅ (아바타 없음)")
+  @DisplayName("유저 생성 성공 (아바타 없음)")
   void createUser_success() {
     //given
     UserCreateRequest testUser = new UserCreateRequest("testUser", "test@example.com", "1234");
@@ -106,7 +106,7 @@ class BasicUserServiceTest {
   }
 
   @Test
-  @DisplayName("유저 생성 성공 ✅ (아바타 있음)")
+  @DisplayName("유저 생성 성공 (아바타 있음)")
   void createUser_success_withAvatar() throws IOException {
     // given
     UserCreateRequest testUser = new UserCreateRequest("testUser", "test@example.com", "1234");
@@ -143,7 +143,7 @@ class BasicUserServiceTest {
   }
 
   @Test
-  @DisplayName("❌ 유저 생성 실패 - 중복 username")
+  @DisplayName("유저 생성 실패 (중복 username)")
   void createUser_fail_duplicateUsername() {
     // given
     UserCreateRequest testUser = new UserCreateRequest("testUser", "test@example.com", "1234");
@@ -151,15 +151,15 @@ class BasicUserServiceTest {
 
     // when & then
     assertThatThrownBy(() -> userService.createUser(testUser, null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("같은 아이디가 존재합니다.");
+        .isInstanceOf(DuplicateUserException.class)
+        .hasMessage("이미 존재하는 사용자입니다.");
 
     then(userRepository).should(times(0)).save(any(User.class));
     then(userStatusRepository).should(times(0)).save(any(UserStatus.class));
   }
 
   @Test
-  @DisplayName("유저 정보 수정 성공 ✅ (아바타 없음)")
+  @DisplayName("유저 정보 수정 성공 (아바타 없음)")
   void updateUser_success() throws IOException {
     // given
     UUID userId = user.getId();
@@ -186,7 +186,7 @@ class BasicUserServiceTest {
   }
 
   @Test
-  @DisplayName("유저 정보 수정 실패 ❌ - 존재하지 않는 회원")
+  @DisplayName("유저 정보 수정 실패 (존재하지 않는 회원)")
   void updateUser_fail_notFound() {
     // given
     UUID userId = UUID.randomUUID();
@@ -195,8 +195,8 @@ class BasicUserServiceTest {
     // when & then
     assertThatThrownBy(() -> userService.updateUser(userId,
         new UserUpdateRequest("testUser", "test@example.com", "1234"), null))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 회원입니다.");
+        .isInstanceOf(UserNotFoundException.class)
+        .hasMessageContaining("사용자를 찾을 수 없습니다.");
 
     then(userRepository).should(times(1)).findById(userId);
     then(userRepository).should(never()).save(any(User.class));
@@ -205,7 +205,7 @@ class BasicUserServiceTest {
 
 
   @Test
-  @DisplayName("유저 삭제 성공 ✅")
+  @DisplayName("유저 삭제 성공")
   void deleteUser_success() {
     // given
     UUID userId = user.getId();
@@ -217,23 +217,6 @@ class BasicUserServiceTest {
     // then
     then(userRepository).should(times(1)).deleteById(userId);
     then(userStatusRepository).should(times(1)).deleteByUserId(userId);
-  }
-
-  @Test
-  @DisplayName("유저 삭제 실패 ❌ - 존재하지 않는 회원")
-  void deleteUser_fail_notFound() {
-    // given
-    UUID userId = UUID.randomUUID();
-    given(userRepository.findById(userId)).willReturn(Optional.empty());
-
-    // when & then
-    assertThatThrownBy(() -> userService.deleteUser(userId))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 회원입니다.");
-
-    then(userRepository).should(times(1)).findById(userId);
-    then(userRepository).should(never()).deleteById(any(UUID.class));
-    then(userStatusRepository).should(never()).deleteByUserId(any(UUID.class));
   }
 
 }

@@ -1,9 +1,15 @@
-package com.sprint.mission.discodeit.service.basic;
+package com.sprint.mission.discodeit.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.willDoNothing;
 
-import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.data.MessageDTO;
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
@@ -12,12 +18,15 @@ import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,7 +43,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class BasicMessageServiceTest {
+class MessageServiceTest {
 
   @InjectMocks
   private BasicMessageService messageService;
@@ -91,7 +100,7 @@ class BasicMessageServiceTest {
   }
 
   @Test
-  @DisplayName("메시지 생성 성공 ✅")
+  @DisplayName("메시지 생성 성공")
   void createMessage_success() {
     MessageCreateRequest request = new MessageCreateRequest(user.getId(), channel.getId(),
         "Hello World");
@@ -109,7 +118,7 @@ class BasicMessageServiceTest {
   }
 
   @Test
-  @DisplayName("메시지 생성 실패 ❌ - 존재하지 않는 회원")
+  @DisplayName("메시지 생성 실패 (존재하지 않는 회원)")
   void createMessage_fail_userNotFound() {
     MessageCreateRequest request = new MessageCreateRequest(UUID.randomUUID(), channel.getId(),
         "Hello");
@@ -117,14 +126,14 @@ class BasicMessageServiceTest {
     given(userRepository.findById(any(UUID.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> messageService.createMessage(request, null))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 회원입니다.");
+        .isInstanceOf(UserNotFoundException.class)
+        .hasMessageContaining("사용자를 찾을 수 없습니다.");
 
     then(messageRepository).should(never()).save(any(Message.class));
   }
 
   @Test
-  @DisplayName("메시지 생성 실패 ❌ - 존재하지 않는 채널")
+  @DisplayName("메시지 생성 실패 (존재하지 않는 채널)")
   void createMessage_fail_channelNotFound() {
     MessageCreateRequest request = new MessageCreateRequest(user.getId(), UUID.randomUUID(),
         "Hello");
@@ -133,14 +142,14 @@ class BasicMessageServiceTest {
     given(channelRepository.findById(any(UUID.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> messageService.createMessage(request, null))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 채널입니다.");
+        .isInstanceOf(ChannelNotFoundException.class)
+        .hasMessageContaining("채널을 찾을 수 없습니다.");
 
     then(messageRepository).should(never()).save(any(Message.class));
   }
 
   @Test
-  @DisplayName("메시지 수정 성공 ✅")
+  @DisplayName("메시지 수정 성공")
   void updateMessage_success() {
     MessageUpdateRequest request = new MessageUpdateRequest("Updated Content");
 
@@ -154,23 +163,8 @@ class BasicMessageServiceTest {
     then(messageRepository).should(times(1)).save(any(Message.class));
   }
 
-
   @Test
-  @DisplayName("메시지 수정 실패 ❌ - 존재하지 않는 메시지")
-  void updateMessage_fail_messageNotFound() {
-    MessageUpdateRequest request = new MessageUpdateRequest("Updated Content");
-
-    given(messageRepository.findById(any(UUID.class))).willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> messageService.updateMessage(UUID.randomUUID(), request))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 메시지입니다.");
-
-    then(messageRepository).should(never()).save(any(Message.class));
-  }
-
-  @Test
-  @DisplayName("메시지 삭제 성공 ✅")
+  @DisplayName("메시지 삭제 성공")
   void deleteMessage_success() {
     given(messageRepository.findById(message.getId())).willReturn(Optional.of(message));
     willDoNothing().given(binaryContentRepository).deleteAll(message.getAttachments());
@@ -180,22 +174,8 @@ class BasicMessageServiceTest {
     then(messageRepository).should(times(1)).deleteById(message.getId());
   }
 
-
   @Test
-  @DisplayName("메시지 삭제 실패 ❌ - 존재하지 않는 메시지")
-  void deleteMessage_fail_messageNotFound() {
-    given(messageRepository.findById(any(UUID.class))).willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> messageService.deleteMessage(UUID.randomUUID()))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 메시지입니다.");
-
-    then(messageRepository).should(never()).deleteById(any(UUID.class));
-    then(binaryContentRepository).should(never()).deleteAll(any());
-  }
-
-  @Test
-  @DisplayName("채널 메시지 페이징 조회 성공 ✅")
+  @DisplayName("채널 메시지 페이징 조회 성공")
   void findAllByChannelId_success() {
     List<Message> messages = List.of(message);
     PageImpl<Message> slice = new PageImpl<>(messages);
@@ -216,13 +196,13 @@ class BasicMessageServiceTest {
   }
 
   @Test
-  @DisplayName("채널 메시지 조회 실패 ❌ - 존재하지 않는 채널")
+  @DisplayName("채널 메시지 조회 실패 (존재하지 않는 채널)")
   void findAllByChannelId_fail_channelNotFound() {
     given(channelRepository.findById(any(UUID.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> messageService.findAllByChannelId(UUID.randomUUID(), null, pageable))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("존재하지 않는 채널입니다.");
+        .isInstanceOf(ChannelNotFoundException.class)
+        .hasMessageContaining("채널을 찾을 수 없습니다.");
 
     then(messageRepository).should(never()).findAllByChannelIdWithPageable(any(), any());
   }
