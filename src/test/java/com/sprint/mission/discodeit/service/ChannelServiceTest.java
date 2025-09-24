@@ -57,6 +57,8 @@ class ChannelServiceTest {
 
   @BeforeEach
   void setUp() {
+    channelRepository.deleteAll();
+    
     publicChannel = Channel.builder().id(UUID.randomUUID()).type(ChannelType.PUBLIC)
         .name("publicChannel").description("Public Desc").build();
 

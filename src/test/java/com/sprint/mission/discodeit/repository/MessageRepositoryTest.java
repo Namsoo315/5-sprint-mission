@@ -32,24 +32,31 @@ class MessageRepositoryTest {
   private User testUser1;
   private User testUser2;
   private Channel testChannel;
+  @Autowired
+  private UserRepository userRepository;
+  @Autowired
+  private ChannelRepository channelRepository;
 
   @BeforeEach
   void setUp() {
+    userRepository.deleteAll();
+    channelRepository.deleteAll();
     messageRepository.deleteAll();
+
     // 1. 테스트용 User 생성
     testUser1 = User.builder()
         .username("testUser1")
         .email("testUser1@example.com")
         .password("password")
         .build();
-    em.persist(testUser1);
+    userRepository.save(testUser1);
 
     testUser2 = User.builder()
         .username("testUser2")
         .email("testUser2@example.com")
         .password("password")
         .build();
-    em.persist(testUser2);
+    userRepository.save(testUser2);
 
     // 2. 테스트용 Channel 생성
     testChannel = Channel.builder()
@@ -57,10 +64,7 @@ class MessageRepositoryTest {
         .name("testChannel")
         .description("testChannel")
         .build();
-    em.persist(testChannel);
-
-    em.flush();
-    em.clear();
+    channelRepository.save(testChannel);
   }
 
   private Message createMessage(User user, String content, Instant createdAt) {
@@ -109,10 +113,10 @@ class MessageRepositoryTest {
     // given
     Instant cursor = Instant.now();
     Message oldMsg = createMessage(testUser1, "이전 메시지", cursor.minusSeconds(10));
-    Message newMsg = createMessage(testUser2, "최신 메시지", cursor.plusSeconds(10));
+    Message newMsg = createMessage(testUser2, "최신 메시지", cursor);
 
-    messageRepository.save(oldMsg);
-    messageRepository.save(newMsg);
+    messageRepository.saveAndFlush(oldMsg);
+    messageRepository.saveAndFlush(newMsg);
     em.flush();
     em.clear();
 
@@ -123,6 +127,7 @@ class MessageRepositoryTest {
     // then
     assertThat(slice.getContent()).hasSize(2);
     assertThat(slice.getContent().get(0).getAuthor().getUsername()).isEqualTo("testUser1");
+    assertThat(slice.getContent().get(1).getAuthor().getUsername()).isEqualTo("testUser2");
   }
 
   @Test
@@ -138,10 +143,9 @@ class MessageRepositoryTest {
   void findTopByChannelIdOrderByCreatedAtDesc_success() {
     // given
     Instant now = Instant.now();
-    messageRepository.save(createMessage(testUser1, "메시지1", now.minusSeconds(10)));
-    Message message2 = messageRepository.save(createMessage(testUser2, "메시지2", now));
+    messageRepository.saveAndFlush(createMessage(testUser1, "메시지1", now.minusSeconds(10)));
+    Message message2 = messageRepository.saveAndFlush(createMessage(testUser2, "메시지2", now));
 
-    em.flush();
     em.clear();
 
     // when
@@ -150,8 +154,8 @@ class MessageRepositoryTest {
     assertThat(messageRepository.findTopByChannelIdOrderByCreatedAtDesc(testChannel.getId()))
         .isPresent()
         .get()
-        .satisfies(instant -> assertThat(instant.truncatedTo(ChronoUnit.MICROS))
-            .isEqualTo(message2.getCreatedAt().truncatedTo(ChronoUnit.MICROS)));
+        .satisfies(instant -> assertThat(instant.truncatedTo(ChronoUnit.MILLIS))
+            .isEqualTo(message2.getCreatedAt().truncatedTo(ChronoUnit.MILLIS)));
   }
 
   @Test

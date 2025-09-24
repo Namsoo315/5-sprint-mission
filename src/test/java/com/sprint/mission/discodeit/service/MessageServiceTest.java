@@ -19,6 +19,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.message.InvalidMessageParameterException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
@@ -76,6 +77,11 @@ class MessageServiceTest {
 
   @BeforeEach
   void setUp() {
+    binaryContentRepository.deleteAll();
+    channelRepository.deleteAll();
+    messageRepository.deleteAll();
+    userRepository.deleteAll();
+
     user = User.builder().id(UUID.randomUUID()).username("testUser").build();
     UserDTO userDTO = new UserDTO(user.getId(), "testUser", "test@example.com", null, true);
 
@@ -149,6 +155,21 @@ class MessageServiceTest {
   }
 
   @Test
+  @DisplayName("메시지 생성 실패 (mapper 예외)")
+  void createMessage_fail_mapperException() {
+    MessageCreateRequest request = new MessageCreateRequest(user.getId(), channel.getId(), "Hello");
+
+    given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+    given(channelRepository.findById(channel.getId())).willReturn(Optional.of(channel));
+    given(messageRepository.save(any(Message.class))).willReturn(message);
+    given(messageMapper.toDto(message)).willThrow(new RuntimeException("Mapper Error"));
+
+    assertThatThrownBy(() -> messageService.createMessage(request, null))
+        .isInstanceOf(InvalidMessageParameterException.class)
+        .hasMessageContaining("잘못된 메시지 파라미터입니다.");
+  }
+
+  @Test
   @DisplayName("메시지 수정 성공")
   void updateMessage_success() {
     MessageUpdateRequest request = new MessageUpdateRequest("Updated Content");
@@ -161,6 +182,20 @@ class MessageServiceTest {
 
     assertThat(result).isEqualTo(messageDTO);
     then(messageRepository).should(times(1)).save(any(Message.class));
+  }
+
+  @Test
+  @DisplayName("메시지 수정 실패 (존재하지 않는 메시지)")
+  void updateMessage_fail_messageNotFound() {
+    MessageUpdateRequest request = new MessageUpdateRequest("Updated Content");
+
+    given(messageRepository.findById(any(UUID.class))).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> messageService.updateMessage(UUID.randomUUID(), request))
+        .isInstanceOf(NoSuchElementException.class)
+        .hasMessageContaining("존재하지 않는 메시지입니다.");
+
+    then(messageRepository).should(never()).save(any(Message.class));
   }
 
   @Test

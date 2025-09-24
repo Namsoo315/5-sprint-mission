@@ -65,6 +65,9 @@ class UserServiceTest {
 
   @BeforeEach
   void setUp() {
+    userRepository.deleteAll();
+    binaryContentRepository.deleteAll();
+    
     user = User.builder()
         .id(UUID.randomUUID())
         .username("testUser")
