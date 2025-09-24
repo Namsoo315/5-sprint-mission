@@ -157,6 +157,9 @@
 * [x] Client 설정: `spring.boot.admin.client.url`
 * [x] Admin 대시보드에서 인스턴스 등록 및 메트릭 확인
 
+<img width="1612" height="367" alt="{B3EED0BF-31A3-4CB6-BF3B-7E1670FA4FA1}" src="https://github.com/user-attachments/assets/5b89befe-693c-402c-981b-4ecfffeb6fd4" />
+<img width="1807" height="451" alt="{37C19C9B-B14A-41C9-88AF-F7F2BAE364DB}" src="https://github.com/user-attachments/assets/2ce5e68b-85ec-4da7-b2ce-6e25f6198aa9" />
+
 ---
 
 ### 테스트 커버리지 관리
@@ -164,6 +167,11 @@
 * [x] JaCoCo 플러그인 추가
 * [x] 테스트 실행 후 HTML, XML 리포트 생성 (`build/reports/jacoco`)
 * [x] `com.sprint.mission.discodeit.service.basic` 패키지 기준 **60% 이상 커버리지** 달성
+<img width="1244" height="319" alt="{744D81D5-6885-40EE-87EF-3F39E1C00A2B}" src="https://github.com/user-attachments/assets/1c9cec78-1862-4543-9c13-7935270ec0de" />
+
+<img width="1078" height="566" alt="{16D26FD4-C833-4840-9F95-DCB7AECC5E0F}" src="https://github.com/user-attachments/assets/51349dc8-7abf-4d4e-a902-71c18e5ba6ed" />
+
+내가 만든 서비스의 모든 조건을 충족시켜야 하나?
 
 ---
 
