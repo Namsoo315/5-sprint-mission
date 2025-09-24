@@ -25,58 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasicUserStatusService implements UserStatusService {
 
   private final UserStatusRepository userStatusRepository;
-  private final UserRepository userRepository;
   private final UserStatusMapper userStatusMapper;
-
-  @Override
-  public UserStatusDTO createUserStatus(UserStatusCreateRequest request) {
-
-    // 1. 호환성 체크: User가 존재하지 않으면 예외 처리
-    User user = userRepository.findById(request.userId())
-        .orElseThrow(UserNotFoundException::new);
-
-    // 1-2. 같은 User와 관련된 UserStatus가 이미 존재하면 예외 처리
-    userStatusRepository.findByUserId(request.userId())
-        .ifPresent(us -> {
-          throw new UserStatusSaveFailedException();
-        });
-
-    // 2. 유저 상태정보 저장.
-    UserStatus userStatus = UserStatus.builder()
-        .user(user)
-        .lastActiveAt(request.lastActiveAt())
-        .build();
-
-    UserStatus save = userStatusRepository.save(userStatus);
-
-    return userStatusMapper.toDto(save);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public UserStatusDTO findByUserStatusId(UUID userStatusId) {
-    UserStatus save = userStatusRepository.findById(userStatusId)
-        .orElseThrow(UserStatusNotFoundException::new);
-    return userStatusMapper.toDto(save);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public List<UserStatusDTO> findAll() {
-    List<UserStatus> saves = userStatusRepository.findAll();
-    return userStatusMapper.toDto(saves);
-  }
-
-  @Override
-  @Transactional
-  public UserStatusDTO updateUserStatus(UUID userStatusId, UserStatusUpdateRequest request) {
-    // 1. 호환성 체크
-    UserStatus userStatus = userStatusRepository.findById(userStatusId).orElseThrow(
-        UserStatusNotFoundException::new);
-    UserStatus save = userStatusRepository.save(userStatus);
-
-    return userStatusMapper.toDto(save);
-  }
 
   @Override
   public UserStatusDTO updateByUserId(UUID userId, UserStatusUpdateRequest request) {

@@ -25,28 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasicBinaryContentService implements BinaryContentService {
 
   private final BinaryContentRepository binaryContentRepository;
-  private final BinaryContentStorage binaryContentStorage;
   private final BinaryContentMapper binaryContentMapper;
-
-  @Override
-  @Transactional
-  public BinaryContentDTO createBinaryContent(BinaryCreateRequest request) {
-    BinaryContent binaryContent = BinaryContent.builder()
-        .fileName(request.fileName())
-        .contentType(request.contentType())
-        .size(request.size())
-        .build();
-
-    BinaryContent save = null;
-    try {
-      save = binaryContentRepository.save(binaryContent);
-      binaryContentStorage.save(save.getId(), request.bytes());
-    } catch (Exception e) {
-      throw BinaryContentSaveFailedException.withMessage(e.getMessage());
-    }
-
-    return binaryContentMapper.toDto(save);
-  }
 
   @Override
   @Transactional(readOnly = true)

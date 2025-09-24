@@ -89,16 +89,6 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
-
-  @Override
-  @Transactional(readOnly = true)
-  public ChannelDTO findByChannelId(UUID channelId) {
-    // 1. 호환성 확인
-    Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(InvalidChannelParameterException::new);
-    return channelMapper.toDto(channel);
-  }
-
   @Override
   @Transactional(readOnly = true)
   public List<ChannelDTO> findAllByUserId(UUID userId) {

@@ -98,13 +98,6 @@ public class BasicMessageService implements MessageService {
 
   @Override
   @Transactional(readOnly = true)
-  public MessageDTO findByMessageId(UUID messageId) {
-    Message save = messageRepository.findById(messageId).orElseThrow(MessageNotFoundException::new);
-    return messageMapper.toDto(save);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
   public PageResponse<MessageDTO> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
     channelRepository.findById(channelId).orElseThrow(ChannelNotFoundException::new);
