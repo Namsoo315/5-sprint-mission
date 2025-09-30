@@ -7,9 +7,11 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/readStatuses")
 @Tag(name = "ReadStatus", description = "수신 정보 관련 API")
+@Slf4j
 public class ReadStatusController {
 
   private final ReadStatusService readStatusService;
@@ -37,7 +40,7 @@ public class ReadStatusController {
   })
   @PostMapping
   public ResponseEntity<ReadStatusDTO> createReadStatus(
-      @RequestBody ReadStatusCreateRequest readStatusCreateRequest) {
+      @RequestBody @Valid ReadStatusCreateRequest readStatusCreateRequest) {
     ReadStatusDTO readStatus = readStatusService.createReadStatus(readStatusCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(readStatus); // 201 Created
   }
@@ -52,7 +55,7 @@ public class ReadStatusController {
   @PatchMapping("/{readStatusId}")
   public ResponseEntity<ReadStatusDTO> modifyReadStatus(
       @PathVariable UUID readStatusId,
-      @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
+      @RequestBody @Valid ReadStatusUpdateRequest readStatusUpdateRequest) {
     ReadStatusDTO readStatus = readStatusService.updateReadStatus(readStatusId,
         readStatusUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(readStatus); // 200 OK

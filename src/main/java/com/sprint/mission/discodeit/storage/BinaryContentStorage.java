@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 public interface BinaryContentStorage {
 
   //바이너리 데이터의 저장/로드를 담당하는 컴포넌트입니다.
-  UUID put(UUID id, byte[] data);
+  UUID save(UUID id, byte[] data);
 
   //키 정보를 바탕으로 byte[] 데이터를 읽어 InputStream 타입으로 반환합니다.
   InputStream get(UUID id);

@@ -1,0 +1,36 @@
+spring:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-dev.sql
+  application:
+    name: discodeit
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
+  datasource:
+    url: jdbc:h2:mem:discodeit;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발은 update/create 편리
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+server:
+  port: 8081   # dev 서버 포트
+
+logging:
+  level:
+    root: debug
+    org.hibernate.sql: debug
+    org.hibernate.type: trace

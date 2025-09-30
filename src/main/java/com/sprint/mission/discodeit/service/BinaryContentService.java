@@ -7,8 +7,6 @@ import java.util.UUID;
 
 public interface BinaryContentService {
 
-  BinaryContentDTO createBinaryContent(BinaryCreateRequest request);
-
   BinaryContentDTO findByBinaryContentId(UUID binaryContentId);
 
   List<BinaryContentDTO> findAllByIdIn(List<UUID> attachmentIds);

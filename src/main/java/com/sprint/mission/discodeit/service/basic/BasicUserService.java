@@ -6,6 +6,11 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
+import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
+import com.sprint.mission.discodeit.exception.user.InvalidUserParameterException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -19,11 +24,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
 
@@ -39,11 +46,13 @@ public class BasicUserService implements UserService {
 
     // 1. username, email 호환성 확인
     if (userRepository.findByUsername(userCreateRequest.username()).isPresent()) {
-      throw new IllegalArgumentException("같은 아이디가 존재합니다.");
+      log.warn("이미 같은 아이디가 존재합니다. username={}", userCreateRequest.username());
+      throw DuplicateUserException.withUsername(userCreateRequest.username());
     }
 
     if (userRepository.findByEmail(userCreateRequest.email()).isPresent()) {
-      throw new IllegalArgumentException("같은 이메일이 존재합니다.");
+      log.warn("이미 같은 이메일이 존재합니다. email={}", userCreateRequest.email());
+      throw DuplicateUserException.withEmail(userCreateRequest.email());
     }
 
     BinaryContent content = null;
@@ -57,9 +66,9 @@ public class BasicUserService implements UserService {
 
       BinaryContent save = binaryContentRepository.save(content);
       try {
-        binaryContentStorage.put(save.getId(), profile.getBytes());
+        binaryContentStorage.save(save.getId(), profile.getBytes());
       } catch (IOException e) {
-        throw new UncheckedIOException("스토리지에 추가할 수 없습니다: " + e.getMessage(), e);
+        throw BinaryContentSaveFailedException.withMessage(e.getMessage());
       }
     }
 
@@ -71,16 +80,24 @@ public class BasicUserService implements UserService {
         .profile(content)
         .build();
 
-    User save = userRepository.save(result);
-
     UserStatus userStatus = UserStatus.builder()
         .user(result)
         .lastActiveAt(Instant.now())
         .build();
 
-    userStatusRepository.save(userStatus);
+    // log 추가
+    log.info("생성할 유저의 아이디 ={}", result.getUsername());
+    try {
+      User save = userRepository.save(result);
+      userStatusRepository.save(userStatus);
 
-    return userMapper.toDto(save);
+      log.debug("계정 생성 완료 ={}", save.getId());
+
+      return userMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("계정 생성에 실패하였습니다. ={}", result.getUsername(), e);
+      throw InvalidUserParameterException.withMessage(e.getMessage());
+    }
   }
 
   @Override
@@ -88,24 +105,29 @@ public class BasicUserService implements UserService {
   public UserDTO findByUserId(UUID userId) {
     // 1. 호환성 체크	user, userStatus Id(toDto가 함) 체크
     User save = userRepository.findById(userId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+        .orElseThrow(UserNotFoundException::new);
     return userMapper.toDto(save);
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<UserDTO> findAll() {
-    List<User> saves = userRepository.findAll();
-    return userMapper.toDto(saves);
+    List<User> find = userRepository.findAll();
+    return userMapper.toDto(find);
   }
 
   @Override
   @Transactional
   public UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
       MultipartFile profile) throws IOException {
+    // 1. User 호환성 체크
+    User user = userRepository.findById(userId).orElseThrow(() -> {
+      log.warn("존재하지 않는 회원 업데이트 시도 userId={}", userId);
+      return new UserNotFoundException();
+    });
 
     BinaryContent savedContent = null;
-    // 1. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
+    // 2. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
     if (profile != null && !profile.isEmpty()) {
       BinaryContent content = BinaryContent.builder()
           .fileName(profile.getOriginalFilename())
@@ -113,12 +135,8 @@ public class BasicUserService implements UserService {
           .size(profile.getSize())
           .build();
       savedContent = binaryContentRepository.save(content);
-      binaryContentStorage.put(savedContent.getId(), profile.getBytes());
+      binaryContentStorage.save(savedContent.getId(), profile.getBytes());
     }
-
-    // 2. User 호환성 체크
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
     // 3. Builder를 사용해서 profile 반영
     User updatedUser = user.toBuilder()
@@ -130,26 +148,40 @@ public class BasicUserService implements UserService {
         .password(userUpdateRequest.newPassword() != null ? userUpdateRequest.newPassword()
             : user.getPassword())
         .build();
-    User save = userRepository.save(updatedUser);
 
-    return userMapper.toDto(save);
+    log.info("업데이트할 유저의 아이디 ={}", updatedUser.getUsername());
+    try {
+      User save = userRepository.save(updatedUser);
+      log.debug("업데이트된 유저의 아이디 ={}", save.getId());
+      return userMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("계정 업데이트에 실패하였습니다. ={}", user.getUsername(), e);
+      throw InvalidUserParameterException.withMessage(e.getMessage());
+    }
   }
 
   @Override
   @Transactional
   public void deleteUser(UUID userId) {
+    log.info("계정을 삭제합니다. ={}", userId);
+    User user = userRepository.findById(userId).orElseThrow(() -> {
+      log.warn("존재하지 않는 회원 삭제 시도 userId={}", userId);
+      return new NoSuchElementException("존재하지 않는 회원입니다.");
+    });
 
-    // 1. 관련 도메인도 같이 삭제 User, UserStatus, BinaryContent
+    try {
+      // 1. user 안에 있는 profile 삭제
+      if (user.getProfile() != null) {
+        binaryContentRepository.delete(user.getProfile());
+      }
+      // 2. 관련 도메인 삭제: UserStatus, User
+      userStatusRepository.deleteByUserId(userId);
+      userRepository.deleteById(userId);
 
-    // 2. user 안에 있는 profileId -> BinaryContentId 삭제
-    User user = userRepository.findById(userId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 회원입니다."));
-
-    if (user.getProfile() != null) {
-      binaryContentRepository.delete(user.getProfile());
+      log.debug("계정 삭제 완료 username={}", user.getId());
+    } catch (Exception e) {
+      log.error("계정 삭제 실패 ", e);
+      throw InvalidUserCredentialsException.withMessage(e.getMessage());
     }
-
-    userStatusRepository.deleteByUserId(userId);
-    userRepository.deleteById(userId);
   }
 }

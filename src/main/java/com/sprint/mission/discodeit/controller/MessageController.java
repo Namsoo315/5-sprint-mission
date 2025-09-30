@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -37,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
 @Tag(name = "Message", description = "메시지 관련 API")
+@Slf4j
 public class MessageController {
 
   private final MessageService messageService;
@@ -49,9 +52,9 @@ public class MessageController {
   })
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<MessageDTO> sendMessage(
-      @RequestPart MessageCreateRequest messageCreateRequest,
+      @RequestPart @Valid MessageCreateRequest messageCreateRequest,
       @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
-
+    log.info("메시지 전송 요청 수신 message={}", messageCreateRequest.content());
     MessageDTO message = messageService.createMessage(messageCreateRequest, attachments);
     return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
   }
@@ -66,7 +69,8 @@ public class MessageController {
   @PatchMapping("/{messageId}")
   public ResponseEntity<MessageDTO> modifyMessage(
       @PathVariable UUID messageId,
-      @RequestBody MessageUpdateRequest messageUpdateRequest) {
+      @RequestBody @Valid MessageUpdateRequest messageUpdateRequest) {
+    log.info("메시지 수정 요청 수신");
     MessageDTO message = messageService.updateMessage(messageId, messageUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(message); // 200 OK
   }
@@ -79,6 +83,7 @@ public class MessageController {
   })
   @DeleteMapping("/{messageId}")
   public ResponseEntity<Void> deleteMessage(@PathVariable UUID messageId) {
+    log.info("메시지 삭제 요청 수신");
     messageService.deleteMessage(messageId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 204 No Content
   }
@@ -104,7 +109,7 @@ public class MessageController {
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
 
-/*  // 테스트용 컨트롤러
+  // 테스트용 컨트롤러
   @GetMapping("/cursor")
   public ResponseEntity<PageResponse<MessageDTO>> findMessageByChannelIdCursor(
       @RequestParam UUID channelId,
@@ -131,6 +136,4 @@ public class MessageController {
         pageable);
     return ResponseEntity.status(HttpStatus.OK).body(messages); // 200 OK
   }
-
-  */
 }

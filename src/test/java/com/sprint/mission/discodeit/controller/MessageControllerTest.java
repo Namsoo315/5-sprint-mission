@@ -1,99 +1,156 @@
 package com.sprint.mission.discodeit.controller;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
+import com.sprint.mission.discodeit.dto.data.MessageDTO;
+import com.sprint.mission.discodeit.dto.data.UserDTO;
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
+import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.IntStream;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
+@WebMvcTest(controllers = MessageController.class)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class MessageControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @Autowired
-  private MessageRepository messageRepository;
+  private ObjectMapper objectMapper;
 
-  @Autowired
-  private ChannelRepository channelRepository;
+  @MockitoBean
+  private MessageService messageService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @MockitoBean
+  private JpaMetamodelMappingContext jpaMetamodelMappingContext; // 가상의 jpa을 실행해줄 환경
 
-  private UUID channelId;
+  @Test
+  @DisplayName("메시지 전송 (binaryContent 없음)")
+  void sendMessageWithoutBinaryContent() throws Exception {
+    UUID messageId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    UUID channelId = UUID.randomUUID();
 
-  @BeforeEach
-  void setup() {
-    channelId = UUID.fromString("2a027fc5-a0bd-4b36-9baa-7a4c6610e4f0");
+    MessageCreateRequest messageCreateRequest = new MessageCreateRequest(userId, channelId,
+        "Hello World");
 
-    Channel channel = channelRepository.findById(channelId).orElseThrow();
-    User author = userRepository.findAll().stream().findFirst().orElseThrow();
+    // JSON part 이름 반드시 컨트롤러 @RequestPart 이름과 일치
+    MockMultipartFile messagePart = new MockMultipartFile(
+        "messageCreateRequest",  // ✅ 수정
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(messageCreateRequest)
+    );
 
-    // 테스트 전 메시지 초기화 후 대량 삽입
-    messageRepository.deleteByChannelId(channelId);
+    MessageDTO dto = MessageDTO.builder()
+        .id(messageId)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .author(UserDTO.builder().id(userId).build())
+        .channelId(channelId)
+        .content(messageCreateRequest.content())
+        .build();
 
-    IntStream.range(0, 10_000).forEach(i -> {
-      Message m = Message.builder()
-          .channel(channel)
-          .author(author)
-          .content("bulk message " + i)
-          .createdAt(Instant.now().plusMillis(i)) // 순차 증가
-          .updatedAt(Instant.now().plusMillis(i))
-          .build();
-      messageRepository.save(m);
-    });
+    given(messageService.createMessage(any(MessageCreateRequest.class), isNull()))
+        .willReturn(dto);
+
+    mockMvc.perform(multipart("/api/messages")
+            .file(messagePart)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").value(messageId.toString()))
+        .andExpect(jsonPath("$.content").value("Hello World"));
+
+    verify(messageService).createMessage(any(MessageCreateRequest.class), isNull());
   }
 
   @Test
-  @Transactional
-  void cursorPagingPerformance() throws Exception {
-    Instant cursorInstant = Instant.now().minusSeconds(3);
+  @DisplayName("메시지 전송 (여러 첨부파일 포함)")
+  void sendMessageWithAttachments() throws Exception {
+    UUID messageId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    UUID channelId = UUID.randomUUID();
 
-    long start = System.currentTimeMillis();
-    mockMvc.perform(get("/api/messages/cursor")   // ✅ 커서 전용 엔드포인트
-            .param("channelId", channelId.toString())
-            .param("cursor", cursorInstant.toString())
-            .param("size", "50"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(50)))
-        .andExpect(jsonPath("$.content[0].createdAt").value(greaterThan(cursorInstant.toString())));
-    long end = System.currentTimeMillis();
+    MessageCreateRequest messageCreateRequest = new MessageCreateRequest(userId, channelId,
+        "Hello with Attachments");
 
-    System.out.println("커서 페이징 실행 시간: " + (end - start) + "ms");
+    // JSON part
+    MockMultipartFile messagePart = new MockMultipartFile(
+        "messageCreateRequest",  // 컨트롤러 @RequestPart 이름과 일치
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(messageCreateRequest)
+    );
+
+    // 첨부파일 여러 개
+    MockMultipartFile attachment1 = new MockMultipartFile(
+        "attachments",  // 컨트롤러 @RequestPart 이름과 일치
+        "file1.png",
+        "image/png",
+        "fake image content 1".getBytes()
+    );
+
+    MockMultipartFile attachment2 = new MockMultipartFile(
+        "attachments",
+        "file2.png",
+        "image/png",
+        "fake image content 2".getBytes()
+    );
+
+    MessageDTO dto = MessageDTO.builder()
+        .id(messageId)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .author(UserDTO.builder().id(userId).build())
+        .channelId(channelId)
+        .content(messageCreateRequest.content())
+        .attachments(List.of(
+            BinaryContentDTO.builder().fileName("file1.png").build(),
+            BinaryContentDTO.builder().fileName("file2.png").build()
+        ))
+        .build();
+
+    given(messageService.createMessage(any(MessageCreateRequest.class), anyList()))
+        .willReturn(dto);
+
+    mockMvc.perform(multipart("/api/messages")
+            .file(messagePart)
+            .file(attachment1)
+            .file(attachment2)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").value(messageId.toString()))
+        .andExpect(jsonPath("$.content").value("Hello with Attachments"))
+        .andExpect(jsonPath("$.attachments[0].fileName").value("file1.png"))
+        .andExpect(jsonPath("$.attachments[1].fileName").value("file2.png"));
+
+    verify(messageService).createMessage(any(MessageCreateRequest.class), anyList());
   }
 
-  @Test
-  @Transactional
-  void offsetPagingPerformance() throws Exception {
-    long start = System.currentTimeMillis();
-    mockMvc.perform(get("/api/messages/page")   // ✅ 페이지 전용 엔드포인트
-            .param("channelId", channelId.toString())
-            .param("size", "50")
-            .param("page", "100"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content.length()").value(lessThanOrEqualTo(50)));
-    long end = System.currentTimeMillis();
-
-    System.out.println("기본 OFFSET 페이징 실행 시간: " + (end - start) + "ms");
-  }
 }

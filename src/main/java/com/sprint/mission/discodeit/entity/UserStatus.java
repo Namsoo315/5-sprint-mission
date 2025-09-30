@@ -31,15 +31,13 @@ public class UserStatus extends BaseUpdatableEntity {
 
   @Column(name = "last_active_at", nullable = false)
   private Instant lastActiveAt;
-
-  @Transient
+  
   public void updateLastActiveAt(Instant newLastActiveAt) {
     if (newLastActiveAt != null && !newLastActiveAt.equals(this.lastActiveAt)) {
       this.lastActiveAt = newLastActiveAt;
     }
   }
-  
-  @Transient
+
   public boolean isOnline() {
     Instant fiveMinutesAgo = Instant.now().minus(Duration.ofMinutes(5));
     return lastActiveAt.isAfter(fiveMinutesAgo);

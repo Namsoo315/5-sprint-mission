@@ -43,7 +43,7 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
     }
   }
 
-  public UUID put(UUID binaryContentId, byte[] bytes) {
+  public UUID save(UUID binaryContentId, byte[] bytes) {
     Path filePath = resolvePath(binaryContentId);
     if (Files.exists(filePath)) {
       throw new IllegalArgumentException("File with key " + binaryContentId + " already exists");
@@ -77,7 +77,7 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
   public ResponseEntity<Resource> download(BinaryContentDTO metaData) {
     InputStream inputStream = get(metaData.id());
     Resource resource = new InputStreamResource(inputStream);
-    
+
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.CONTENT_DISPOSITION,

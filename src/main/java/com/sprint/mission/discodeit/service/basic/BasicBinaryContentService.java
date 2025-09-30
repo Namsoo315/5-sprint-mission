@@ -3,6 +3,10 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.request.BinaryCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentDeleteFailedException;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoundException;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -11,37 +15,23 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BasicBinaryContentService implements BinaryContentService {
 
   private final BinaryContentRepository binaryContentRepository;
-  private final BinaryContentStorage binaryContentStorage;
   private final BinaryContentMapper binaryContentMapper;
-
-  @Override
-  @Transactional
-  public BinaryContentDTO createBinaryContent(BinaryCreateRequest request) {
-    BinaryContent binaryContent = BinaryContent.builder()
-        .fileName(request.fileName())
-        .contentType(request.contentType())
-        .size(request.size())
-        .build();
-
-    BinaryContent save = binaryContentRepository.save(binaryContent);
-    binaryContentStorage.put(save.getId(), request.bytes());
-
-    return binaryContentMapper.toDto(save);
-  }
 
   @Override
   @Transactional(readOnly = true)
   public BinaryContentDTO findByBinaryContentId(UUID binaryContentId) {
-    BinaryContent save = binaryContentRepository.findById(binaryContentId).orElseThrow(
-        () -> new NoSuchElementException("존재하지 않는 파일입니다."));
+    BinaryContent save = binaryContentRepository.findById(binaryContentId)
+        .orElseThrow(BinaryContentNotFoundException::new);
     return binaryContentMapper.toDto(save);
 
   }
@@ -57,7 +47,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Transactional
   public void delete(UUID binaryContentId) {
     if (!binaryContentRepository.existsById(binaryContentId)) {
-      throw new NoSuchElementException("존재하지 않는 파일입니다.");
+      throw new BinaryContentDeleteFailedException();
     }
     binaryContentRepository.deleteById(binaryContentId);
   }
