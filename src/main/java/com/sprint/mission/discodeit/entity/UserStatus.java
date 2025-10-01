@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.AccessLevel;
@@ -31,7 +30,7 @@ public class UserStatus extends BaseUpdatableEntity {
 
   @Column(name = "last_active_at", nullable = false)
   private Instant lastActiveAt;
-  
+
   public void updateLastActiveAt(Instant newLastActiveAt) {
     if (newLastActiveAt != null && !newLastActiveAt.equals(this.lastActiveAt)) {
       this.lastActiveAt = newLastActiveAt;

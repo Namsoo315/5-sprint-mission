@@ -1,7 +1,13 @@
 package com.sprint.mission.discodeit.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.times;
 
 import com.sprint.mission.discodeit.dto.data.ChannelDTO;
 import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequest;
@@ -58,7 +64,7 @@ class ChannelServiceTest {
   @BeforeEach
   void setUp() {
     channelRepository.deleteAll();
-    
+
     publicChannel = Channel.builder().id(UUID.randomUUID()).type(ChannelType.PUBLIC)
         .name("publicChannel").description("Public Desc").build();
 
