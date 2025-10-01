@@ -1,0 +1,12 @@
+.gradle
+build/
+out/
+**/*.iml
+*.log
+*.md
+*.yml
+*.yaml
+*.env
+.DS_Store
+.git
+.gitignore
