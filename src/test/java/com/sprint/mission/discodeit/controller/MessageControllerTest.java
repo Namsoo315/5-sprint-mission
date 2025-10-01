@@ -15,7 +15,6 @@ import com.sprint.mission.discodeit.dto.data.MessageDTO;
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

@@ -20,7 +20,7 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
   public static final String REQUEST_ID = "requestId";
   public static final String REQUEST_METHOD = "requestMethod";
   public static final String REQUEST_URI = "requestUri";
-  public static final String REQUEST_ID_HEADER = "Blog-Request-ID";
+  public static final String REQUEST_ID_HEADER = "Discodeit-Request-ID";
 
   // 요청 이전에 받아서 처리하는 핸들러
   @Override
