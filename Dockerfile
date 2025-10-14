@@ -1,35 +1,36 @@
 # 빌드 스테이지
 FROM amazoncorretto:17 AS builder
 
-# 작업 디렉토리 설정
 WORKDIR /app
 
-# Gradle Wrapper 파일 먼저 복사
+COPY gradlew ./
+RUN chmod +x gradlew
 COPY gradle ./gradle
-COPY gradlew ./gradlew
-
-# Gradle 캐시를 위한 의존성 파일 복사
-COPY build.gradle settings.gradle ./
-
-# 의존성 다운로드
+COPY settings.gradle ./settings.gradle
+COPY build.gradle ./build.gradle
 RUN ./gradlew dependencies
 
-# 소스 코드 복사 및 빌드
 COPY src ./src
-RUN ./gradlew build -x test # 테스트 제외함 빌드 빠름!
-#RUN #./gradlew build # 테스트 포함함! 빌드 느림!!
+RUN ./gradlew clean bootJar -x test --no-daemon
 
 # 런타임 스테이지
 FROM amazoncorretto:17
 
-# 작업 디렉토리 설정
 WORKDIR /app
 
-# 빌드 스테이지에서 jar 파일만 복사
-COPY --from=builder /app/build/libs/*.jar /app/app.jar
+ENV SPRING_PROFILES_ACTIVE=prod \
+    PROJECT_NAME=discodeit \
+    PROJECT_VERSION=1.2-M8 \
+    JVM_OPTS="" \
+    SERVER_PORT=80
 
-# 8080 포트 노출
+COPY --from=builder /app/build/libs/*.jar /app/
+
+RUN set -eux; \
+    JAR_PATH="$(ls /app/*.jar | head -n1)"; \
+    TARGET_PATH="/app/${PROJECT_NAME}-${PROJECT_VERSION}.jar"; \
+    if [ "$JAR_PATH" != "$TARGET_PATH" ]; then mv "$JAR_PATH" "$TARGET_PATH"; fi
+
 EXPOSE 80
 
-# jar 파일 실행
-ENTRYPOINT ["sh", "-c", "java $JVM_OPTS -jar /app/app.jar --spring.profiles.active=$SPRING_PROFILES_ACTIVE --server.port=80"]
+ENTRYPOINT ["sh", "-c", "java $JVM_OPTS -Dserver.port=${SERVER_PORT} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar /app/${PROJECT_NAME}-${PROJECT_VERSION}.jar"]
