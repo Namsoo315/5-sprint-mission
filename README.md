@@ -1,6 +1,4 @@
-좋습니다 👍
-주신 요구사항들을 **README.md**로 정리하면, 과제/프로젝트용 문서로 바로 올릴 수 있는 RAW Markdown 형태가 됩니다.
-아래는 그대로 복사해서 GitHub에 넣어도 되는 버전이에요.
+[![codecov](https://codecov.io/gh/<USERNAME>/<REPO>/branch/main/graph/badge.svg?token=<TOKEN>)](https://codecov.io/gh/<USERNAME>/<REPO>)
 
 ---
 
@@ -113,9 +111,9 @@ implementation 'software.amazon.awssdk:s3:2.31.7'
 
 ### AWS RDS
 
-* [ ] PostgreSQL RDS 인스턴스 생성 (프리 티어, 퍼블릭 액세스 비활성화)
-* [ ] EC2 생성 후 SSH 터널링을 통해 RDS 접근
-* [ ] DataGrip으로 접속해 유저/DB/schema 초기화
+* [x] PostgreSQL RDS 인스턴스 생성 (프리 티어, 퍼블릭 액세스 비활성화)
+* [x] EC2 생성 후 SSH 터널링을 통해 RDS 접근
+* [x] DataGrip으로 접속해 유저/DB/schema 초기화
 
 ```sql
 CREATE USER discodeit_user WITH PASSWORD 'discodeit1234';
@@ -127,16 +125,16 @@ DATABASE discodeit OWNER discodeit_user;
 
 ### AWS ECR
 
-* [ ] 퍼블릭 레포지토리 `discodeit` 생성
-* [ ] Docker 이미지 빌드 후 push (`latest`, `1.2-M8`)
-* [ ] 멀티 플랫폼: linux/amd64, linux/arm64
+* [x] 퍼블릭 레포지토리 `discodeit` 생성
+* [x] Docker 이미지 빌드 후 push (`latest`, `1.2-M8`)
+* [x] 멀티 플랫폼: linux/amd64, linux/arm64
 
 ### AWS ECS
 
-* [ ] 환경 변수 파일 `discodeit.env` 작성 후 S3 업로드
-* [ ] ECS 클러스터, 태스크 정의, 서비스 생성
-* [ ] EC2 보안 그룹 인바운드 규칙 (HTTP Anywhere-IPv4 허용)
-* [ ] ECS 태스크 실행 후 EC2 퍼블릭 IP 접속 확인
+* [x] 환경 변수 파일 `discodeit.env` 작성 후 S3 업로드
+* [x] ECS 클러스터, 태스크 정의, 서비스 생성
+* [x] EC2 보안 그룹 인바운드 규칙 (HTTP Anywhere-IPv4 허용)
+* [x] ECS 태스크 실행 후 EC2 퍼블릭 IP 접속 확인
 
 ---
 
@@ -144,17 +142,17 @@ DATABASE discodeit OWNER discodeit_user;
 
 ### 이미지 최적화
 
-* [ ] 멀티 스테이지 빌드 (`local-slim` 태그)
-* [ ] 이미지 크기 비교
+* [x] 멀티 스테이지 빌드 (`local-slim` 태그)
+* [x] 이미지 크기 비교
 
 ### CI/CD (GitHub Actions)
 
-* [ ] `.github/workflows/test.yml` 작성 (PR 시 테스트 실행)
-* [ ] CodeCov 연동 및 커버리지 뱃지 추가
-* [ ] `.github/workflows/deploy.yml` 작성 (release 브랜치 push 시 배포)
-* [ ] GitHub Secrets & Variables 설정
-* [ ] Docker 이미지 빌드 및 ECR push
-* [ ] ECS 서비스 업데이트 자동화
+* [x] `.github/workflows/test.yml` 작성 (PR 시 테스트 실행)
+* [x] CodeCov 연동 및 커버리지 뱃지 추가
+* [x] `.github/workflows/deploy.yml` 작성 (release 브랜치 push 시 배포)
+* [x] GitHub Secrets & Variables 설정
+* [x] Docker 이미지 빌드 및 ECR push
+* [x] ECS 서비스 업데이트 자동화
 
 ---
 
