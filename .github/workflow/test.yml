@@ -1,0 +1,44 @@
+name: 테스트
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JDK 17 설정
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+          cache: gradle
+
+      - name: Gradle 권한 부여
+        run: chmod +x gradlew
+
+      - name: 의존성 캐시
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 테스트 실행
+        run: ./gradlew clean test jacocoTestReport
+
+      - name: Codecov 업로드
+        uses: codecov/codecov-action@v3
+        with:
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.CODECOV_TOKEN }} # 퍼블릭 리포면 생략 가능
+          fail_ci_if_error: true
