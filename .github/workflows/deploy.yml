@@ -87,7 +87,7 @@ jobs:
             '{
               family: .family,
               taskRoleArn: .taskRoleArn,
-              executionRoleArn: .executionRoleArn,
+              executionRoleArn: "arn:aws:iam::851454408057:role/ecsTaskExecutionRole"
               networkMode: .networkMode,
               containerDefinitions: [.containerDefinitions[] |
                 .image=$IMAGE |
@@ -109,8 +109,8 @@ jobs:
               volumes: .volumes,
               placementConstraints: .placementConstraints,
               requiresCompatibilities: .requiresCompatibilities,
-              cpu: .cpu,
-              memory: .memory
+              cpu: .1024,
+              memory: .3072
             }' task-def.json > new-task-def.json
 
       # 새 태스크 정의 등록

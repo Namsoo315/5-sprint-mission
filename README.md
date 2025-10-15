@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/<USERNAME>/<REPO>/branch/main/graph/badge.svg?token=<TOKEN>)](https://codecov.io/gh/<USERNAME>/<REPO>)
+[![codecov](https://codecov.io/gh/Namsoo315/5-sprint-mission/branch/남현수-sprint8/graph/badge.svg)](https://codecov.io/gh/Namsoo315/5-sprint-mission)
 
 ---
 
