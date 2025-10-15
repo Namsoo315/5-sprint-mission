@@ -138,3 +138,4 @@ jobs:
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
             --task-definition ${{ env.TASK_DEF_ARN }}
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-0c6ac4e5fa46483e9,subnet-05b8fb29394f97a00,subnet-0cc51e9f9f68292b7,subnet-03d75cbdfa80c92c2],securityGroups=[sg-0e5e68774d6454000],assignPublicIp=ENABLED}"
