@@ -86,8 +86,8 @@ jobs:
             --arg PRESIGNED_EXP "${{ vars.AWS_S3_PRESIGNED_URL_EXPIRATION }}" \
             '{
               family: .family,
-              taskRoleArn: .taskRoleArn,
-              executionRoleArn: "arn:aws:iam::851454408057:role/ecsTaskExecutionRole"
+              taskRoleArn: (.taskRoleArn // ""),
+              executionRoleArn: "arn:aws:iam::851454408057:role/ecsTaskExecutionRole",
               networkMode: .networkMode,
               containerDefinitions: [.containerDefinitions[] |
                 .image=$IMAGE |
