@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Properties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,12 +29,24 @@ class AWSS3Test {
   @BeforeAll
   static void setUp() throws IOException {
     Properties props = new Properties();
-    props.load(new FileInputStream(new File(".env")));
 
-    String accessKey = props.getProperty("AWS_S3_ACCESS_KEY");
-    String secretKey = props.getProperty("AWS_S3_SECRET_KEY");
-    String region = props.getProperty("AWS_S3_REGION");
-    bucketName = props.getProperty("AWS_S3_BUCKET");
+    // ✅ 1️⃣ .env 파일이 있으면 읽기
+    File envFile = new File(".env");
+    if (envFile.exists()) {
+      props.load(new FileInputStream(envFile));
+    }
+
+    // ✅ 2️⃣ 환경 변수에서 읽기 (없으면 .env 값, 그것도 없으면 기본값)
+    String accessKey = System.getenv().getOrDefault("AWS_S3_ACCESS_KEY",
+        props.getProperty("AWS_S3_ACCESS_KEY", "default-access-key"));
+    String secretKey = System.getenv().getOrDefault("AWS_S3_SECRET_KEY",
+        props.getProperty("AWS_S3_SECRET_KEY", "default-secret-key"));
+    String region = System.getenv().getOrDefault("AWS_S3_REGION",
+        props.getProperty("AWS_S3_REGION", "ap-northeast-2"));
+    bucketName = System.getenv().getOrDefault("AWS_S3_BUCKET",
+        props.getProperty("AWS_S3_BUCKET", "default-bucket"));
+
+    System.out.printf("Using AWS config: region=%s, bucket=%s%n", region, bucketName);
 
     AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
@@ -46,6 +59,21 @@ class AWSS3Test {
         .region(Region.of(region))
         .credentialsProvider(StaticCredentialsProvider.create(credentials))
         .build();
+  }
+
+  @AfterEach
+  void cleanUp() {
+    String[] filesToDelete = {"storage/test-upload.txt", "storage/download-upload.txt"};
+
+    for (String filePath : filesToDelete) {
+      File file = new File(filePath);
+      if (file.exists()) {
+        boolean deleted = file.delete();
+        if (!deleted) {
+          System.err.println("Failed to delete file: " + filePath);
+        }
+      }
+    }
   }
 
   @Test

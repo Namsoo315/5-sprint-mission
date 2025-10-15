@@ -138,4 +138,4 @@ jobs:
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
             --task-definition ${{ env.TASK_DEF_ARN }} \
-            --desired-count 1
+            --launch-type FARGATE
