@@ -14,7 +14,7 @@ jobs:
       - name: 체크아웃
         uses: actions/checkout@v4
 
-      # AWS CLI 설치 및 설정 (Public ECR은 ap-northeast-2 사용)
+      # AWS CLI 설정 (Public ECR)
       - name: AWS CLI 설정 (Public ECR)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -62,7 +62,7 @@ jobs:
             --task-definition ${{ vars.ECS_TASK_DEFINITION }} \
             --query taskDefinition > task-def.json
 
-      # 새 이미지 및 Secrets/Variables로 태스크 정의 수정
+      # 새 이미지 및 환경변수로 태스크 정의 수정
       - name: 새 태스크 정의 작성
         id: task-def
         env:
@@ -84,21 +84,34 @@ jobs:
             --arg JVM_OPTS "${{ vars.JVM_OPTS }}" \
             --arg STORAGE_TYPE "${{ vars.STORAGE_TYPE }}" \
             --arg PRESIGNED_EXP "${{ vars.AWS_S3_PRESIGNED_URL_EXPIRATION }}" \
-            '.containerDefinitions[0].image=$IMAGE |
-             .containerDefinitions[0].environment[] |=
-               if .name=="AWS_S3_ACCESS_KEY" then .value=$AWS_ACCESS
-               elif .name=="AWS_S3_SECRET_KEY" then .value=$AWS_SECRET
-               elif .name=="AWS_S3_REGION" then .value=$AWS_REGION
-               elif .name=="AWS_S3_BUCKET" then .value=$S3_BUCKET
-               elif .name=="SPRING_DATASOURCE_URL" then .value=$DB_URL
-               elif .name=="SPRING_DATASOURCE_USERNAME" then .value=$DB_USER
-               elif .name=="SPRING_DATASOURCE_PASSWORD" then .value=$DB_PASS
-               elif .name=="SPRING_PROFILES_ACTIVE" then .value=$PROFILE
-               elif .name=="JVM_OPTS" then .value=$JVM_OPTS
-               elif .name=="STORAGE_TYPE" then .value=$STORAGE_TYPE
-               elif .name=="AWS_S3_PRESIGNED_URL_EXPIRATION" then .value=$PRESIGNED_EXP
-               else . end' \
-            task-def.json > new-task-def.json
+            '{
+              "family": .family,
+              "taskRoleArn": (.taskRoleArn // ""),
+              "executionRoleArn": "arn:aws:iam::851454408057:role/ecsTaskExecutionRole",
+              "networkMode": .networkMode,
+              "containerDefinitions": [.containerDefinitions[] |
+                .image=$IMAGE |
+                .environment |= map(
+                  if .name=="AWS_S3_ACCESS_KEY" then .value=$AWS_ACCESS
+                  elif .name=="AWS_S3_SECRET_KEY" then .value=$AWS_SECRET
+                  elif .name=="AWS_S3_REGION" then .value=$AWS_REGION
+                  elif .name=="AWS_S3_BUCKET" then .value=$S3_BUCKET
+                  elif .name=="SPRING_DATASOURCE_URL" then .value=$DB_URL
+                  elif .name=="SPRING_DATASOURCE_USERNAME" then .value=$DB_USER
+                  elif .name=="SPRING_DATASOURCE_PASSWORD" then .value=$DB_PASS
+                  elif .name=="SPRING_PROFILES_ACTIVE" then .value=$PROFILE
+                  elif .name=="JVM_OPTS" then .value=$JVM_OPTS
+                  elif .name=="STORAGE_TYPE" then .value=$STORAGE_TYPE
+                  elif .name=="AWS_S3_PRESIGNED_URL_EXPIRATION" then .value=$PRESIGNED_EXP
+                  else . end
+                )
+              ],
+              "volumes": .volumes,
+              "placementConstraints": .placementConstraints,
+              "requiresCompatibilities": .requiresCompatibilities,
+              "cpu": "1024",
+              "memory": "3072"
+            }' task-def.json > new-task-def.json
 
       # 새 태스크 정의 등록
       - name: 새 태스크 정의 등록
