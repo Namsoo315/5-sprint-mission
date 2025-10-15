@@ -109,8 +109,8 @@ jobs:
               volumes: .volumes,
               placementConstraints: .placementConstraints,
               requiresCompatibilities: .requiresCompatibilities,
-              cpu: .1024,
-              memory: .3072
+              cpu: 1024,
+              memory: 3072
             }' task-def.json > new-task-def.json
 
       # 새 태스크 정의 등록

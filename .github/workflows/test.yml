@@ -3,7 +3,7 @@ name: 테스트
 on:
   pull_request:
     branches:
-      - main
+      - 남현수-sprint8
 
 jobs:
   build:
