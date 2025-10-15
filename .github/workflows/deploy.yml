@@ -88,7 +88,8 @@ jobs:
               "family": .family,
               "taskRoleArn": (.taskRoleArn // ""),
               "executionRoleArn": "arn:aws:iam::851454408057:role/ecsTaskExecutionRole",
-              "networkMode": .networkMode,
+              "networkMode": "awsvpc",
+              "requiresCompatibilities": ["FARGATE"],
               "containerDefinitions": [.containerDefinitions[] |
                 .image=$IMAGE |
                 .environment |= map(
@@ -137,5 +138,4 @@ jobs:
           aws ecs update-service \
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
-            --task-definition ${{ env.TASK_DEF_ARN }} \
-            --launch-type FARGATE
+            --task-definition ${{ env.TASK_DEF_ARN }}
