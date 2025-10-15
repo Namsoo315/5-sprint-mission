@@ -41,8 +41,8 @@ class AWSS3Test {
         props.getProperty("AWS_S3_ACCESS_KEY", "default-access-key"));
     String secretKey = System.getenv().getOrDefault("AWS_S3_SECRET_KEY",
         props.getProperty("AWS_S3_SECRET_KEY", "default-secret-key"));
-    String region = System.getenv().getOrDefault("AWS_S3_REGION",
-        props.getProperty("AWS_S3_REGION", "ap-northeast-2"));
+    String region = System.getenv().getOrDefault("AWS_REGION",
+        props.getProperty("AWS_REGION", "ap-northeast-2"));
     bucketName = System.getenv().getOrDefault("AWS_S3_BUCKET",
         props.getProperty("AWS_S3_BUCKET", "default-bucket"));
 
