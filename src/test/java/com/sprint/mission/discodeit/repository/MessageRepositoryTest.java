@@ -111,9 +111,10 @@ class MessageRepositoryTest {
   @DisplayName("채널 ID와 cursor 기준 메시지 조회 성공")
   void findAllByChannelIdWithAuthorAndAttachments_success() {
     // given
-    Instant cursor = Instant.now();
-    Message oldMsg = createMessage(testUser1, "이전 메시지", cursor.minusSeconds(10));
-    Message newMsg = createMessage(testUser2, "최신 메시지", cursor);
+    Instant now = Instant.now();
+    Message oldMsg = createMessage(testUser1, "이전 메시지", now.minusSeconds(30));
+    Message newMsg = createMessage(testUser2, "최신 메시지", now.minusSeconds(10));
+    Instant cursor = now;
 
     messageRepository.saveAndFlush(oldMsg);
     messageRepository.saveAndFlush(newMsg);

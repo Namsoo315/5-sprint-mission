@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Properties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,21 @@ class AWSS3Test {
         .region(Region.of(region))
         .credentialsProvider(StaticCredentialsProvider.create(credentials))
         .build();
+  }
+
+  @AfterEach
+  void cleanUp() {
+    String[] filesToDelete = {"storage/test-upload.txt", "storage/download-upload.txt"};
+
+    for (String filePath : filesToDelete) {
+      File file = new File(filePath);
+      if (file.exists()) {
+        boolean deleted = file.delete();
+        if (!deleted) {
+          System.err.println("Failed to delete file: " + filePath);
+        }
+      }
+    }
   }
 
   @Test
