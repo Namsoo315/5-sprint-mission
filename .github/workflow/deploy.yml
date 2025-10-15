@@ -3,7 +3,7 @@ name: 배포
 on:
   push:
     branches:
-      - [ 남현수-sprint8 ]
+      - [ main ]
 
 jobs:
   build-and-push:
