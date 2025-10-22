@@ -5,6 +5,14 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Log 제외 ###
+.logs
+.logs/*.log
+
+### 환경 변수 제외 ###
+.env
+*.env
+
 ### STS ###
 .apt_generated
 .classpath

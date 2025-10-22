@@ -1,170 +1,162 @@
-# 📌 Discodeit 프로젝트 마일스톤 및 요구사항
-
-## 🚀 프로젝트 마일스톤
-
-* **GURU**
-* **로그 관리**
-* **커스텀 예외 설계**
-* **유효성 검사**
-* **Actuator를 활용한 모니터링**
-* **단위 테스트**
-* **슬라이스 테스트**
-* **통합 테스트**
+[![codecov](https://codecov.io/gh/Namsoo315/5-sprint-mission/branch/남현수-sprint8/graph/badge.svg)](https://codecov.io/gh/Namsoo315/5-sprint-mission)
 
 ---
 
-## ✅ 기본 요구사항
+````markdown
+# Discodeit 프로젝트
 
-### 프로파일 기반 설정 관리
-
-* [x] 개발(`dev`), 운영(`prod`) 환경에 대한 프로파일을 구성하세요.
-* [x] `application-dev.yaml`, `application-prod.yaml` 파일을 생성하세요.
-* [x] 데이터베이스 연결 정보, 서버 포트를 프로파일별로 분리하세요.
+이 저장소는 **애플리케이션 컨테이너화 → BinaryContentStorage 고도화 (AWS S3) → AWS 배포 (ECS, RDS) → CI/CD 구축** 의 전체
+마일스톤을 포함합니다.
 
 ---
 
-### 로그 관리
+## 📌 프로젝트 마일스톤
 
-* [x] Lombok의 `@Slf4j` 어노테이션을 활용해 로깅을 구성하세요.
-* [x] `application.yaml`에 기본 로깅 레벨(`info`)을 설정하세요.
-* [x] 환경별 로깅 레벨:
+1. 애플리케이션 컨테이너화
+2. BinaryContentStorage 고도화 (AWS S3)
+3. AWS를 활용한 배포 (AWS ECS, RDS)
+4. CI/CD 파이프라인 구축 (GitHub Actions)
 
-    * 개발 환경: `debug`
-    * 운영 환경: `info`
-* [x] `logback-spring.xml` 파일을 생성하고, 로그 패턴과 출력 방식을 커스터마이징하세요.
+---
 
-**로그 패턴 예시**
+## 🚀 애플리케이션 컨테이너화
 
-```
-{년}-{월}-{일} {시}:{분}:{초}:{밀리초} [{스레드명}] {로그 레벨(5글자)} {로거 이름(최대 36글자)} - {로그 메시지}{줄바꿈}
-```
+### Dockerfile 작성
 
-**출력 예시**
+- [x] Amazon Corretto 17 이미지를 베이스 이미지로 사용하세요.
+- [x] 작업 디렉토리를 설정하세요. (`/app`)
+- [x] 프로젝트 파일을 컨테이너로 복사하세요. (.dockerignore 활용)
+- [x] Gradle Wrapper를 사용하여 애플리케이션을 빌드하세요.
+- [x] 80 포트를 노출하도록 설정하세요.
+- [x] 프로젝트 정보를 환경 변수로 설정하세요.
 
-```
-25-01-01 10:33:55.740 [main] DEBUG c.s.m.discodeit.DiscodeitApplication - Running with Spring Boot v3.4.0, Spring v6.2.0
+```bash
+PROJECT_NAME=discodeit
+PROJECT_VERSION=1.2-M8
+````
+
+* [x] JVM 옵션을 환경 변수로 설정하세요.
+
+```bash
+JVM_OPTS=""
 ```
 
-* [x] 콘솔과 파일에 동시에 로그 기록
-* [x] 로그 파일 저장 경로: `{프로젝트 루트}/.logs`
-* [x] 로그 파일은 **일자별 롤링** 및 **30일 보관**
-* [x] 서비스/컨트롤러 주요 메소드에 로깅 추가
+* [x] 환경 변수를 활용하여 애플리케이션 실행 명령어를 설정하세요.
 
-    * 사용자 생성/수정/삭제
-    * 채널 생성/수정/삭제
-    * 메시지 생성/수정/삭제
-    * 파일 업로드/다운로드
+### 이미지 빌드 및 실행 테스트
 
----
+* [x] Docker 이미지를 빌드하고 태그(local)를 지정하세요.
+* [x] 빌드된 이미지를 활용해서 컨테이너를 실행하고 애플리케이션을 테스트하세요.
+* [x] prod 프로필로 실행하세요.
+* [x] 데이터베이스는 로컬 PostgreSQL을 활용하세요.
+* [x] [http://localhost:8081](http://localhost:8081) 접속 가능하도록 포트 매핑하세요.
 
-### 예외 처리 고도화
+### Docker Compose 구성
 
-* [x] 패키지: `com.sprint.mission.discodeit.exception[.{도메인}]`
-* [x] `ErrorCode` Enum 클래스를 통해 예외 코드와 메시지 정의
-* [x] 기본 예외 클래스: `DiscodeitException`
-* [x] 도메인별 예외 클래스 정의 (`UserException`, `ChannelException` 등)
-* [x] 구체 예외 정의 (`UserNotFoundException`, `UserAlreadyExistException` 등)
-* [x] 기존 표준 예외 (`NoSuchElementException`, `IllegalArgumentException`) → 커스텀 예외로 대체
-* [x] 일관된 예외 응답(`ErrorResponse`) 설계
-* [x] `@RestControllerAdvice` 기반 예외 핸들러 구현
-
----
-
-### 유효성 검사
-
-* [ ] Spring Validation 의존성 추가
-* [ ] Request DTO에 제약 조건 어노테이션 적용 (`@NotNull`, `@NotBlank`, `@Size`, `@Email` 등)
-* [ ] 컨트롤러에서 `@Valid` 활용
-* [ ] 유효성 검증 실패 시 `MethodArgumentNotValidException` 처리
-* [ ] 상세 오류 메시지를 포함한 응답 반환
+* [x] 애플리케이션과 PostgreSQL 서비스를 포함하세요.
+* [x] 환경 변수는 `.env` 파일로 관리하고, `.env`는 git에 포함되지 않도록 합니다.
+* [x] 애플리케이션 서비스를 로컬 Dockerfile에서 빌드하도록 구성하세요.
+* [x] 애플리케이션 볼륨을 구성하여 BinaryContentStorage 데이터가 유지되도록 하세요.
+* [x] PostgreSQL 볼륨을 구성하여 데이터가 유지되도록 하세요.
+* [x] PostgreSQL 서비스 실행 후 `schema.sql` 자동 실행되도록 구성하세요.
+* [x] 서비스 간 의존성을 설정하세요 (`depends_on`).
+* [x] 필요한 포트 매핑을 구성하세요.
+* [x] `docker compose up --build`로 서비스 시작 및 테스트하세요.
 
 ---
 
-### Actuator
+## 📦 BinaryContentStorage 고도화 (AWS S3)
 
-* [ ] Spring Boot Actuator 의존성 추가
-* [ ] 기본 엔드포인트 활성화: `health`, `info`, `metrics`, `loggers`
-* [ ] 애플리케이션 정보 추가 (`info` 엔드포인트)
+### AWS S3 버킷 구성
 
-    * 이름: `Discodeit`
-    * 버전: `1.7.0`
-    * Java: 17
-    * Spring Boot: 3.4.0
-    * 주요 설정 정보 (DB, JPA, storage, multipart 등)
-* [ ] 서버 실행 후 `/actuator/*` 엔드포인트 확인
+* [x] S3 버킷 생성: `discodeit-binary-content-storage-(사용자 이니셜)`
+* [x] 퍼블릭 액세스 차단 (모두 차단)
+* [x] 버전 관리 비활성화
 
----
+### IAM 사용자 구성
 
-### 단위 테스트
+* [x] `discodeit` 사용자 생성
+* [x] AmazonS3FullAccess 권한 부여
+* [x] 액세스 키 발급 후 `.env` 파일에 추가
 
-* [ ] 서비스 레이어 단위 테스트 작성
-* [ ] 각 서비스별 최소 2개 이상(성공/실패) 케이스
-
-    * UserService: `create`, `update`, `delete`
-    * ChannelService: `create`, `update`, `delete`, `findByUserId`
-    * MessageService: `create`, `update`, `delete`, `findByChannelId`
-* [ ] `Mockito`, `BDDMockito` 활용
-
----
-
-### 슬라이스 테스트
-
-* [ ] 레포지토리 레이어 → `@DataJpaTest` 활용
-* [ ] `application-test.yaml` 생성 (H2 인메모리 DB, PostgreSQL 호환 모드)
-* [ ] 테스트 시 스키마 새로 생성
-* [ ] User, Channel, Message 주요 쿼리 메소드 테스트 (성공/실패)
-* [ ] 컨트롤러 레이어 → `@WebMvcTest` 활용
-* [ ] 필요시 `@Import`로 Bean 등록
-* [ ] MockMvc 활용 JSON 응답 검증
-
----
-
-### 통합 테스트
-
-* [ ] `@SpringBootTest` 기반 통합 테스트 구성
-* [ ] H2 인메모리 DB 사용
-* [ ] 주요 API 엔드포인트 테스트 (성공/실패)
-
-    * 사용자: 생성, 수정, 삭제, 목록 조회
-    * 채널: 생성, 수정, 삭제
-    * 메시지: 생성, 수정, 삭제, 목록 조회
-* [ ] 각 테스트는 `@Transactional`로 독립 실행
-
----
-
-## 🔥 심화 요구사항
-
-### MDC 기반 로깅 고도화
-
-* [ ] `MDCLoggingInterceptor` 구현 (패키지: `com.**.discodeit.config`)
-* [ ] 요청 ID(UUID), 요청 URL, 요청 방식 추가
-* [ ] 응답 헤더에 `Discodeit-Request-ID` 포함
-* [ ] `WebMvcConfig` 통해 인터셉터 등록
-* [ ] Logback 패턴에 MDC 값 추가
-
-**패턴 예시**
-
-```
-{년}-{월}-{일} {시}:{분}:{초}:{밀리초} [{스레드명}] {로그 레벨(5글자)} {로거 이름(최대 36글자)} [{MDC:요청ID} | {MDC:요청 메소드} | {MDC:요청 URL}] - {로그 메시지}{줄바꿈}
+```env
+# AWS
+AWS_S3_ACCESS_KEY=**엑세스_키**
+AWS_S3_SECRET_KEY=**시크릿_키**
+AWS_S3_REGION=ap-northeast-2
+AWS_S3_BUCKET=버킷_이름
 ```
 
+### AWS S3 테스트
+
+* [x] SDK 의존성 추가
+
+```gradle
+implementation 'software.amazon.awssdk:s3:2.31.7'
+```
+
+* [x] `AWSS3Test` 클래스 작성 (업로드/다운로드/PresignedUrl 테스트)
+* [x] `.env` 값 로드
+
+### S3 BinaryContentStorage 구현
+
+* [x] `S3BinaryContentStorage` 구현
+* [x] `@ConditionalOnProperty` 로 `discodeit.storage.type=s3`일 때만 Bean 등록
+* [x] PresignedUrl을 활용한 리다이렉트 방식 `download()` 구현
+* [x] `S3BinaryContentStorageTest` 작성
+
 ---
 
-### Spring Boot Admin 메트릭 가시화
+## ☁️ AWS를 활용한 배포 (RDS, ECR, ECS)
 
-* [ ] Spring Boot Admin 서버 모듈 생성 (포트: 9090)
-* [ ] `@EnableAdminServer` 적용
-* [ ] Client 설정: `spring.boot.admin.client.url`
-* [ ] Admin 대시보드에서 인스턴스 등록 및 메트릭 확인
+### AWS RDS
+
+* [x] PostgreSQL RDS 인스턴스 생성 (프리 티어, 퍼블릭 액세스 비활성화)
+* [x] EC2 생성 후 SSH 터널링을 통해 RDS 접근
+* [x] DataGrip으로 접속해 유저/DB/schema 초기화
+
+```sql
+CREATE USER discodeit_user WITH PASSWORD 'discodeit1234';
+GRANT discodeit_user TO postgres;
+CREATE
+DATABASE discodeit OWNER discodeit_user;
+-- schema.sql 실행
+```
+
+### AWS ECR
+
+* [x] 퍼블릭 레포지토리 `discodeit` 생성
+* [x] Docker 이미지 빌드 후 push (`latest`, `1.2-M8`)
+* [x] 멀티 플랫폼: linux/amd64, linux/arm64
+
+### AWS ECS
+
+* [x] 환경 변수 파일 `discodeit.env` 작성 후 S3 업로드
+* [x] ECS 클러스터, 태스크 정의, 서비스 생성
+* [x] EC2 보안 그룹 인바운드 규칙 (HTTP Anywhere-IPv4 허용)
+* [x] ECS 태스크 실행 후 EC2 퍼블릭 IP 접속 확인
 
 ---
 
-### 테스트 커버리지 관리
+## 🔧 심화 요구사항
 
-* [ ] JaCoCo 플러그인 추가
-* [ ] 테스트 실행 후 HTML, XML 리포트 생성 (`build/reports/jacoco`)
-* [ ] `com.sprint.mission.discodeit.service.basic` 패키지 기준 **60% 이상 커버리지** 달성
+### 이미지 최적화
+
+* [x] 멀티 스테이지 빌드 (`local-slim` 태그)
+* [x] 이미지 크기 비교
+
+### CI/CD (GitHub Actions)
+
+* [x] `.github/workflows/test.yml` 작성 (PR 시 테스트 실행)
+* [x] CodeCov 연동 및 커버리지 뱃지 추가
+* [x] `.github/workflows/deploy.yml` 작성 (release 브랜치 push 시 배포)
+* [x] GitHub Secrets & Variables 설정
+* [x] Docker 이미지 빌드 및 ECR push
+* [x] ECS 서비스 업데이트 자동화
 
 ---
 
-👉 위 요구사항을 기반으로 단계별 기능 구현 및 검증을 진행합니다.
+## 📖 참고
+
+* 프리티어 과금 주의 (EC2, RDS, 모니터링 옵션 등)
+* `.env` 파일은 반드시 git에 포함하지 않습니다.
