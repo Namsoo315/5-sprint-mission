@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class BasicChannelService implements ChannelService {
   private final MessageRepository messageRepository;
   private final ChannelMapper channelMapper;
 
+  @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional
   public ChannelDTO createPublicChannel(PublicChannelCreateRequest request) {
@@ -108,6 +110,7 @@ public class BasicChannelService implements ChannelService {
         .toList();
   }
 
+  @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional
   public ChannelDTO updateChannel(UUID channelId, ChannelUpdateRequest request) {
@@ -138,6 +141,7 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
+  @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional
   public void deleteChannel(UUID channelId) {
