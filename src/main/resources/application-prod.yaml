@@ -2,9 +2,9 @@ spring:
   application:
     name: discodeit
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/discodeit?sessionTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:discodeit_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:discodeit1234}
     driver-class-name: org.postgresql.Driver
   sql:
     init:
@@ -24,9 +24,8 @@ spring:
     open-in-view: false
 
 server:
-  port: 80   # prod 서버 포트
+  port: 8080   # prod 서버 포트
 
 logging:
   level:
     root: info
-    org.hibernate.sql: info
