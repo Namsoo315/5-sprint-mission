@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserRoleUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import java.io.IOException;
 import java.util.List;
@@ -18,6 +19,8 @@ public interface UserService {
 
   UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
       MultipartFile profile) throws IOException;
+
+  UserDTO updateRoleUser(UserRoleUpdateRequest userRoleUpdateRequest);
 
   void deleteUser(UUID userId);
 }
