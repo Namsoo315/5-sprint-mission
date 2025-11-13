@@ -2,9 +2,11 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserRoleUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserRole;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
@@ -24,6 +26,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +41,7 @@ public class BasicUserService implements UserService {
   private final BinaryContentRepository binaryContentRepository;
   private final BinaryContentStorage binaryContentStorage;
   private final UserStatusRepository userStatusRepository;
+  private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
 
   @Override
@@ -75,7 +80,8 @@ public class BasicUserService implements UserService {
     User result = User.builder()
         .username(userCreateRequest.username())
         .email(userCreateRequest.email())
-        .password(userCreateRequest.password())
+        .password(passwordEncoder.encode(userCreateRequest.password())) // Password Bcrypt Encoder
+        .role(UserRole.USER)
         .profile(content)
         .build();
 
@@ -152,6 +158,27 @@ public class BasicUserService implements UserService {
     try {
       User save = userRepository.save(updatedUser);
       log.debug("업데이트된 유저의 아이디 ={}", save.getId());
+      return userMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("계정 업데이트에 실패하였습니다. ={}", user.getUsername(), e);
+      throw InvalidUserParameterException.withMessage(e.getMessage());
+    }
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @Override
+  @Transactional
+  public UserDTO updateRoleUser(UserRoleUpdateRequest userRoleUpdateRequest) {
+    User user = userRepository.findById(userRoleUpdateRequest.userId()).orElseThrow(() -> {
+      log.warn("존재하지 않는 회원 권한 업데이트 시도 userId={}", userRoleUpdateRequest.userId());
+      return new UserNotFoundException();
+    });
+
+    user.updateRole(userRoleUpdateRequest.newRole());
+
+    try {
+      User save = userRepository.save(user);
+      log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);
     } catch (Exception e) {
       log.error("계정 업데이트에 실패하였습니다. ={}", user.getUsername(), e);
