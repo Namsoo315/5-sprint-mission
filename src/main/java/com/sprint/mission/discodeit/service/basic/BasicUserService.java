@@ -7,7 +7,6 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserRole;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
@@ -16,11 +15,10 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.security.SessionManager;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -40,9 +38,9 @@ public class BasicUserService implements UserService {
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
   private final BinaryContentStorage binaryContentStorage;
-  private final UserStatusRepository userStatusRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
+  private final SessionManager sessionManager;
 
   @Override
   @Transactional
@@ -85,16 +83,10 @@ public class BasicUserService implements UserService {
         .profile(content)
         .build();
 
-    UserStatus userStatus = UserStatus.builder()
-        .user(result)
-        .lastActiveAt(Instant.now())
-        .build();
-
     // log 추가
     log.info("생성할 유저의 아이디 ={}", result.getUsername());
     try {
       User save = userRepository.save(result);
-      userStatusRepository.save(userStatus);
 
       log.debug("계정 생성 완료 ={}", save.getId());
 
@@ -121,6 +113,7 @@ public class BasicUserService implements UserService {
     return userMapper.toDto(find);
   }
 
+  @PreAuthorize("principal.userDTO.id == #userId or hasRole('ADMIN')")
   @Override
   @Transactional
   public UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
@@ -157,6 +150,8 @@ public class BasicUserService implements UserService {
     log.info("업데이트할 유저의 아이디 ={}", updatedUser.getUsername());
     try {
       User save = userRepository.save(updatedUser);
+
+      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
       log.debug("업데이트된 유저의 아이디 ={}", save.getId());
       return userMapper.toDto(save);
     } catch (Exception e) {
@@ -164,6 +159,7 @@ public class BasicUserService implements UserService {
       throw InvalidUserParameterException.withMessage(e.getMessage());
     }
   }
+
 
   @PreAuthorize("hasRole('ADMIN')")
   @Override
@@ -178,6 +174,8 @@ public class BasicUserService implements UserService {
 
     try {
       User save = userRepository.save(user);
+      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
+
       log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);
     } catch (Exception e) {
@@ -186,6 +184,7 @@ public class BasicUserService implements UserService {
     }
   }
 
+  @PreAuthorize("principal.userDTO.id == #userId or hasRole('ADMIN')")
   @Override
   @Transactional
   public void deleteUser(UUID userId) {
@@ -200,10 +199,10 @@ public class BasicUserService implements UserService {
       if (user.getProfile() != null) {
         binaryContentRepository.delete(user.getProfile());
       }
-      // 2. 관련 도메인 삭제: UserStatus, User
-      userStatusRepository.deleteByUserId(userId);
-      userRepository.deleteById(userId);
 
+      // 2. 관련 도메인 삭제: User
+      userRepository.deleteById(userId);
+      sessionManager.invalidateSessionsByUserId(userId);    // 세션 무효화
       log.debug("계정 삭제 완료 username={}", user.getId());
     } catch (Exception e) {
       log.error("계정 삭제 실패 ", e);

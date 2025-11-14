@@ -17,6 +17,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +39,9 @@ public class SecurityConfig {
       LoginSuccessHandler loginSuccessHandler,
       LoginFailureHandler loginFailureHandler,
       DaoAuthenticationProvider daoAuthenticationProvider,
-      Http403ForbiddenAccessDeniedHandler forbiddenAccessDeniedHandler
+      Http403ForbiddenAccessDeniedHandler forbiddenAccessDeniedHandler,
+      SessionRegistry sessionRegistry,
+      UserDetailsService userDetailsService
   ) throws Exception {
 
     http
@@ -47,7 +51,8 @@ public class SecurityConfig {
                 "/",
                 "/index.html",
                 "/favicon.ico",
-                "/assets/**"
+                "/assets/**",
+                "/error/**"
             ).permitAll()
             .requestMatchers("/api/auth/csrf-token").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
@@ -68,11 +73,24 @@ public class SecurityConfig {
         )
         .logout(logout -> logout
             .logoutUrl("/api/auth/logout")
+            .invalidateHttpSession(true)
             .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
         )
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
             .accessDeniedHandler(forbiddenAccessDeniedHandler)
+        )
+        .sessionManagement(management -> management
+            .sessionConcurrency(concurrency -> concurrency
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(true)
+                .expiredUrl("/error/expired")
+                .sessionRegistry(sessionRegistry))
+        )
+        .rememberMe(remember -> remember
+            .key("remember-me")
+            .tokenValiditySeconds(60 * 60 * 24 * 30)    // 30일
+            .userDetailsService(userDetailsService)
         )
     ;
     return http.build();
@@ -93,6 +111,11 @@ public class SecurityConfig {
     provider.setPasswordEncoder(passwordEncoder);
     provider.setAuthoritiesMapper(new RoleHierarchyAuthoritiesMapper(roleHierarchy));
     return provider;
+  }
+
+  @Bean
+  public SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
   }
 
   @Bean
