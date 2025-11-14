@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS message_attachments CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS read_statuses CASCADE;
-DROP TABLE IF EXISTS user_statuses CASCADE;
 DROP TABLE IF EXISTS channels CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS binary_contents CASCADE;
@@ -42,20 +41,6 @@ CREATE TABLE channels
     name        VARCHAR(100),
     description VARCHAR(500),
     type        VARCHAR(10) NOT NULL CHECK (type IN ('PUBLIC', 'PRIVATE'))
-);
-
--- user_statuses 테이블
-CREATE TABLE user_statuses
-(
-    id             UUID PRIMARY KEY,
-    created_at     TIMESTAMPTZ NOT NULL,
-    updated_at     TIMESTAMPTZ,
-    user_id        UUID        NOT NULL UNIQUE,
-    last_active_at TIMESTAMPTZ NOT NULL,
-    CONSTRAINT fk_user_statuses_user
-        FOREIGN KEY (user_id)
-            REFERENCES users (id)
-            ON DELETE CASCADE
 );
 
 -- read_statuses 테이블
