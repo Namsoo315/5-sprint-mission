@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,6 +111,7 @@ public class BasicMessageService implements MessageService {
     return pageResponseMapper.fromSlice(slice, dtoList);
   }
 
+  @PreAuthorize("hasRole('ADMIN') or @basicMessageService.isOwner(#messageId, principal.userDTO.id)")
   @Override
   @Transactional
   public MessageDTO updateMessage(UUID messageId, MessageUpdateRequest request) {
@@ -135,6 +137,7 @@ public class BasicMessageService implements MessageService {
     }
   }
 
+  @PreAuthorize("@basicMessageService.isOwner(#messageId, principal.userDTO.id) or hasRole('ADMIN')")
   @Override
   @Transactional
   public void deleteMessage(UUID messageId) {
@@ -153,5 +156,15 @@ public class BasicMessageService implements MessageService {
       log.error("메시지 삭제 실패", e);
       throw InvalidMessageParameterException.withMessage(e.getMessage());
     }
+  }
+
+  // 자기 자신만 삭제하고 싶을 때
+  @Transactional(readOnly = true)
+  public boolean isOwner(UUID messageId, UUID userId) {
+    return messageRepository.findById(messageId)
+        .map(Message::getAuthor)
+        .map(User::getId)
+        .filter(userId::equals)
+        .isPresent();
   }
 }
