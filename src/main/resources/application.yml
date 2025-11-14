@@ -68,3 +68,8 @@ info:
   multipart:
     max-file-size: ${spring.servlet.multipart.max-file-size}
     max-request-size: ${spring.servlet.multipart.max-request-size}
+
+server:
+  servlet:
+    session:
+      timeout: 30m
