@@ -2,10 +2,11 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserRoleUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.entity.UserRole;
 import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
@@ -14,16 +15,17 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.security.SessionManager;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,8 +38,9 @@ public class BasicUserService implements UserService {
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
   private final BinaryContentStorage binaryContentStorage;
-  private final UserStatusRepository userStatusRepository;
+  private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
+  private final SessionManager sessionManager;
 
   @Override
   @Transactional
@@ -75,20 +78,15 @@ public class BasicUserService implements UserService {
     User result = User.builder()
         .username(userCreateRequest.username())
         .email(userCreateRequest.email())
-        .password(userCreateRequest.password())
+        .password(passwordEncoder.encode(userCreateRequest.password())) // Password Bcrypt Encoder
+        .role(UserRole.USER)
         .profile(content)
-        .build();
-
-    UserStatus userStatus = UserStatus.builder()
-        .user(result)
-        .lastActiveAt(Instant.now())
         .build();
 
     // log 추가
     log.info("생성할 유저의 아이디 ={}", result.getUsername());
     try {
       User save = userRepository.save(result);
-      userStatusRepository.save(userStatus);
 
       log.debug("계정 생성 완료 ={}", save.getId());
 
@@ -115,6 +113,7 @@ public class BasicUserService implements UserService {
     return userMapper.toDto(find);
   }
 
+  @PreAuthorize("principal.userDTO.id == #userId or hasRole('ADMIN')")
   @Override
   @Transactional
   public UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
@@ -151,6 +150,8 @@ public class BasicUserService implements UserService {
     log.info("업데이트할 유저의 아이디 ={}", updatedUser.getUsername());
     try {
       User save = userRepository.save(updatedUser);
+
+      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
       log.debug("업데이트된 유저의 아이디 ={}", save.getId());
       return userMapper.toDto(save);
     } catch (Exception e) {
@@ -159,6 +160,31 @@ public class BasicUserService implements UserService {
     }
   }
 
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @Override
+  @Transactional
+  public UserDTO updateRoleUser(UserRoleUpdateRequest userRoleUpdateRequest) {
+    User user = userRepository.findById(userRoleUpdateRequest.userId()).orElseThrow(() -> {
+      log.warn("존재하지 않는 회원 권한 업데이트 시도 userId={}", userRoleUpdateRequest.userId());
+      return new UserNotFoundException();
+    });
+
+    user.updateRole(userRoleUpdateRequest.newRole());
+
+    try {
+      User save = userRepository.save(user);
+      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
+
+      log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
+      return userMapper.toDto(save);
+    } catch (Exception e) {
+      log.error("계정 업데이트에 실패하였습니다. ={}", user.getUsername(), e);
+      throw InvalidUserParameterException.withMessage(e.getMessage());
+    }
+  }
+
+  @PreAuthorize("principal.userDTO.id == #userId or hasRole('ADMIN')")
   @Override
   @Transactional
   public void deleteUser(UUID userId) {
@@ -173,10 +199,10 @@ public class BasicUserService implements UserService {
       if (user.getProfile() != null) {
         binaryContentRepository.delete(user.getProfile());
       }
-      // 2. 관련 도메인 삭제: UserStatus, User
-      userStatusRepository.deleteByUserId(userId);
-      userRepository.deleteById(userId);
 
+      // 2. 관련 도메인 삭제: User
+      userRepository.deleteById(userId);
+      sessionManager.invalidateSessionsByUserId(userId);    // 세션 무효화
       log.debug("계정 삭제 완료 username={}", user.getId());
     } catch (Exception e) {
       log.error("계정 삭제 실패 ", e);

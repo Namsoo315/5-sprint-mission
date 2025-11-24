@@ -1,162 +1,115 @@
-[![codecov](https://codecov.io/gh/Namsoo315/5-sprint-mission/branch/남현수-sprint8/graph/badge.svg)](https://codecov.io/gh/Namsoo315/5-sprint-mission)
+# ✔️ **최종 체크리스트 (모든 항목 완료 처리)**
+
+아래 내용 **그대로 README에 사용 가능**하며,
+모든 TODO 항목은 **[x]** 로 체크된 상태다.
 
 ---
 
-````markdown
-# Discodeit 프로젝트
+# 프로젝트 마일스톤 — Spring Security 환경 설정
 
-이 저장소는 **애플리케이션 컨테이너화 → BinaryContentStorage 고도화 (AWS S3) → AWS 배포 (ECS, RDS) → CI/CD 구축** 의 전체
-마일스톤을 포함합니다.
+## Sprint Security 환경 설정
 
----
+세션 기반 인증 / 인가
 
-## 📌 프로젝트 마일스톤
+### Security 기본 설정
 
-1. 애플리케이션 컨테이너화
-2. BinaryContentStorage 고도화 (AWS S3)
-3. AWS를 활용한 배포 (AWS ECS, RDS)
-4. CI/CD 파이프라인 구축 (GitHub Actions)
-
----
-
-## 🚀 애플리케이션 컨테이너화
-
-### Dockerfile 작성
-
-- [x] Amazon Corretto 17 이미지를 베이스 이미지로 사용하세요.
-- [x] 작업 디렉토리를 설정하세요. (`/app`)
-- [x] 프로젝트 파일을 컨테이너로 복사하세요. (.dockerignore 활용)
-- [x] Gradle Wrapper를 사용하여 애플리케이션을 빌드하세요.
-- [x] 80 포트를 노출하도록 설정하세요.
-- [x] 프로젝트 정보를 환경 변수로 설정하세요.
-
-```bash
-PROJECT_NAME=discodeit
-PROJECT_VERSION=1.2-M8
-````
-
-* [x] JVM 옵션을 환경 변수로 설정하세요.
-
-```bash
-JVM_OPTS=""
-```
-
-* [x] 환경 변수를 활용하여 애플리케이션 실행 명령어를 설정하세요.
-
-### 이미지 빌드 및 실행 테스트
-
-* [x] Docker 이미지를 빌드하고 태그(local)를 지정하세요.
-* [x] 빌드된 이미지를 활용해서 컨테이너를 실행하고 애플리케이션을 테스트하세요.
-* [x] prod 프로필로 실행하세요.
-* [x] 데이터베이스는 로컬 PostgreSQL을 활용하세요.
-* [x] [http://localhost:8081](http://localhost:8081) 접속 가능하도록 포트 매핑하세요.
-
-### Docker Compose 구성
-
-* [x] 애플리케이션과 PostgreSQL 서비스를 포함하세요.
-* [x] 환경 변수는 `.env` 파일로 관리하고, `.env`는 git에 포함되지 않도록 합니다.
-* [x] 애플리케이션 서비스를 로컬 Dockerfile에서 빌드하도록 구성하세요.
-* [x] 애플리케이션 볼륨을 구성하여 BinaryContentStorage 데이터가 유지되도록 하세요.
-* [x] PostgreSQL 볼륨을 구성하여 데이터가 유지되도록 하세요.
-* [x] PostgreSQL 서비스 실행 후 `schema.sql` 자동 실행되도록 구성하세요.
-* [x] 서비스 간 의존성을 설정하세요 (`depends_on`).
-* [x] 필요한 포트 매핑을 구성하세요.
-* [x] `docker compose up --build`로 서비스 시작 및 테스트하세요.
+* [x] Spring Security 의존성 추가
+* [x] SecurityConfig 생성 (`com.sprint.mission.discodeit.config`)
+* [x] SecurityFilterChain Bean 등록
+* [x] Security 필터 체인 목록 TRACE 로깅 설정
+* [x] CookieCsrfTokenRepository.withHttpOnlyFalse() 적용
+* [x] SpaCsrfTokenRequestHandler 구현 및 적용
+* [x] CSRF 토큰 발급 API 구현 (`GET /api/auth/csrf-token`)
 
 ---
 
-## 📦 BinaryContentStorage 고도화 (AWS S3)
+## 회원가입
 
-### AWS S3 버킷 구성
-
-* [x] S3 버킷 생성: `discodeit-binary-content-storage-(사용자 이니셜)`
-* [x] 퍼블릭 액세스 차단 (모두 차단)
-* [x] 버전 관리 비활성화
-
-### IAM 사용자 구성
-
-* [x] `discodeit` 사용자 생성
-* [x] AmazonS3FullAccess 권한 부여
-* [x] 액세스 키 발급 후 `.env` 파일에 추가
-
-```env
-# AWS
-AWS_S3_ACCESS_KEY=**엑세스_키**
-AWS_S3_SECRET_KEY=**시크릿_키**
-AWS_S3_REGION=ap-northeast-2
-AWS_S3_BUCKET=버킷_이름
-```
-
-### AWS S3 테스트
-
-* [x] SDK 의존성 추가
-
-```gradle
-implementation 'software.amazon.awssdk:s3:2.31.7'
-```
-
-* [x] `AWSS3Test` 클래스 작성 (업로드/다운로드/PresignedUrl 테스트)
-* [x] `.env` 값 로드
-
-### S3 BinaryContentStorage 구현
-
-* [x] `S3BinaryContentStorage` 구현
-* [x] `@ConditionalOnProperty` 로 `discodeit.storage.type=s3`일 때만 Bean 등록
-* [x] PresignedUrl을 활용한 리다이렉트 방식 `download()` 구현
-* [x] `S3BinaryContentStorageTest` 작성
+* [x] 회원가입 API (`POST /api/users`) 유지
+* [x] 비밀번호 BCryptPasswordEncoder로 해시 저장
+* [x] 모든 신규 사용자 역할을 USER로 설정
 
 ---
 
-## ☁️ AWS를 활용한 배포 (RDS, ECR, ECS)
+## 인증 - 로그인
 
-### AWS RDS
-
-* [x] PostgreSQL RDS 인스턴스 생성 (프리 티어, 퍼블릭 액세스 비활성화)
-* [x] EC2 생성 후 SSH 터널링을 통해 RDS 접근
-* [x] DataGrip으로 접속해 유저/DB/schema 초기화
-
-```sql
-CREATE USER discodeit_user WITH PASSWORD 'discodeit1234';
-GRANT discodeit_user TO postgres;
-CREATE
-DATABASE discodeit OWNER discodeit_user;
--- schema.sql 실행
-```
-
-### AWS ECR
-
-* [x] 퍼블릭 레포지토리 `discodeit` 생성
-* [x] Docker 이미지 빌드 후 push (`latest`, `1.2-M8`)
-* [x] 멀티 플랫폼: linux/amd64, linux/arm64
-
-### AWS ECS
-
-* [x] 환경 변수 파일 `discodeit.env` 작성 후 S3 업로드
-* [x] ECS 클러스터, 태스크 정의, 서비스 생성
-* [x] EC2 보안 그룹 인바운드 규칙 (HTTP Anywhere-IPv4 허용)
-* [x] ECS 태스크 실행 후 EC2 퍼블릭 IP 접속 확인
+* [x] formLogin 기본 활성화
+* [x] 로그인 처리 URL → `/api/auth/login`
+* [x] InMemoryUserDetailsManager → DiscodeitUserDetailsService로 교체
+* [x] User → DiscodeitUserDetails로 대체
+* [x] PasswordEncoder → BCrypt 사용
+* [x] 인증 성공 시 LoginSuccessHandler에서 200 UserDto 반환
+* [x] 인증 실패 시 LoginFailureHandler에서 401 ErrorResponse 반환
+* [x] 기존 AuthController/AuthService 로그인 로직 제거
 
 ---
 
-## 🔧 심화 요구사항
+## 인증 - 세션 기반 현재 사용자 조회
 
-### 이미지 최적화
-
-* [x] 멀티 스테이지 빌드 (`local-slim` 태그)
-* [x] 이미지 크기 비교
-
-### CI/CD (GitHub Actions)
-
-* [x] `.github/workflows/test.yml` 작성 (PR 시 테스트 실행)
-* [x] CodeCov 연동 및 커버리지 뱃지 추가
-* [x] `.github/workflows/deploy.yml` 작성 (release 브랜치 push 시 배포)
-* [x] GitHub Secrets & Variables 설정
-* [x] Docker 이미지 빌드 및 ECR push
-* [x] ECS 서비스 업데이트 자동화
+* [x] `/api/auth/me` 구현
+* [x] @AuthenticationPrincipal를 통해 Principal 정보 조회 가능
 
 ---
 
-## 📖 참고
+## 인증 - 로그아웃
 
-* 프리티어 과금 주의 (EC2, RDS, 모니터링 옵션 등)
-* `.env` 파일은 반드시 git에 포함하지 않습니다.
+* [x] 로그아웃 URL → `/api/auth/logout`
+* [x] LogoutSuccessHandler → HttpStatusReturningLogoutSuccessHandler 사용
+* [x] 로그아웃 성공 시 204 반환
+
+---
+
+## 인가 - 권한 정의
+
+* [x] 역할 정의: ADMIN / CHANNEL_MANAGER / USER
+* [x] users 테이블에 role 컬럼 추가
+* [x] 회원가입 시 USER 기본 권한 부여
+* [x] 권한 수정 API 구현 (`PUT /api/auth/role`)
+* [x] 애플리케이션 실행 시 ADMIN 계정 자동 초기화 (없을 때만)
+* [x] DiscodeitUserDetails.getAuthorities 역할 반환 로직 구현
+
+---
+
+## 인가 - 권한 적용
+
+* [x] authorizeHttpRequests 활성화
+* [x] 모든 요청 인증 요구
+* [x] 다음 요청 permitAll:
+
+    * [x] CSRF Token 발급
+    * [x] 회원가입
+    * [x] 로그인
+    * [x] 로그아웃
+    * [x] Swagger / Actuator 등 API 이외 요청
+* [x] Method Security 활성화
+* [x] 채널 생성/수정/삭제는 CHANNEL_MANAGER 권한 필요
+* [x] 권한 수정은 ADMIN 권한 필요
+* [x] 권한 부족 시 403 반환 처리
+* [x] RoleHierarchy 구성
+  (ADMIN > CHANNEL_MANAGER > USER)
+
+---
+
+## 세션 관리 고도화
+
+* [x] 동일 계정 동시 로그인 방지(sessionConcurrency)
+* [x] DiscodeitUserDetails equals()/hashCode() 오버라이드
+* [x] 권한 변경 시 기존 로그인 세션 무효화(sessionRegistry 활용)
+* [x] SessionRegistry Bean 등록
+* [x] HttpSessionEventPublisher 등록하여 세션 만료 이벤트 처리
+* [x] UserStatus 엔티티 삭제
+* [x] SessionRegistry 기반 로그인 여부 판별로 전환
+
+---
+
+## 로그인 고도화 - RememberMe
+
+* [x] remember-me 파라미터가 true인 경우 자동 로그인 유지
+* [x] JSESSIONID 삭제 후 새로고침 시 인증 유지 확인
+
+---
+
+## 리소스 단위 권한 적용 (SpEL)
+
+* [x] 사용자 정보 수정/삭제 → 본인만 가능하도록 @PreAuthorize 적용
+* [x] 메시지 수정/삭제 → 작성자만 가능하도록 @PreAuthorize 적용

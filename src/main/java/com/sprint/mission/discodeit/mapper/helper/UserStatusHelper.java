@@ -1,8 +1,7 @@
 package com.sprint.mission.discodeit.mapper.helper;
 
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.security.SessionManager;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
@@ -11,12 +10,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserStatusHelper {
 
-  private final UserStatusRepository userStatusRepository;
+  private final SessionManager sessionManager;
 
   @Named("getOnlineStatus")
   public Boolean getOnlineStatus(User user) {
-    return userStatusRepository.findByUserId(user.getId())
-        .map(UserStatus::isOnline)
-        .orElse(null);
+    // Session이 비어져있지 않을 경우에 online 치부한다.
+    return !sessionManager.getActiveSessionsByUserId(user.getId()).isEmpty();
   }
 }
