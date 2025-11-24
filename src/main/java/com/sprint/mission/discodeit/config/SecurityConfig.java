@@ -24,8 +24,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +33,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -67,7 +64,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
             .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
-            .requestMatchers("/swagger-ui.html", "/actuator", "/actuator/**").permitAll()
+            .requestMatchers("/swagger-ui/*", "/actuator", "/actuator/**").permitAll()
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
@@ -89,7 +86,7 @@ public class SecurityConfig {
             .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
             .accessDeniedHandler(forbiddenAccessDeniedHandler)
         )
-        .sessionManagement(management -> management
+        .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .addFilterBefore(
@@ -104,18 +101,6 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
-
-  @Bean
-  public DaoAuthenticationProvider daoAuthenticationProvider(
-      UserDetailsService userDetailsService,
-      PasswordEncoder passwordEncoder,
-      RoleHierarchy roleHierarchy
-  ) {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-    provider.setPasswordEncoder(passwordEncoder);
-    provider.setAuthoritiesMapper(new RoleHierarchyAuthoritiesMapper(roleHierarchy));
-    return provider;
   }
 
   @Bean
@@ -137,6 +122,18 @@ public class SecurityConfig {
     DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
     handler.setRoleHierarchy(roleHierarchy);
     return handler;
+  }
+
+  @Bean
+  public DaoAuthenticationProvider daoAuthenticationProvider(
+      UserDetailsService userDetailsService,
+      PasswordEncoder passwordEncoder,
+      RoleHierarchy roleHierarchy
+  ) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder);
+    provider.setAuthoritiesMapper(new RoleHierarchyAuthoritiesMapper(roleHierarchy));
+    return provider;
   }
 
   @Bean
