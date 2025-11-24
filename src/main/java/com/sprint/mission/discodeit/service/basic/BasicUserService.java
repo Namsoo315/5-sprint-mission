@@ -15,7 +15,7 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.security.SessionManager;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class BasicUserService implements UserService {
   private final BinaryContentStorage binaryContentStorage;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
-  private final SessionManager sessionManager;
+  private final JwtRegistry<UUID> jwtRegistry;
 
   @Override
   @Transactional
@@ -151,7 +151,7 @@ public class BasicUserService implements UserService {
     try {
       User save = userRepository.save(updatedUser);
 
-      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
+      jwtRegistry.invalidateJwtInformationByUserId(save.getId());
       log.debug("업데이트된 유저의 아이디 ={}", save.getId());
       return userMapper.toDto(save);
     } catch (Exception e) {
@@ -174,7 +174,7 @@ public class BasicUserService implements UserService {
 
     try {
       User save = userRepository.save(user);
-      sessionManager.invalidateSessionsByUserId(save.getId());    // 세션 무효화
+      jwtRegistry.invalidateJwtInformationByUserId(save.getId());
 
       log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);
@@ -202,7 +202,7 @@ public class BasicUserService implements UserService {
 
       // 2. 관련 도메인 삭제: User
       userRepository.deleteById(userId);
-      sessionManager.invalidateSessionsByUserId(userId);    // 세션 무효화
+      jwtRegistry.invalidateJwtInformationByUserId(userId);
       log.debug("계정 삭제 완료 username={}", user.getId());
     } catch (Exception e) {
       log.error("계정 삭제 실패 ", e);
