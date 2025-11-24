@@ -15,6 +15,6 @@ public class UserStatusHelper {
 
   @Named("getOnlineStatus")
   public Boolean getOnlineStatus(User user) {
-    return !jwtRegistry.hasActiveJwtInformationByUserId(user.getId());
+    return jwtRegistry.hasActiveJwtInformationByUserId(user.getId());
   }
 }
