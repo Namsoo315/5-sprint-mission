@@ -67,7 +67,6 @@ public class SecurityConfig {
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/auth/logout")
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
         )

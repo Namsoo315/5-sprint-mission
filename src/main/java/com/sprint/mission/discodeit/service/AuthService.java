@@ -6,7 +6,5 @@ import com.sprint.mission.discodeit.dto.request.AuthLoginRequest;
 
 public interface AuthService {
 
-  UserDTO login(AuthLoginRequest request);
-
   JwtInformation refreshToken(String refreshToken);
 }
