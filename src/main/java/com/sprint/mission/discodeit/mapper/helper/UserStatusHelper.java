@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.mapper.helper;
 
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.security.SessionManager;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
@@ -10,11 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserStatusHelper {
 
-  private final SessionManager sessionManager;
+  private final JwtRegistry<UUID> jwtRegistry;
 
   @Named("getOnlineStatus")
   public Boolean getOnlineStatus(User user) {
-    // Session이 비어져있지 않을 경우에 online 치부한다.
-    return !sessionManager.getActiveSessionsByUserId(user.getId()).isEmpty();
+    return jwtRegistry.hasActiveJwtInformationByUserId(user.getId());
   }
 }

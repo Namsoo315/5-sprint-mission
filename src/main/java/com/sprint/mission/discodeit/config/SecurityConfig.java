@@ -3,8 +3,14 @@ package com.sprint.mission.discodeit.config;
 import com.sprint.mission.discodeit.entity.UserRole;
 import com.sprint.mission.discodeit.security.Http403ForbiddenAccessDeniedHandler;
 import com.sprint.mission.discodeit.security.LoginFailureHandler;
-import com.sprint.mission.discodeit.security.LoginSuccessHandler;
 import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
+import com.sprint.mission.discodeit.security.jwt.InMemoryJwtRegistry;
+import com.sprint.mission.discodeit.security.jwt.JwtAuthenticationFilter;
+import com.sprint.mission.discodeit.security.jwt.JwtLoginSuccessHandler;
+import com.sprint.mission.discodeit.security.jwt.JwtLogoutHandler;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
+import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
+import java.util.UUID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,13 +23,13 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -36,12 +42,12 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(
       HttpSecurity http,
-      LoginSuccessHandler loginSuccessHandler,
+      JwtLoginSuccessHandler jwtLoginSuccessHandler,
+      JwtLogoutHandler jwtLogoutHandler,
       LoginFailureHandler loginFailureHandler,
       DaoAuthenticationProvider daoAuthenticationProvider,
       Http403ForbiddenAccessDeniedHandler forbiddenAccessDeniedHandler,
-      SessionRegistry sessionRegistry,
-      UserDetailsService userDetailsService
+      JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
 
     http
@@ -51,71 +57,48 @@ public class SecurityConfig {
                 "/",
                 "/index.html",
                 "/favicon.ico",
-                "/assets/**",
-                "/error/**"
+                "/assets/**"
             ).permitAll()
             .requestMatchers("/api/auth/csrf-token").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            .requestMatchers("/api/auth/me"   // 처음 로그인전에도 /api/auth/me를 보내서
-                , "/api/auth/login", "/api/auth/logout").permitAll()
-            .requestMatchers("/swagger-ui.html", "/actuator", "/actuator/**").permitAll()
+            .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+            .requestMatchers("/swagger-ui/*", "/actuator", "/actuator/**").permitAll()
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/auth/logout")
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
         )
         .formLogin(login -> login
             .loginProcessingUrl("/api/auth/login")
-            .successHandler(loginSuccessHandler)
+            .successHandler(jwtLoginSuccessHandler)
             .failureHandler(loginFailureHandler)
         )
         .logout(logout -> logout
             .logoutUrl("/api/auth/logout")
-            .invalidateHttpSession(true)
+            .addLogoutHandler(jwtLogoutHandler)
             .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
         )
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
             .accessDeniedHandler(forbiddenAccessDeniedHandler)
         )
-        .sessionManagement(management -> management
-            .sessionConcurrency(concurrency -> concurrency
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(true)
-                .expiredUrl("/error/expired")
-                .sessionRegistry(sessionRegistry))
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
-        .rememberMe(remember -> remember
-            .key("remember-me")
-            .tokenValiditySeconds(60 * 60 * 24 * 30)    // 30일
-            .userDetailsService(userDetailsService)
+        .addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class
         )
     ;
+
     return http.build();
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
-
-  @Bean
-  public DaoAuthenticationProvider daoAuthenticationProvider(
-      UserDetailsService userDetailsService,
-      PasswordEncoder passwordEncoder,
-      RoleHierarchy roleHierarchy
-  ) {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-    provider.setPasswordEncoder(passwordEncoder);
-    provider.setAuthoritiesMapper(new RoleHierarchyAuthoritiesMapper(roleHierarchy));
-    return provider;
-  }
-
-  @Bean
-  public SessionRegistry sessionRegistry() {
-    return new SessionRegistryImpl();
   }
 
   @Bean
@@ -137,5 +120,22 @@ public class SecurityConfig {
     DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
     handler.setRoleHierarchy(roleHierarchy);
     return handler;
+  }
+
+  @Bean
+  public DaoAuthenticationProvider daoAuthenticationProvider(
+      UserDetailsService userDetailsService,
+      PasswordEncoder passwordEncoder,
+      RoleHierarchy roleHierarchy
+  ) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder);
+    provider.setAuthoritiesMapper(new RoleHierarchyAuthoritiesMapper(roleHierarchy));
+    return provider;
+  }
+
+  @Bean
+  public JwtRegistry<UUID> jwtRegistry(JwtTokenProvider jwtTokenProvider) {
+    return new InMemoryJwtRegistry(1, jwtTokenProvider);
   }
 }
