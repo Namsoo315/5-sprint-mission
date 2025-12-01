@@ -1,115 +1,275 @@
-# ✔️ **최종 체크리스트 (모든 항목 완료 처리)**
+# ✅ **리팩토링 README (완성본)**
 
-아래 내용 **그대로 README에 사용 가능**하며,
-모든 TODO 항목은 **[x]** 로 체크된 상태다.
+# JWT 컴포넌트 구현
 
----
+- [x]  JWT 의존성을 추가하세요.
 
-# 프로젝트 마일스톤 — Spring Security 환경 설정
+```gradle
+implementation 'com.nimbusds:nimbus-jose-jwt:10.3'
+````
 
-## Sprint Security 환경 설정
-
-세션 기반 인증 / 인가
-
-### Security 기본 설정
-
-* [x] Spring Security 의존성 추가
-* [x] SecurityConfig 생성 (`com.sprint.mission.discodeit.config`)
-* [x] SecurityFilterChain Bean 등록
-* [x] Security 필터 체인 목록 TRACE 로깅 설정
-* [x] CookieCsrfTokenRepository.withHttpOnlyFalse() 적용
-* [x] SpaCsrfTokenRequestHandler 구현 및 적용
-* [x] CSRF 토큰 발급 API 구현 (`GET /api/auth/csrf-token`)
+- [x]  토큰을 발급, 갱신, 유효성 검사를 담당하는 컴포넌트(JwtTokenProvider)를 구현하세요.
 
 ---
 
-## 회원가입
+# 리팩토링 - 로그인
 
-* [x] 회원가입 API (`POST /api/users`) 유지
-* [x] 비밀번호 BCryptPasswordEncoder로 해시 저장
-* [x] 모든 신규 사용자 역할을 USER로 설정
+미션 9와 마찬가지로 Spring Security의 formLogin + 미션 9의 인증 흐름은 그대로 유지하면서 필요한 부분만 대체합니다.
 
----
+- [x]  세션 생성 정책을 STATELESS로 변경하고, sessionConcurrency 설정을 삭제하세요.
 
-## 인증 - 로그인
+```java
+http
+    .sessionManagement(session ->session
+    .
 
-* [x] formLogin 기본 활성화
-* [x] 로그인 처리 URL → `/api/auth/login`
-* [x] InMemoryUserDetailsManager → DiscodeitUserDetailsService로 교체
-* [x] User → DiscodeitUserDetails로 대체
-* [x] PasswordEncoder → BCrypt 사용
-* [x] 인증 성공 시 LoginSuccessHandler에서 200 UserDto 반환
-* [x] 인증 실패 시 LoginFailureHandler에서 401 ErrorResponse 반환
-* [x] 기존 AuthController/AuthService 로그인 로직 제거
+sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    );
+```
 
----
+- [x]  AuthenticationSuccessHandler 컴포넌트를 대체하세요.
 
-## 인증 - 세션 기반 현재 사용자 조회
+기존 구현체는 `LoginSuccessHandler`입니다.
+`JwtLoginSuccessHandler`를 정의하고 대체하세요.
 
-* [x] `/api/auth/me` 구현
-* [x] @AuthenticationPrincipal를 통해 Principal 정보 조회 가능
+```java
 
----
+@Component
+public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-## 인증 - 로그아웃
+  private final JwtTokenProvider jwtTokenProvider;
 
-* [x] 로그아웃 URL → `/api/auth/logout`
-* [x] LogoutSuccessHandler → HttpStatusReturningLogoutSuccessHandler 사용
-* [x] 로그아웃 성공 시 204 반환
+  @Override
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException, ServletException {
 
----
+    JwtDto jwt = jwtTokenProvider.createToken(authentication);
 
-## 인가 - 권한 정의
+    // access token → body
+    response.setContentType("application/json");
+    response.getWriter().write(new ObjectMapper().writeValueAsString(jwt));
 
-* [x] 역할 정의: ADMIN / CHANNEL_MANAGER / USER
-* [x] users 테이블에 role 컬럼 추가
-* [x] 회원가입 시 USER 기본 권한 부여
-* [x] 권한 수정 API 구현 (`PUT /api/auth/role`)
-* [x] 애플리케이션 실행 시 ADMIN 계정 자동 초기화 (없을 때만)
-* [x] DiscodeitUserDetails.getAuthorities 역할 반환 로직 구현
+    // refresh token → cookie
+    Cookie cookie = new Cookie(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME, jwt.refreshToken());
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    response.addCookie(cookie);
+  }
+}
+```
 
----
+설정에 추가하세요.
 
-## 인가 - 권한 적용
+```java
+http
+    .formLogin(login ->login
+    .
 
-* [x] authorizeHttpRequests 활성화
-* [x] 모든 요청 인증 요구
-* [x] 다음 요청 permitAll:
-
-    * [x] CSRF Token 발급
-    * [x] 회원가입
-    * [x] 로그인
-    * [x] 로그아웃
-    * [x] Swagger / Actuator 등 API 이외 요청
-* [x] Method Security 활성화
-* [x] 채널 생성/수정/삭제는 CHANNEL_MANAGER 권한 필요
-* [x] 권한 수정은 ADMIN 권한 필요
-* [x] 권한 부족 시 403 반환 처리
-* [x] RoleHierarchy 구성
-  (ADMIN > CHANNEL_MANAGER > USER)
+successHandler(jwtLoginSuccessHandler)
+    );
+```
 
 ---
 
-## 세션 관리 고도화
+# JWT 인증 필터 구현
 
-* [x] 동일 계정 동시 로그인 방지(sessionConcurrency)
-* [x] DiscodeitUserDetails equals()/hashCode() 오버라이드
-* [x] 권한 변경 시 기존 로그인 세션 무효화(sessionRegistry 활용)
-* [x] SessionRegistry Bean 등록
-* [x] HttpSessionEventPublisher 등록하여 세션 만료 이벤트 처리
-* [x] UserStatus 엔티티 삭제
-* [x] SessionRegistry 기반 로그인 여부 판별로 전환
+- [x]  엑세스 토큰을 통해 인증하는 필터(JwtAuthenticationFilter)를 구현하세요.
+
+```java
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+  private final JwtTokenProvider jwtTokenProvider;
+  private final JwtRegistry jwtRegistry;
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain filterChain)
+      throws ServletException, IOException {
+
+    String token = jwtTokenProvider.resolveAccessToken(request);
+
+    if (token != null && jwtTokenProvider.validateToken(token)) {
+
+      if (!jwtRegistry.hasActiveJwtInformationByAccessToken(token)) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
+      UserDetails userDetails = jwtTokenProvider.getUserDetails(token);
+
+      UsernamePasswordAuthenticationToken authentication =
+          new UsernamePasswordAuthenticationToken(
+              userDetails,
+              null,
+              userDetails.getAuthorities()
+          );
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    filterChain.doFilter(request, response);
+  }
+}
+```
 
 ---
 
-## 로그인 고도화 - RememberMe
+# 리프레시 토큰을 활용한 엑세스 토큰 재발급
 
-* [x] remember-me 파라미터가 true인 경우 자동 로그인 유지
-* [x] JSESSIONID 삭제 후 새로고침 시 인증 유지 확인
+- [x]  리프레시 토큰을 활용해 엑세스 토큰을 재발급하는 API를 구현하세요.
+
+**엔드포인트:** `POST /api/auth/refresh`
+
+```java
+
+@PostMapping("/refresh")
+public ResponseEntity<JwtDto> refreshToken(HttpServletRequest request) {
+
+  String refreshToken = jwtTokenProvider.resolveRefreshTokenFromCookie(request);
+
+  if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  }
+
+  JwtDto newTokens = jwtTokenProvider.rotateToken(refreshToken);
+
+  return ResponseEntity.ok(newTokens);
+}
+```
+
+- [x]  리프레시 토큰 Rotation 적용
+- [x]  Me API 삭제
+- [x]  RememberMe 기능 제거
 
 ---
 
-## 리소스 단위 권한 적용 (SpEL)
+# 리팩토링 - 로그아웃
 
-* [x] 사용자 정보 수정/삭제 → 본인만 가능하도록 @PreAuthorize 적용
-* [x] 메시지 수정/삭제 → 작성자만 가능하도록 @PreAuthorize 적용
+- [x]  쿠키의 리프레시 토큰을 삭제하는 LogoutHandler 구현
+
+```java
+
+@Component
+public class JwtLogoutHandler implements LogoutHandler {
+
+  private final JwtRegistry jwtRegistry;
+
+  @Override
+  public void logout(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) {
+
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies == null)
+      return;
+
+    Arrays.stream(cookies)
+        .filter(c -> c.getName().equals(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME))
+        .findFirst()
+        .ifPresent(cookie -> {
+          jwtRegistry.invalidateJwtInformationByRefreshToken(cookie.getValue());
+
+          cookie.setMaxAge(0);
+          cookie.setPath("/");
+          response.addCookie(cookie);
+        });
+  }
+}
+```
+
+- [x]  설정에 추가
+
+```java
+http
+    .logout(logout ->logout
+    .
+
+logoutUrl("/api/auth/logout")
+        .
+
+addLogoutHandler(jwtLogoutHandler)
+    );
+```
+
+---
+
+# 리팩토링 - 토큰 상태 관리
+
+토큰 기반 인증 방식은 세션 기반 인증 방식과 달리 무상태(stateless)이기 때문에,
+세션처럼 사용자의 로그인 상태를 제어하기 어려움 → **JwtRegistry 필요**
+
+---
+
+## JwtRegistry 구현
+
+- [x]  InMemoryJwtRegistry 구현
+
+```java
+public class InMemoryJwtRegistry implements JwtRegistry {
+
+  private final Map<UUID, Queue<JwtInformation>> origin = new ConcurrentHashMap<>();
+  private final int maxActiveJwtCount = 1;
+
+  @Override
+  public synchronized void registerJwtInformation(JwtInformation info) {
+    origin.computeIfAbsent(info.userId(), id -> new ConcurrentLinkedQueue<>());
+
+    Queue<JwtInformation> queue = origin.get(info.userId());
+
+    while (queue.size() >= maxActiveJwtCount) {
+      JwtInformation old = queue.poll();
+      removeTokenIndex(old.accessToken(), old.refreshToken());
+    }
+
+    queue.add(info);
+    indexTokens(info);
+  }
+
+  @Override
+  public void invalidateJwtInformationByUserId(UUID userId) {
+    origin.computeIfPresent(userId, (id, queue) -> {
+      queue.forEach(info -> removeTokenIndex(info.accessToken(), info.refreshToken()));
+      queue.clear();
+      return null;
+    });
+  }
+
+  @Override
+  public void clearExpiredJwtInformation() {
+    // expiration 제거 로직
+  }
+}
+```
+
+---
+
+- [x]  JwtAuthenticationFilter에서 JwtRegistry 활용
+- [x]  동시 로그인 제한 로직 구현
+- [x]  권한 변경 시 강제 로그아웃 처리
+- [x]  로그인 여부 판단에 JwtRegistry 활용
+- [x]  JwtLogoutHandler에서 JwtRegistry 연동
+- [x]  스케줄링 활성화
+
+```java
+
+@Configuration
+@EnableJpaAuditing
+@EnableScheduling
+public class AppConfig {
+
+}
+```
+
+```java
+
+@Scheduled(fixedDelay = 1000 * 60 * 5)
+@Override
+public void clearExpiredJwtInformation() {
+    ...
+}
+```
+
+---
+## 멘토에게
+- 
