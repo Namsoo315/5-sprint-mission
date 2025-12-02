@@ -7,17 +7,15 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserRole;
-import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserParameterException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,8 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
-  private final BinaryContentRepository binaryContentRepository;
-  private final BinaryContentStorage binaryContentStorage;
+  private final BinaryContentService binaryContentService;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
   private final JwtRegistry<UUID> jwtRegistry;
@@ -57,22 +54,8 @@ public class BasicUserService implements UserService {
       throw DuplicateUserException.withEmail(userCreateRequest.email());
     }
 
-    BinaryContent content = null;
     // 2. 선택적으로 프로필 이미지를 같이 등록함. 있으면 등록 없으면 등록 안함.
-    if (profile != null && !profile.isEmpty()) {
-      content = BinaryContent.builder()
-          .fileName(profile.getOriginalFilename())
-          .contentType(profile.getContentType())
-          .size(profile.getSize())
-          .build();
-
-      BinaryContent save = binaryContentRepository.save(content);
-      try {
-        binaryContentStorage.save(save.getId(), profile.getBytes());
-      } catch (IOException e) {
-        throw BinaryContentSaveFailedException.withMessage(e.getMessage());
-      }
-    }
+    BinaryContent binaryContent = binaryContentService.createBinaryContent(profile);
 
     // 3. user, userStatus 같이 생성.
     User result = User.builder()
@@ -80,7 +63,7 @@ public class BasicUserService implements UserService {
         .email(userCreateRequest.email())
         .password(passwordEncoder.encode(userCreateRequest.password())) // Password Bcrypt Encoder
         .role(UserRole.USER)
-        .profile(content)
+        .profile(binaryContent)
         .build();
 
     // log 추가
@@ -124,21 +107,11 @@ public class BasicUserService implements UserService {
       return new UserNotFoundException();
     });
 
-    BinaryContent savedContent = null;
-    // 2. 선택적으로 프로필 이미지를 같이 등록함. (있으면 등록 없으면 등록 안함.)
-    if (profile != null && !profile.isEmpty()) {
-      BinaryContent content = BinaryContent.builder()
-          .fileName(profile.getOriginalFilename())
-          .contentType(profile.getContentType())
-          .size(profile.getSize())
-          .build();
-      savedContent = binaryContentRepository.save(content);
-      binaryContentStorage.save(savedContent.getId(), profile.getBytes());
-    }
+    BinaryContent binaryContent = binaryContentService.createBinaryContent(profile);
 
     // 3. Builder를 사용해서 profile 반영
     User updatedUser = user.toBuilder()
-        .profile(savedContent != null ? savedContent : user.getProfile())
+        .profile(binaryContent != null ? binaryContent : user.getProfile())
         .username(userUpdateRequest.newUsername() != null ? userUpdateRequest.newUsername()
             : user.getUsername())
         .email(
@@ -197,7 +170,7 @@ public class BasicUserService implements UserService {
     try {
       // 1. user 안에 있는 profile 삭제
       if (user.getProfile() != null) {
-        binaryContentRepository.delete(user.getProfile());
+        binaryContentService.delete(user.getProfile().getId());
       }
 
       // 2. 관련 도메인 삭제: User
