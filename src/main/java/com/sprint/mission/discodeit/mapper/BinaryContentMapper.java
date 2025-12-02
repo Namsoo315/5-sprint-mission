@@ -13,6 +13,7 @@ public interface BinaryContentMapper {
   @Mapping(target = "fileName", source = "fileName")
   @Mapping(target = "size", source = "size")
   @Mapping(target = "contentType", source = "contentType")
+  @Mapping(target = "status", source = "status")
   BinaryContentDTO toDto(BinaryContent binaryContent);
 
   List<BinaryContentDTO> toDto(List<BinaryContent> binaryContents);
