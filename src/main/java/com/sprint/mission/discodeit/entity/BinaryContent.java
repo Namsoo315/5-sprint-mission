@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BinaryContent extends BaseEntity {
 
-  @Column(name = "file_name", nullable = false, length = 255)
+  @Column(name = "file_name", nullable = false)
   private String fileName;
 
   @Column(nullable = false)
