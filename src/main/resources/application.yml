@@ -39,7 +39,7 @@ security:
     secret: your-jwt-secret-key-here-12345628219012345  # 32char 이상 길게 써줘야함!!
     #    access-token-validity-seconds: 3600 # 1시간
     access-token-validity-seconds: 3600
-    refresh-token-validity-seconds: 86400 # 14일
+    refresh-token-validity-seconds: 1204000 # 14일
 
 management:
   endpoints:

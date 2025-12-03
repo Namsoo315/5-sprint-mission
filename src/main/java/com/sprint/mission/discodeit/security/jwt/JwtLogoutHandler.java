@@ -22,7 +22,7 @@ public class JwtLogoutHandler implements LogoutHandler {
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) {
-    Cookie refreshTokenExpirationCookie = jwtTokenProvider.genereateRefreshTokenExpirationCookie();
+    Cookie refreshTokenExpirationCookie = jwtTokenProvider.generateRefreshTokenExpirationCookie();
     response.addCookie(refreshTokenExpirationCookie);
     try {
       jwtRegistry.invalidateJwtInformationByUserId(

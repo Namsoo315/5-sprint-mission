@@ -155,7 +155,7 @@ public class JwtTokenProvider {
   }
 
   // 생성된 Refresh  토큰을 쿠키로 변환하는 과정
-  public Cookie genereateRefreshTokenCookie(String refreshToken) {
+  public Cookie generateRefreshTokenCookie(String refreshToken) {
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken); // 키쌍으로 만들어짐
     cookie.setHttpOnly(true); // 브라우저에서 읽기 금지
     cookie.setSecure(true);
@@ -165,7 +165,7 @@ public class JwtTokenProvider {
   }
 
   // 생성된 Refresh 무효화 하는 쿠키로 만드는 과정
-  public Cookie genereateRefreshTokenExpirationCookie() {
+  public Cookie generateRefreshTokenExpirationCookie() {
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, ""); // 값 지우기
     cookie.setHttpOnly(true);
     cookie.setSecure(true);

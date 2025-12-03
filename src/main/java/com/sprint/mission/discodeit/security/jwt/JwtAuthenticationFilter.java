@@ -42,25 +42,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       String token = resolveToken(request);
       if (StringUtils.hasText(token)) {
-        if (jwtTokenProvider.validateAccessToken(token) &&
-            jwtRegistry.hasActiveJwtInformationByAccessToken(token)) {
-
-          String username = jwtTokenProvider.getUsernameFromToken(token);
-
-          UserDTO userDTO = jwtTokenProvider.parseAccessToken(token).userDTO();
-          DiscodeitUserDetails discodeitUserDetails = new DiscodeitUserDetails(userDTO, null);
-          UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-              discodeitUserDetails, null, discodeitUserDetails.getAuthorities());
-
-          authenticationToken.setDetails(
-              new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-          log.debug("Set authentication for user: {}", username);
-        } else {
-          log.debug("Invalid JWT token");
+        if (!jwtTokenProvider.validateAccessToken(token)) {
+          log.debug("TokenProvider Invalid JWT token");
           sendErrorResponse(response, "Invalid JWT token", HttpServletResponse.SC_UNAUTHORIZED);
           return;
         }
+
+        if (!jwtRegistry.hasActiveJwtInformationByAccessToken(token)) {
+          log.debug("jwtRegistry Invalid JWT token");
+          sendErrorResponse(response, "Invalid JWT token", HttpServletResponse.SC_UNAUTHORIZED);
+          return;
+        }
+
+        String username = jwtTokenProvider.getUsernameFromToken(token);
+
+        UserDTO userDTO = jwtTokenProvider.parseAccessToken(token).userDTO();
+        DiscodeitUserDetails discodeitUserDetails = new DiscodeitUserDetails(userDTO, null);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            discodeitUserDetails, null, discodeitUserDetails.getAuthorities());
+
+        authenticationToken.setDetails(
+            new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        log.debug("Set authentication for user: {}", username);
       }
     } catch (Exception e) {
       log.error("Authentication failed. {}", e.getMessage());

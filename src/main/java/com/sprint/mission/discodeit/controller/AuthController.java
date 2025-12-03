@@ -61,7 +61,7 @@ public class AuthController {
       HttpServletResponse response) {
     log.info("Refresh Token: {}", refreshToken);
     JwtInformation jwtInformation = authService.refreshToken(refreshToken);
-    Cookie cookie = jwtTokenProvider.genereateRefreshTokenCookie(jwtInformation.getRefreshToken());
+    Cookie cookie = jwtTokenProvider.generateRefreshTokenCookie(jwtInformation.getRefreshToken());
     response.addCookie(cookie);
 
     JwtDTO jwtDTO = new JwtDTO(jwtInformation.getUserDTO(), jwtInformation.getAccessToken());
