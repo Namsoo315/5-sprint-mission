@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS read_statuses CASCADE;
 DROP TABLE IF EXISTS channels CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS binary_contents CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 
 -- binary_contents 테이블
 CREATE TABLE binary_contents
@@ -34,6 +35,21 @@ CREATE TABLE users
             ON DELETE SET NULL
 );
 
+CREATE TABLE notifications
+(
+    id          UUID PRIMARY KEY,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE,
+    receiver_id UUID                     NOT NULL,
+    title       VARCHAR(255)             NOT NULL,
+    content     TEXT                     NOT NULL,
+
+    CONSTRAINT fk_notifications_receiver
+        FOREIGN KEY (receiver_id)
+            REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
 -- channels 테이블
 CREATE TABLE channels
 (
@@ -48,12 +64,13 @@ CREATE TABLE channels
 -- read_statuses 테이블
 CREATE TABLE read_statuses
 (
-    id           UUID PRIMARY KEY,
-    created_at   TIMESTAMPTZ NOT NULL,
-    updated_at   TIMESTAMPTZ,
-    user_id      UUID        NOT NULL,
-    channel_id   UUID        NOT NULL,
-    last_read_at TIMESTAMPTZ NOT NULL,
+    id                   UUID PRIMARY KEY,
+    created_at           TIMESTAMPTZ NOT NULL,
+    updated_at           TIMESTAMPTZ,
+    user_id              UUID        NOT NULL,
+    channel_id           UUID        NOT NULL,
+    last_read_at         TIMESTAMPTZ NOT NULL,
+    notification_enabled BOOLEAN     NOT NULL,
     CONSTRAINT fk_read_statuses_user
         FOREIGN KEY (user_id)
             REFERENCES users (id)
