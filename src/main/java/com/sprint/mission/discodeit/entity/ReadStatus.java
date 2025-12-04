@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,9 +35,16 @@ public class ReadStatus extends BaseEntity {
   @Column(name = "last_read_at", nullable = false)
   private Instant lastReadAt;
 
-  public void updateLastReadAt(Instant newLastReadAt) {
-    if (newLastReadAt != null && !newLastReadAt.equals(this.lastReadAt)) {
-      this.lastReadAt = newLastReadAt;
+  @Column(name = "notification_enabled", nullable = false)
+  private boolean notificationEnabled = false;
+
+  public void updateReadStatus(ReadStatusUpdateRequest request) {
+    if (request.newLastReadAt() != null && !request.newLastReadAt().equals(this.lastReadAt)) {
+      this.lastReadAt = request.newLastReadAt();
+    }
+
+    if (request.newNotificationEnabled() != null) {
+      this.notificationEnabled = request.newNotificationEnabled();
     }
   }
 
