@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.event.MessageCreatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.InvalidMessageParameterException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
@@ -24,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +42,8 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   private final BinaryContentService binaryContentService;
   private final MessageMapper messageMapper;
@@ -70,6 +74,9 @@ public class BasicMessageService implements MessageService {
     log.info("생성할 메시지 내용='{}'", message.getContent());
     try {
       Message save = messageRepository.save(message);
+      applicationEventPublisher.publishEvent(
+          new MessageCreatedEvent(save.getAuthor().getId(), save.getChannel().getId(),
+              save.getContent()));
       log.debug("메시지 생성 완료 아이디='{}'", save.getId());
       return messageMapper.toDto(save);
     } catch (Exception e) {

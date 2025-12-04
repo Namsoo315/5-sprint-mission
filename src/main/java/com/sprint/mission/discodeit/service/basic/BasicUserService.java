@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserRole;
+import com.sprint.mission.discodeit.event.RoleUpdatedEvent;
 import com.sprint.mission.discodeit.exception.user.DuplicateUserException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserCredentialsException;
 import com.sprint.mission.discodeit.exception.user.InvalidUserParameterException;
@@ -22,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
   private final BinaryContentService binaryContentService;
+  private final ApplicationEventPublisher applicationEventPublisher;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
   private final JwtRegistry<UUID> jwtRegistry;
@@ -147,8 +150,9 @@ public class BasicUserService implements UserService {
 
     try {
       User save = userRepository.save(user);
+      applicationEventPublisher.publishEvent(
+          new RoleUpdatedEvent(save, user.getRole(), save.getRole()));
       jwtRegistry.invalidateJwtInformationByUserId(save.getId());
-
       log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);
     } catch (Exception e) {
