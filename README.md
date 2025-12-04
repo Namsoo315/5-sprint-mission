@@ -66,6 +66,7 @@ BinaryContent의 상태를 업데이트하는 메소드를 정의하세요.
 * 성공 시 BinaryContent의 status를 SUCCESS로 업데이트하세요.
 * 실패 시 BinaryContent의 status를 FAIL로 업데이트하세요.
 
+<img width="751" height="783" alt="{35A0B64C-1C74-4863-91A8-D8F2AF2CDA58}" src="https://github.com/user-attachments/assets/cb41abc0-6612-4a97-94e8-2b950c70497c" />
 Processing 일땐 이런식으로 뜨고 Success일땐 제대로 출려됨
 
 ---
