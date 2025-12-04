@@ -181,3 +181,59 @@ public class NotificationRequiredEventListener {
     
 --- 
 
+# 비동기 적용하기
+
+[x] 비동기를 적용하기 위한 설정(AsyncConfig) 클래스를 구현하세요.
+@EanbleAsync 어노테이션을 활용하세요.
+TaskExecutor를 Bean으로 등록하세요.
+TaskDecorator를 활용해 MDC의 Request ID, SecurityContext의 인정 정보가 비동기 스레드에서도 유지되도록 구현하세요.
+
+[x] 앞서 구현한 Event Listener를 비동기적으로 처리하세요.
+@Async 어노테이션을 활용하세요.
+
+[x] 동기 처리와 비동기 처리 간 성능 차이를 비교해보세요.
+파일 업로드 로직에 의도적인 지연(Thread.sleep(…))을 발생시키세요.
+
+```java
+// LocalBinaryContentStorage
+public UUID put(UUID binaryContentId, byte[] bytes) {
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Thread interrupted while simulating delay", e);
+    }
+    ...
+}
+```
+
+메시지 생성 API의 실행 시간을 측정해보세요.
+
+@Timed 어노테이션을 메소드에 추가합니다.
+
+```java
+// MessageController
+@Timed("message.create.async")
+@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<MessageDto> create(...) {...}
+```
+
+Actuator 설정을 추가합니다.
+
+```yaml
+# application.yaml
+management:
+  ...
+  observations:
+    annotations:
+      enabled: true
+```
+
+`/actuator/metrics/message.create.async` 에서 측정된 시간을 확인할 수 있습니다.
+
+
+10개의 데이터를 한번에 보낼때 
+왼쪽이 동기, 오른쪽이 비동기
+차이가 꽤 남
+<img width="996" height="893" alt="{4B2CEE99-F352-4B58-9B86-884FBFBAA7F8}" src="https://github.com/user-attachments/assets/75e7f327-cbca-47eb-89ad-24f61fef2156" />
+
