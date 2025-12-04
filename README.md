@@ -176,5 +176,8 @@ public class NotificationRequiredEventListener {
 * title: "권한이 변경되었습니다."
 * content: "USER -> CHANNEL_MANAGER"
 
+ 잘 됩니다.
+<img width="951" height="500" alt="{19EDD488-366E-443A-925A-673D121F1543}" src="https://github.com/user-attachments/assets/d02c20cb-6b8f-4c22-9e10-d8c340cfda80" />
+    
 --- 
 
