@@ -146,12 +146,13 @@ public class BasicUserService implements UserService {
       return new UserNotFoundException();
     });
 
+    UserRole oldRole = user.getRole();    // 예전 유저권한을 저장하기 위한 객체
     user.updateRole(userRoleUpdateRequest.newRole());
 
     try {
       User save = userRepository.save(user);
       applicationEventPublisher.publishEvent(
-          new RoleUpdatedEvent(save, user.getRole(), save.getRole()));
+          new RoleUpdatedEvent(save, oldRole, save.getRole()));
       jwtRegistry.invalidateJwtInformationByUserId(save.getId());
       log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);

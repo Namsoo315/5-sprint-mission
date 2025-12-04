@@ -70,3 +70,111 @@ BinaryContent의 상태를 업데이트하는 메소드를 정의하세요.
 Processing 일땐 이런식으로 뜨고 Success일땐 제대로 출려됨
 
 ---
+
+알겠어. **요구한 그대로, 내용 수정 없이, 체크박스만 `[x]`로 변경**해서 README에 바로 복붙할 수 있는 버전으로 정리해줄게.
+이미지 위치도 그대로 둘 테니 너가 직접 넣으면 돼.
+
+---
+
+# Spring Event - 알림 기능 추가하기
+
+1) 채널에 새로운 메시지가 등록되거나 2) 권한이 변경된 경우 이벤트를 발행해 알림을 받을 수 있도록 구현합니다.
+
+[x] 채널에 새로운 메시지가 등록된 경우 알림을 받을 수 있도록 리팩토링하세요.  
+MessageCreatedEvent를 정의하고 새로운 메시지가 등록되면 이벤트를 발행하세요.
+
+사용자 별로 관심있는 채널의 알림만 받을 수 있도록 ReadStatus 엔티티에 채널 알림 여부 속성(notificationEnabled)을 추가하세요.
+
+PRIVATE 채널은 알림 여부를 true로 초기화합니다.  
+PUBLIC 채널은 알림 여부를 false로 초기화합니다.
+
+```sql
+-- schema.sql
+CREATE TABLE read_statuses
+(
+    id                   uuid PRIMARY KEY,
+    created_at           timestamp with time zone NOT NULL,
+    updated_at           timestamp with time zone,
+    user_id              uuid                     NOT NULL,
+    channel_id           uuid                     NOT NULL,
+    last_read_at         timestamp with time zone NOT NULL,
+    notification_enabled boolean                  NOT NULL,
+    UNIQUE (user_id, channel_id)
+);
+
+-- ALTER TABLE read_statuses
+--      ADD COLUMN notification_enabled boolean NOT NULL;
+````
+
+알림 여부를 수정할 수 있게 ReadStatusUpdateRequest를 수정하세요.
+
+알림이 활성화 되어 있는 경우
+
+알림이 활성화 되어 있지 않은 경우
+
+[x] 사용자의 권한(Role)이 변경된 경우 알림을 받을 수 있도록 리팩토링하세요.
+RoleUpdatedEvent를 정의하고 권한이 변경되면 이벤트를 발행하세요.
+
+[x] 알림 API를 구현하세요.
+NotificationDto를 정의하세요.
+
+* receiverId: 알림을 수신할 User의 id입니다.
+
+### 알림 조회
+
+* 엔드포인트: `GET /api/notifications`
+* 요청
+  헤더: 엑세스 토큰
+* 응답
+  200 List<NotifcationDto>
+  401 ErrorResponse
+
+### 알림 확인
+
+* 엔드포인트: `DELETE /api/notifications/{notificationId}`
+* 요청
+  헤더: 엑세스 토큰
+* 응답
+  204 Void
+* 인증되지 않은 요청: 401 ErrorResponse
+* 인가되지 않은 요청: 403 ErrorResponse
+* 요청자 본인의 알림에 대해서만 수행할 수 있습니다.
+* 알림이 없는 경우: 404 ErrorResponse
+
+[x] 알림이 필요한 이벤트가 발행되었을 때 알림을 생성하세요.
+이벤트를 처리할 리스너를 구현하세요.
+
+```java
+public class NotificationRequiredEventListener {
+
+  @TransactionalEventListener
+  public void on(MessageCreatedEvent event) {...}
+
+  @TransactionalEventListener
+  public void on(RoleUpdatedEvent event) {...}
+}
+```
+
+### on(MessageCreatedEvent)
+
+* 해당 채널의 알림 여부를 활성화한 ReadStatus를 조회합니다.
+* 해당 ReadStatus의 사용자들에게 알림을 생성합니다.
+
+#### 알림 예시
+
+* title: "보낸 사람 (#채널명)"
+* content: "메시지 내용"
+
+단, 해당 메시지를 보낸 사람은 알림 대상에서 제외합니다.
+
+### on(RoleUpdatedEvent)
+
+* 권한이 변경된 당사자에게 알림을 생성합니다.
+
+#### 알림 예시
+
+* title: "권한이 변경되었습니다."
+* content: "USER -> CHANNEL_MANAGER"
+
+--- 
+
