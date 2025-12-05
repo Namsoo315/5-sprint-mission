@@ -7,6 +7,14 @@ spring:
     multipart:
       max-file-size: 1MB
       max-request-size: 10MB
+  cache:
+    type: caffeine
+    caffeine:
+      spec: >
+        maximumSize=100,
+        expireAfterAccess=600s,
+        recordStats 
+        
 springdoc:
   api-docs:
     enabled: true
@@ -41,6 +49,7 @@ security:
     access-token-validity-seconds: 3600
     refresh-token-validity-seconds: 1204000 # 14일
 
+
 management:
   endpoints:
     web:
@@ -59,6 +68,11 @@ management:
   observations:
     annotations:
       enabled: true
+  metrics:
+    tags:
+      application: discodeit-cache
+    enable:
+      cache: true     # ?? ?? ??? ???
 
 info:
   app:
