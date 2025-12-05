@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.event.MessageCreatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
@@ -16,6 +17,7 @@ import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -42,6 +44,7 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+  private final ReadStatusRepository readStatusRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -74,9 +77,13 @@ public class BasicMessageService implements MessageService {
     log.info("생성할 메시지 내용='{}'", message.getContent());
     try {
       Message save = messageRepository.save(message);
+
+      // 채널에서 알림이 활성화된 ReadStatus 조회 (Listener쪽 안에 있으니 Transactional BeforeCommit이 먹히지 않음.)
+      List<ReadStatus> enabledUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
+          channel.getId());
       applicationEventPublisher.publishEvent(
           new MessageCreatedEvent(save.getAuthor().getId(), save.getChannel().getId(),
-              save.getContent()));
+              save.getContent(), enabledUsers));
       log.debug("메시지 생성 완료 아이디='{}'", save.getId());
       return messageMapper.toDto(save);
     } catch (Exception e) {
