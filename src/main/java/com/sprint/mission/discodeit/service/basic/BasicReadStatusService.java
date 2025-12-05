@@ -50,6 +50,7 @@ public class BasicReadStatusService implements ReadStatusService {
           .orElseGet(() -> {
             ReadStatus rs = ReadStatus.builder().user(user).channel(channel)
                 .lastReadAt(Instant.now())
+                .notificationEnabled(false)
                 .build();
             return readStatusRepository.save(rs);
           });
@@ -73,7 +74,7 @@ public class BasicReadStatusService implements ReadStatusService {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
         .orElseThrow(ReadStatusNotFoundException::new);
 
-    readStatus.updateLastReadAt(request.newLastReadAt());
+    readStatus.updateReadStatus(request);
 
     // 2. 상태정보 업데이트 후 Repository save(update)
     ReadStatus save = readStatusRepository.save(readStatus);

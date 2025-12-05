@@ -33,6 +33,14 @@ discodeit:
     email: admin@discodeit.com
     password: admin
 
+security:
+  jwt:
+    issuer: disocdeit
+    secret: your-jwt-secret-key-here-12345628219012345  # 32char 이상 길게 써줘야함!!
+    #    access-token-validity-seconds: 3600 # 1시간
+    access-token-validity-seconds: 3600
+    refresh-token-validity-seconds: 1204000 # 14일
+
 management:
   endpoints:
     web:
@@ -47,6 +55,9 @@ management:
     java:
       enabled: true
     os:
+      enabled: true
+  observations:
+    annotations:
       enabled: true
 
 info:
@@ -68,3 +79,8 @@ info:
   multipart:
     max-file-size: ${spring.servlet.multipart.max-file-size}
     max-request-size: ${spring.servlet.multipart.max-request-size}
+
+server:
+  servlet:
+    session:
+      timeout: 30m

@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.mapper.helper;
 
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
@@ -11,12 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserStatusHelper {
 
-  private final UserStatusRepository userStatusRepository;
+  private final JwtRegistry<UUID> jwtRegistry;
 
   @Named("getOnlineStatus")
   public Boolean getOnlineStatus(User user) {
-    return userStatusRepository.findByUserId(user.getId())
-        .map(UserStatus::isOnline)
-        .orElse(null);
+    return jwtRegistry.hasActiveJwtInformationByUserId(user.getId());
   }
 }

@@ -80,6 +80,7 @@ public class BasicChannelService implements ChannelService {
               .user(user)
               .channel(save)
               .lastReadAt(Instant.now())
+              .notificationEnabled(true)
               .build())
           .forEach(readStatusRepository::save);
 

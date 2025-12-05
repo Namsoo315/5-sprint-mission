@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
            MESSAGE_NOT_FOUND,
            BINARY_CONTENT_NOT_FOUND,
            READ_STATUS_NOT_FOUND,
-           USER_STATUS_NOT_FOUND -> HttpStatus.NOT_FOUND;
+           NOTIFICATION_NOT_FOUND -> HttpStatus.NOT_FOUND;
 
       // 409 Conflict
       case DUPLICATE_USER,
@@ -83,8 +83,7 @@ public class GlobalExceptionHandler {
       case INTERNAL_SERVER_ERROR,
            BINARY_CONTENT_SAVE_FAILED,
            BINARY_CONTENT_DELETE_FAILED,
-           READ_STATUS_SAVE_FAILED,
-           USER_STATUS_SAVE_FAILED -> HttpStatus.INTERNAL_SERVER_ERROR;
+           READ_STATUS_SAVE_FAILED -> HttpStatus.INTERNAL_SERVER_ERROR;
     };
   }
 
