@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,6 +93,7 @@ public class BasicUserService implements UserService {
     return userMapper.toDto(save);
   }
 
+  @Cacheable(value = "users", key = "'all'")
   @Override
   @Transactional(readOnly = true)
   public List<UserDTO> findAll() {
@@ -103,7 +105,7 @@ public class BasicUserService implements UserService {
   @Override
   @Transactional
   public UserDTO updateUser(UUID userId, UserUpdateRequest userUpdateRequest,
-      MultipartFile profile) throws IOException {
+      MultipartFile profile) {
     // 1. User 호환성 체크
     User user = userRepository.findById(userId).orElseThrow(() -> {
       log.warn("존재하지 않는 회원 업데이트 시도 userId={}", userId);
