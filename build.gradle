@@ -62,10 +62,14 @@ dependencies {
 
     // Resilience4j (Boot 3용)
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
-    
+
     // Retry (@Retryable)
     implementation 'org.springframework.retry:spring-retry'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // 캐시(Caffeine)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
 
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
