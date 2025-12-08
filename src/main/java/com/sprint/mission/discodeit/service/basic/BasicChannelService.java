@@ -23,6 +23,9 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,9 @@ public class BasicChannelService implements ChannelService {
   private final MessageRepository messageRepository;
   private final ChannelMapper channelMapper;
 
+  @Caching(evict = {
+      @CacheEvict(value = "channels", key = "'all'")
+  })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional
@@ -61,6 +67,9 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
+  @Caching(evict = {
+      @CacheEvict(value = "channels", key = "'all'")
+  })
   @Override
   @Transactional
   public ChannelDTO createPrivateChannel(PrivateChannelCreateRequest request) {
@@ -80,6 +89,7 @@ public class BasicChannelService implements ChannelService {
               .user(user)
               .channel(save)
               .lastReadAt(Instant.now())
+              .notificationEnabled(true)
               .build())
           .forEach(readStatusRepository::save);
 
@@ -91,6 +101,7 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
+  @Cacheable(value = "channels", key = "'all'")
   @Override
   @Transactional(readOnly = true)
   public List<ChannelDTO> findAllByUserId(UUID userId) {
@@ -110,6 +121,9 @@ public class BasicChannelService implements ChannelService {
         .toList();
   }
 
+  @Caching(evict = {
+      @CacheEvict(value = "channels", key = "'all'")
+  })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional
@@ -141,6 +155,9 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
+  @Caching(evict = {
+      @CacheEvict(value = "channels", key = "'all'")
+  })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
   @Transactional

@@ -23,7 +23,7 @@ ext {
 
 group = 'com.sprint.mission'
 version = '1.0.0-discodeit'
-version = '2.0-M9'
+version = '2.2-M11'
 
 java {
     toolchain {
@@ -59,6 +59,21 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'com.nimbusds:nimbus-jose-jwt:10.3'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // Resilience4j (Boot 3용)
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+
+    // Retry (@Retryable)
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // 캐시(Caffeine, Redis)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")

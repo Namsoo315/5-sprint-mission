@@ -2,13 +2,13 @@ package com.sprint.mission.discodeit.dto.data;
 
 import java.time.Instant;
 import java.util.UUID;
-import lombok.Builder;
 
-@Builder
-public record UserStatusDTO(
+public record NotificationDTO(
     UUID id,
-    UUID userId,
-    Instant lastActiveAt
+    Instant createdAt,
+    UUID receiverId,
+    String title,
+    String content
 ) {
 
 }

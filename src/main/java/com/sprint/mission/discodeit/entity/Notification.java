@@ -3,30 +3,29 @@ package com.sprint.mission.discodeit.entity;
 import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Table(name = "channels")
-@Entity
+@Table(name = "notifications")
 @Getter
-@SuperBuilder(toBuilder = true)
+@Entity
+@SuperBuilder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Channel extends BaseEntity {
+public class Notification extends BaseEntity {
 
-  @Column(length = 100)
-  private String name;
+  @Column(name = "receiver_id", nullable = false)
+  private UUID receiverId;
 
-  @Column(length = 500)
-  private String description;
+  @Column(nullable = false)
+  private String title;
 
-  @Enumerated(EnumType.STRING)
-  @Column(columnDefinition = "channel_type", nullable = false)
-  private ChannelType type;
+  @Column(name = "content", nullable = false)
+  private String content;
+
 }

@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -28,6 +30,9 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
   private final JwtTokenProvider jwtTokenProvider;
   private final JwtRegistry<UUID> jwtRegistry;
 
+  @Caching(evict = {
+      @CacheEvict(value = "users", key = "'all'")
+  })
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
@@ -39,7 +44,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenProvider.generateAccessToken(discodeitUserDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(discodeitUserDetails);
 
-        Cookie refreshTokenCookie = jwtTokenProvider.genereateRefreshTokenCookie(refreshToken);
+        Cookie refreshTokenCookie = jwtTokenProvider.generateRefreshTokenCookie(refreshToken);
         response.addCookie(refreshTokenCookie);
 
         JwtDTO jwtDTO = new JwtDTO(discodeitUserDetails.getUserDTO(), accessToken);

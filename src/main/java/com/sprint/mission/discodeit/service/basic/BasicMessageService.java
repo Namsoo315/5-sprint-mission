@@ -7,26 +7,30 @@ import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.event.MessageCreatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.InvalidMessageParameterException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.storage.BinaryContentStorage;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,13 +47,19 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+  private final ReadStatusRepository readStatusRepository;
 
-  private final BinaryContentRepository binaryContentRepository;
-  private final BinaryContentStorage binaryContentStorage;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
+  private final BinaryContentService binaryContentService;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
+  private final ReadStatusMapper readStatusMapper;
 
+
+  @Caching(evict = {
+      @CacheEvict(value = "notifications", key = "#messageCreateRequest.authorId()")
+  })
   @Override
   @Transactional
   public MessageDTO createMessage(MessageCreateRequest messageCreateRequest,
@@ -67,19 +77,7 @@ public class BasicMessageService implements MessageService {
         });
 
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
-    List<BinaryContent> attachmentIds = attachments == null ? List.of()
-        : attachments.stream().filter(file -> file != null && !file.isEmpty()).map(file -> {
-          BinaryContent content = BinaryContent.builder().fileName(file.getOriginalFilename())
-              .contentType(file.getContentType()).size(file.getSize()).build();
-
-          BinaryContent saved = binaryContentRepository.save(content);
-          try {
-            binaryContentStorage.save(saved.getId(), file.getBytes());
-          } catch (IOException e) {
-            throw BinaryContentSaveFailedException.withMessage(e.getMessage());
-          }
-          return saved;
-        }).toList();
+    List<BinaryContent> attachmentIds = binaryContentService.createBinaryContents(attachments);
 
     Message message = Message.builder().author(user).channel(channel)
         .content(messageCreateRequest.content()).attachments(attachmentIds).build();
@@ -87,6 +85,15 @@ public class BasicMessageService implements MessageService {
     log.info("생성할 메시지 내용='{}'", message.getContent());
     try {
       Message save = messageRepository.save(message);
+
+      // 채널에서 알림이 활성화된 ReadStatus 조회 (Listener쪽 안에 있으니 Transactional BeforeCommit이 먹히지 않음.)
+      List<ReadStatus> enabledUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
+          channel.getId());
+
+      applicationEventPublisher.publishEvent(
+          new MessageCreatedEvent(save.getAuthor().getId(), save.getChannel().getId(),
+              save.getAuthor().getUsername(),
+              save.getContent(), readStatusMapper.toDto(enabledUsers)));
       log.debug("메시지 생성 완료 아이디='{}'", save.getId());
       return messageMapper.toDto(save);
     } catch (Exception e) {
@@ -149,7 +156,7 @@ public class BasicMessageService implements MessageService {
     log.info("삭제할 메시지 내용='{}'", message.getContent());
 
     try {
-      binaryContentRepository.deleteAll(message.getAttachments());
+      binaryContentService.deleteAll(message.getAttachments());
       messageRepository.deleteById(messageId);
       log.debug("메시지 삭제 완료 아이디='{}'", message.getId());
     } catch (Exception e) {
