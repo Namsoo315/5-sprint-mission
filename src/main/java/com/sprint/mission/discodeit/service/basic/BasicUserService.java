@@ -17,13 +17,14 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
-import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -154,7 +155,7 @@ public class BasicUserService implements UserService {
     try {
       User save = userRepository.save(user);
       applicationEventPublisher.publishEvent(
-          new RoleUpdatedEvent(save, oldRole, save.getRole()));
+          new RoleUpdatedEvent(save.getId(), oldRole, save.getRole()));
       jwtRegistry.invalidateJwtInformationByUserId(save.getId());
       log.debug("업데이트된 유저의 아이디 = {}, 권한 ={}", save.getId(), save.getRole());
       return userMapper.toDto(save);
@@ -164,6 +165,9 @@ public class BasicUserService implements UserService {
     }
   }
 
+  @Caching(evict = {
+      @CacheEvict(value = "notifications", key = "#userId")
+  })
   @PreAuthorize("principal.userDTO.id == #userId or hasRole('ADMIN')")
   @Override
   @Transactional

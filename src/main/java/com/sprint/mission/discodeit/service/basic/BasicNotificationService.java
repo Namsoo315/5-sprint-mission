@@ -27,17 +27,17 @@ public class BasicNotificationService implements NotificationService {
   @Override
   @Transactional(readOnly = true)
   public List<NotificationDTO> findNotifications(UUID receiverId) {
-    List<Notification> notifications = notificationRepository.findAllByUser_Id(receiverId);
+    List<Notification> notifications = notificationRepository.findAllByReceiverId(receiverId);
 
     return notificationMapper.toDto(notifications);
   }
 
   @Caching(evict = {
-      @CacheEvict(value = "notifications", key = "#notificationId")
+      @CacheEvict(value = "notifications", key = "#receiverId")
   })
   @Override
   @Transactional
-  public void checkNotifications(UUID notificationId) {
+  public void checkNotifications(UUID notificationId, UUID receiverId) {
 
     notificationRepository.deleteById(notificationId);
   }
