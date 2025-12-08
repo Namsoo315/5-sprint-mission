@@ -8,5 +8,5 @@ public interface NotificationService {
 
   List<NotificationDTO> findNotifications(UUID receiverId);
 
-  void checkNotifications(UUID notificationId);
+  void checkNotifications(UUID notificationId, UUID receiverId);
 }

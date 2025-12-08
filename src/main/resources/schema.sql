@@ -42,12 +42,7 @@ CREATE TABLE notifications
     updated_at  TIMESTAMP WITH TIME ZONE,
     receiver_id UUID                     NOT NULL,
     title       VARCHAR(255)             NOT NULL,
-    content     TEXT                     NOT NULL,
-
-    CONSTRAINT fk_notifications_receiver
-        FOREIGN KEY (receiver_id)
-            REFERENCES users (id)
-            ON DELETE CASCADE
+    content     TEXT                     NOT NULL
 );
 
 -- channels 테이블

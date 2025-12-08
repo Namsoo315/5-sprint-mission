@@ -237,3 +237,212 @@ management:
 차이가 꽤 남
 <img width="996" height="893" alt="{4B2CEE99-F352-4B58-9B86-884FBFBAA7F8}" src="https://github.com/user-attachments/assets/75e7f327-cbca-47eb-89ad-24f61fef2156" />
 
+---
+## 캐시 적용하기
+
+### 1. Caffeine 캐시 환경 구성
+- `org.springframework.boot:spring-boot-starter-cache` 의존성을 추가하세요.
+- `com.github.ben-manes.caffeine:caffeine` 의존성을 추가하세요.
+- `application.yaml` 설정 또는 Bean을 통해 Caffeine 캐시를 설정하세요.
+
+```yaml
+spring:
+  cache:
+    type: caffeine
+    cache-names:
+      - users
+      - channels
+      - notifications
+    caffeine:
+      spec: >
+        maximumSize=100,
+        expireAfterAccess=600s,
+        recordStats
+````
+
+또는 Bean 방식 설정:
+
+```java
+@Bean
+public Caffeine<Object, Object> caffeineSpec() {
+    return Caffeine.newBuilder()
+        .maximumSize(100)
+        .expireAfterAccess(600, TimeUnit.SECONDS)
+        .recordStats();
+}
+```
+
+---
+
+### 2. @Cacheable 적용
+
+캐시가 필요한 메소드에 `@Cacheable` 어노테이션을 적용하세요.
+
+대상:
+
+* 사용자별 채널 목록 조회
+* 사용자별 알림 목록 조회
+* 사용자 목록 조회
+
+예시:
+
+```java
+@Cacheable(cacheNames = "channels", key = "#userId")
+public List<Channel> findChannelsByUser(Long userId) {
+    return channelRepository.findAllByUserId(userId);
+}
+
+@Cacheable(cacheNames = "notifications", key = "#userId")
+public List<Notification> findNotifications(Long userId) {
+    return notificationRepository.findAllByUserId(userId);
+}
+
+@Cacheable(cacheNames = "users")
+public List<User> findAllUsers() {
+    return userRepository.findAll();
+}
+```
+
+---
+
+### 3. 데이터 변경 시 캐시 무효화 또는 갱신
+
+`@CacheEvict`, `@CachePut`, `CacheManager` 등을 활용해 데이터 변경 시 캐시를 갱신 또는 무효화하세요.
+
+예시:
+
+```java
+@CacheEvict(cacheNames = "channels", key = "#userId")
+public void updateChannel(Long userId, Channel channel) {
+    channelRepository.save(channel);
+}
+
+@CacheEvict(cacheNames = "notifications", key = "#userId")
+public void addNotification(Long userId, Notification notification) {
+    notificationRepository.save(notification);
+}
+
+@CacheEvict(cacheNames = "users", allEntries = true)
+public void updateUser(User user) {
+    userRepository.save(user);
+}
+```
+
+대상별 무효화 기준:
+
+* 새로운 채널 추가/수정/삭제 → 채널 목록 캐시 무효화
+* 알림 추가/삭제 → 알림 목록 캐시 무효화
+* 사용자 추가/로그인/로그아웃 → 사용자 목록 캐시 무효화
+
+---
+
+### 4. 캐시 적용 전후 비교
+
+* 로그를 통해 SQL 실행 여부를 비교하세요.
+* 캐시 적용 전에는 동일 요청마다 쿼리가 실행됩니다.
+* 캐시 적용 후에는 최초 1회만 쿼리가 실행되고 이후 조회는 캐시에서 반환됩니다.
+
+---
+
+### 5. 캐시 통계 지표 확인 (Spring Actuator)
+
+Caffeine Spec에 `recordStats` 옵션을 추가하세요.
+
+```yaml
+spring:
+  cache:
+    caffeine:
+      spec: >
+        maximumSize=100,
+        expireAfterAccess=600s,
+        recordStats
+```
+
+Actuator를 통해 캐시 상태를 조회합니다.
+
+* `/actuator/caches`
+* `/actuator/metrics/cache.*`
+
+<img width="729" height="867" alt="{A277BD2E-FFA4-4EEA-B49C-ACC4B7927466}" src="https://github.com/user-attachments/assets/dab1491f-fd49-45e5-bf44-f834f48b14cb" />
+히트 처리도 잘 되고
+
+hibernate log로 뜨는 Query문들이 현저히 줄어드는것을 확인함.
+
+---
+
+# Spring Kafka 도입하기
+
+회원이 늘어나면서 알림 연산량이 급증해 알림 기능만 별도의 마이크로 서비스로 분리하기로 결정했다고 가정한다.
+이제 알림 서비스와 메인 서비스는 완전히 분리된 서버이므로 Spring Event만을 통해서 이벤트를 발행/소비할 수 없다.
+따라서 메인 서비스에서 Kafka를 통해 서버 외부로 이벤트를 발행하고, 알림 서비스에서는 서버 외부의 이벤트를 소비할 수 있도록 해야 한다.
+
+---
+
+## [x] Kafka 환경을 구성하세요.
+
+Docker Compose를 활용해 Kafka를 구동한다.
+
+### docker-compose-kafka.yaml
+
+```yaml
+# https://developer.confluent.io/confluent-tutorials/kafka-on-docker/#the-docker-compose-file
+services:
+  broker:
+    image: apache/kafka:latest
+    hostname: broker
+    container_name: broker
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+```
+
+### 실행 명령
+
+```bash
+docker compose -f docker-compose-kafka.yaml up -d
+```
+
+---
+
+## [x] Spring Kafka 의존성을 추가하고 application.yml에 Kafka 설정을 추가하세요.
+
+### build.gradle
+
+```groovy
+implementation 'org.springframework.kafka:spring-kafka'
+```
+
+### application.yml
+
+```yaml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: discodeit-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+```
+
+---
+
+## [x] Spring Event듯

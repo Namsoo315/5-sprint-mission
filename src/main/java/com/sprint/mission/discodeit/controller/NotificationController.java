@@ -49,8 +49,12 @@ public class NotificationController {
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
   @DeleteMapping("/{notificationId}")
-  public ResponseEntity<Void> checkNotification(@PathVariable UUID notificationId) {
-    notificationService.checkNotifications(notificationId);
+  public ResponseEntity<Void> checkNotification(@PathVariable UUID notificationId
+  ) {
+    DiscodeitUserDetails userDetails = (DiscodeitUserDetails) SecurityContextHolder.getContext()
+        .getAuthentication().getPrincipal();
+    
+    notificationService.checkNotifications(notificationId, userDetails.getUserDTO().id());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
   }
