@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.event;
 
-import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.dto.data.ReadStatusDTO;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,8 +8,9 @@ import java.util.UUID;
 public record MessageCreatedEvent(
     UUID userId,
     UUID channelId,
+    String username,
     String content,
-    List<ReadStatus> enabledUsers
+    List<ReadStatusDTO> enabledUsers
 ) {
 
 }
