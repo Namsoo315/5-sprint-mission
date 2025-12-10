@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,24 +37,6 @@ public class BasicBinaryContentService implements BinaryContentService {
       return null;
     }
 
-    return getBinaryContent(profile);
-  }
-
-  @Override
-  @Transactional
-  public List<BinaryContent> createBinaryContents(List<MultipartFile> profiles) {
-    if (profiles == null || profiles.isEmpty()) {
-      return List.of();
-    }
-
-    return profiles.stream()
-        .filter(file -> file != null && !file.isEmpty())
-        .map(this::getBinaryContent)
-        .toList();
-  }
-
-  @NotNull
-  private BinaryContent getBinaryContent(MultipartFile profile) {
     BinaryContent binaryContent = BinaryContent.builder()
         .fileName(profile.getOriginalFilename())
         .contentType(profile.getContentType())
@@ -70,13 +51,14 @@ public class BasicBinaryContentService implements BinaryContentService {
     } catch (Exception e) {
       throw BinaryContentSaveFailedException.withMessage(e.getMessage());
     }
+
     return saved;
   }
 
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)    // BinaryContentStatus 트랜잭션 전파 범위
-  public BinaryContentDTO updateStatus(UUID binaryContentId, BinaryContentStatus status) {
+  public void updateStatus(UUID binaryContentId, BinaryContentStatus status) {
     BinaryContent binaryContent = binaryContentRepository.findById(binaryContentId)
         .orElseThrow(BinaryContentNotFoundException::new);
 
@@ -85,7 +67,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     log.info("binaryContent status: {}", binaryContent.getStatus());
 
-    return binaryContentMapper.toDto(binaryContent);
+    binaryContentMapper.toDto(binaryContent);
   }
 
   @Override

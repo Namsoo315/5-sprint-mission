@@ -23,9 +23,13 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -77,7 +81,11 @@ public class BasicMessageService implements MessageService {
         });
 
     // 1-2. 선택적으로 첨부파일들을 같이 등록함. 있으면 등록 없으면 등록 안함.
-    List<BinaryContent> attachmentIds = binaryContentService.createBinaryContents(attachments);
+    List<BinaryContent> attachmentIds = Optional.ofNullable(attachments)
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(binaryContentService::createBinaryContent)
+        .collect(Collectors.toList());
 
     Message message = Message.builder().author(user).channel(channel)
         .content(messageCreateRequest.content()).attachments(attachmentIds).build();
@@ -86,14 +94,9 @@ public class BasicMessageService implements MessageService {
     try {
       Message save = messageRepository.save(message);
 
-      // 채널에서 알림이 활성화된 ReadStatus 조회 (Listener쪽 안에 있으니 Transactional BeforeCommit이 먹히지 않음.)
-      List<ReadStatus> enabledUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
-          channel.getId());
-
       applicationEventPublisher.publishEvent(
           new MessageCreatedEvent(save.getAuthor().getId(), save.getChannel().getId(),
-              save.getAuthor().getUsername(),
-              save.getContent(), readStatusMapper.toDto(enabledUsers)));
+              save.getContent()));
       log.debug("메시지 생성 완료 아이디='{}'", save.getId());
       return messageMapper.toDto(save);
     } catch (Exception e) {

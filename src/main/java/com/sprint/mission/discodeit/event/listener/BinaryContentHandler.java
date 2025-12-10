@@ -30,7 +30,8 @@ public class BinaryContentHandler {
   @Retryable(
       maxAttempts = 5,
       backoff = @Backoff(delay = 1000),
-      recover = "recover"
+      recover = "recover",
+      retryFor = {BinaryContentSaveFailedException.class}
   )
   @Async(value = "taskExecutor")
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
