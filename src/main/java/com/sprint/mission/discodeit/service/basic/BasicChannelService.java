@@ -42,7 +42,7 @@ public class BasicChannelService implements ChannelService {
   private final ChannelMapper channelMapper;
 
   @Caching(evict = {
-      @CacheEvict(value = "channels", key = "'all'")
+      @CacheEvict(value = "channels", allEntries = true)
   })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
@@ -68,7 +68,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = "channels", key = "'all'")
+      @CacheEvict(value = "channels", allEntries = true)
   })
   @Override
   @Transactional
@@ -101,7 +101,7 @@ public class BasicChannelService implements ChannelService {
     }
   }
 
-  @Cacheable(value = "channels", key = "'all'")
+  @Cacheable(value = "channels", key = "#userId")
   @Override
   @Transactional(readOnly = true)
   public List<ChannelDTO> findAllByUserId(UUID userId) {
@@ -122,7 +122,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = "channels", key = "'all'")
+      @CacheEvict(value = "channels", allEntries = true)
   })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
@@ -156,7 +156,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = "channels", key = "'all'")
+      @CacheEvict(value = "channels", allEntries = true)
   })
   @PreAuthorize("hasRole('CHANNEL_MANAGER')")
   @Override
