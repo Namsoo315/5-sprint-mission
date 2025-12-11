@@ -37,7 +37,7 @@ public class NotificationRequiredTopicListener {
 
       // 채널에서 알림이 활성화된 ReadStatus 조회 (Listener쪽 안에 있으니 Transactional BeforeCommit이 먹히지 않음.)
       List<ReadStatus> enabledUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
-          event.channelId());
+          event.message().channelId());
 
       enabledUsers.stream()
           // 2. 메시지 보낸 사람 제외
@@ -47,7 +47,7 @@ public class NotificationRequiredTopicListener {
             Notification notification = Notification.builder()
                 .receiverId(readStatus.getUser().getId())
                 .title("보낸 사람 (#" + readStatus.getUser().getUsername() + ")")
-                .content(event.content())
+                .content(event.message().content())
                 .build();
 
             notificationRepository.save(notification);

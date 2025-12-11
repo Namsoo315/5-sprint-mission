@@ -56,6 +56,7 @@ public class SecurityConfig {
             .requestMatchers(
                 "/",
                 "/index.html",
+                "/ws/**", // 임시
                 "/favicon.ico",
                 "/assets/**"
             ).permitAll()

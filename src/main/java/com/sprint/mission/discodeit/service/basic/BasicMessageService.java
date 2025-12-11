@@ -7,7 +7,6 @@ import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.event.MessageCreatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
@@ -15,15 +14,12 @@ import com.sprint.mission.discodeit.exception.message.InvalidMessageParameterExc
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
-import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -51,14 +47,12 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
-  private final ReadStatusRepository readStatusRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
   private final BinaryContentService binaryContentService;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
-  private final ReadStatusMapper readStatusMapper;
 
 
   @Caching(evict = {
@@ -93,12 +87,12 @@ public class BasicMessageService implements MessageService {
     log.info("생성할 메시지 내용='{}'", message.getContent());
     try {
       Message save = messageRepository.save(message);
+      MessageDTO result = messageMapper.toDto(save);
 
       applicationEventPublisher.publishEvent(
-          new MessageCreatedEvent(save.getAuthor().getId(), save.getChannel().getId(),
-              save.getContent()));
+          new MessageCreatedEvent(save.getAuthor().getId(), result));
       log.debug("메시지 생성 완료 아이디='{}'", save.getId());
-      return messageMapper.toDto(save);
+      return result;
     } catch (Exception e) {
       log.error("메시지 생성 실패 내용='{}'", message.getContent(), e);
       throw InvalidMessageParameterException.withMessage(e.getMessage());
