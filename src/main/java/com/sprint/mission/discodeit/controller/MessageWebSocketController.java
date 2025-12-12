@@ -21,19 +21,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 public class MessageWebSocketController {
 
   private final MessageService messageService;
-  private final SimpMessagingTemplate simpMessagingTemplate;
 
   @MessageMapping("/messages")
   public void sendMessage(
       @RequestPart MessageCreateRequest request,
       @AuthenticationPrincipal DiscodeitUserDetails userDetails) throws IOException {
-    // 일단 임시
-    MessageDTO message = messageService.createMessage(request, null);
 
-    String destination = "/sub/channels." + request.channelId() + ".messages";
-    simpMessagingTemplate.convertAndSend(destination, message);
-
-    log.info("메시지 전송 완료 {}", destination);
+    messageService.createMessage(request, null);
   }
 
 }
