@@ -26,8 +26,6 @@ public class WebSocketRequiredEventListener {
 
     String destination = "/sub/channels." + channelId + ".messages";
 
-    log.info("WebSocket push -> {}", destination);
-    
     simpMessagingTemplate.convertAndSend(destination, message);
   }
 }

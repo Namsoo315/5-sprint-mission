@@ -58,7 +58,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)    // BinaryContentStatus 트랜잭션 전파 범위
-  public void updateStatus(UUID binaryContentId, BinaryContentStatus status) {
+  public BinaryContentDTO updateStatus(UUID binaryContentId, BinaryContentStatus status) {
     BinaryContent binaryContent = binaryContentRepository.findById(binaryContentId)
         .orElseThrow(BinaryContentNotFoundException::new);
 
@@ -67,7 +67,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     log.info("binaryContent status: {}", binaryContent.getStatus());
 
-    binaryContentMapper.toDto(binaryContent);
+    return binaryContentMapper.toDto(binaryContent);
   }
 
   @Override
