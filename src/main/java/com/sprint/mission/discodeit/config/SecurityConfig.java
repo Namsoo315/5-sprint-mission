@@ -56,10 +56,11 @@ public class SecurityConfig {
             .requestMatchers(
                 "/",
                 "/index.html",
-                "/ws/**", // 임시
+                "/ws/**",
                 "/favicon.ico",
                 "/assets/**"
             ).permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/sse").permitAll()
             .requestMatchers("/api/auth/csrf-token").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
