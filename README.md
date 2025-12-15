@@ -193,3 +193,7 @@ Backend 컨테이너가 접근 가능한 다음의 인프라 컨테이너들을 
 
 각 컨테이너는 Docker Compose 네트워크를 통해 백엔드에서 통신할 수 있어야 합니다.
 외부 네트워크와 단절되어야 합니다.
+
+<img width="1608" height="775" alt="{588FEC85-B449-4790-8A9C-2F6EED28B91B}" src="https://github.com/user-attachments/assets/d35bcb6f-c771-4669-bd78-09b40e043ff9" />
+배포 완료 하였고 통신, l됨
+
