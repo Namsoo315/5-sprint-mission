@@ -10,11 +10,19 @@ public class WebConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/**")    //API 경로에 대해서만
-        .allowedOriginPatterns("http://localhost:8080")
-        .allowedMethods("GET", "POST", "PATCH", "DELETE") //PUT은 사용안해서 일단 뺌
-        .allowedHeaders("*")              // 필요 헤더인데 뭐가 필요한지 좀 더 고민.
+    registry.addMapping("/api/**")
+        .allowedOriginPatterns("http://localhost:3000")
+        .allowedMethods("GET", "POST", "PATCH", "DELETE")
+        .allowedHeaders("*")
         .allowCredentials(true)
         .maxAge(3600);
+
+    registry.addMapping("/ws/**")
+        .allowedOriginPatterns("http://localhost:3000")
+        .allowedMethods("GET", "POST", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
+
   }
 }

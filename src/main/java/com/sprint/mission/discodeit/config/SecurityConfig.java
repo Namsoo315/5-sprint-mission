@@ -53,19 +53,11 @@ public class SecurityConfig {
     http
         .authenticationProvider(daoAuthenticationProvider)
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/",
-                "/index.html",
-                "/ws/**",
-                "/favicon.ico",
-                "/assets/**"
-            ).permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/sse").permitAll()
+            .requestMatchers("/ws/**").permitAll()
             .requestMatchers("/api/auth/csrf-token").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
-            .requestMatchers("/swagger-ui/*", "/actuator", "/actuator/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/logout").permitAll()
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
