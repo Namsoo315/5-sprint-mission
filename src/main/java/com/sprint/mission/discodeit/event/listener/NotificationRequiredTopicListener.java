@@ -18,6 +18,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.NotificationService;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -41,11 +42,14 @@ public class NotificationRequiredTopicListener {
     try {
       MessageCreatedEvent event = objectMapper.readValue(kafkaEvent, MessageCreatedEvent.class);
 
-      List<ReadStatus> enabledUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
-          event.message().channelId());
+      UUID channelId = event.message().channelId();
+      UUID senderId = event.userId();
 
-      enabledUsers.stream()
-          .filter(readStatus -> !readStatus.getUser().getId().equals(event.userId()))
+      List<ReadStatus> channelUsers = readStatusRepository.findAllByChannelIdAndNotificationEnabledTrue(
+          channelId);
+
+      channelUsers.stream()
+          .filter(readStatus -> !readStatus.getUser().getId().equals(senderId))
           .forEach(readStatus -> {
 
             NotificationDTO notification = notificationService.createNotification(
@@ -54,10 +58,10 @@ public class NotificationRequiredTopicListener {
                     "보낸 사람 (#" + event.message().author().username() + ")",
                     event.message().content()
                 ));
-            log.info("메시지 전송 완료, message : {}", notification.content());
+            log.info("알림 전송 완료, message : {}", notification.content());
           });
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      log.error("MessageCreatedEvent 처리 실패: {}", kafkaEvent, e);
     }
   }
 
