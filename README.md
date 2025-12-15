@@ -88,3 +88,43 @@ public class WebSocketRequiredEventListener {
 * SimpMessagingTemplate 를 통해 적절한 엔드포인트로 메시지를 전송하세요.
 
 ---
+
+## 배포 아키텍처 구성하기
+
+- [x]  다음의 다이어그램에 부합하는 배포 아키텍처를 Docker Compose를 통해 구현하세요.
+
+---
+
+## Reverse Proxy
+
+Nginx 기반의 리버스 프록시 컨테이너를 구성하세요.
+
+역할 및 설정은 다음과 같습니다:
+
+* /api/*, /ws/* 요청은 Backend 컨테이너로 프록시 처리합니다.
+* 이 외의 모든 요청은 정적 리소스(프론트엔드 빌드 결과)를 서빙합니다.
+* 프론트엔드 정적 리소스는 Nginx 컨테이너 내부의 적절한 경로(/usr/share/nginx/html 등)에 복사하세요.
+* 외부에서 접근 가능한 유일한 컨테이너이며, 3000번 포트를 통해 접근할 수 있어야 합니다.
+
+---
+
+## Backend
+
+Spring Boot 기반의 백엔드 서버를 Docker 컨테이너로 구성하세요.
+
+* Reverse Proxy를 통해 /api/*, /ws/* 요청이 이 서버로 전달됩니다.
+
+---
+
+## DB, Memory DB, Message Broker
+
+Backend 컨테이너가 접근 가능한 다음의 인프라 컨테이너들을 구성하세요
+
+* DB: PostgreSQL
+* Memory DB: Redis
+* Message Broker: Kafka
+
+각 컨테이너는 Docker Compose 네트워크를 통해 백엔드에서 통신할 수 있어야 합니다.
+외부 네트워크와 단절되어야 합니다.
+
+---
