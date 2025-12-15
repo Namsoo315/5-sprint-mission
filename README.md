@@ -1,11 +1,6 @@
-아래는 **기존 내용을 그대로 유지하면서**, 체크박스만 **[ ] → [x]** 로 변경한 버전입니다.
-README에 바로 붙여 넣어도 됩니다.
-
----
-
 # 웹소켓 구현하기
 
-[x] **웹소켓 환경 구성**
+- [x] **웹소켓 환경 구성**
 spring-boot-starter-websocket 의존성을 추가하세요.
 
 ```gradle
@@ -46,7 +41,7 @@ public void registerStompEndpoints(StompEndpointRegistry registry) {...}
 
 ---
 
-[x] **메시지 송신**
+- [x] **메시지 송신**
 첨부파일이 없는 단순 텍스트 메시지인 경우 STOMP를 통해 메시지를 전송할 수 있도록 컨트롤러를 구현하세요.
 
 ```java
@@ -65,7 +60,7 @@ public class MessageWebSocketController {
 
 ---
 
-[x] **메시지 수신**
+- [x] **메시지 수신**
 
 * 클라이언트는 채널 입장 시 웹소켓으로
   **/sub/channels.{channelId}.messages** 를 구독해 메시지를 수신합니다.
@@ -87,6 +82,78 @@ public class WebSocketRequiredEventListener {
 * MessageCreatedEvent를 통해 새로운 메시지 생성 이벤트를 확인하세요.
 * SimpMessagingTemplate 를 통해 적절한 엔드포인트로 메시지를 전송하세요.
 
+---
+
+# SSE 구현하기
+
+- [x]  SSE 환경을 구성하세요.
+
+클라이언트에서 SSE 연결을 위한 엔드포인트를 구현하세요.
+
+GET /api/sse
+
+사용자별 SseEmitter 객체를 생성하고 메시지를 전송하는 컴포넌트를 구현하세요.
+
+```
+@Service
+public class SseService {
+
+  public SseEmitter connect(UUID receiverId, UUID lastEventId) {...}
+
+  public void send(Collection<UUID> receiverIds, String eventName, Object data) {...}
+
+  public void broadcast(String eventName, Object data) {...}
+
+  @Scheduled(fixedDelay = 1000 * 60 * 30)
+  public void cleanUp() {...}
+
+  private boolean ping(SseEmitter sseEmitter) {...}
+}
+```
+
+connect: SseEmitter 객체를 생성합니다.
+send, broadcast: SseEmitter 객체를 통해 이벤트를 전송합니다.
+cleanUp: 주기적으로 ping을 보내서 만료된 SseEmitter 객체를 삭제합니다.
+ping: 최초 연결 또는 만료 여부를 확인하기 위한 용도로 더미 이벤트를 보냅니다.
+
+SseEmitter 객체를 메모리에서 저장하는 컴포넌트를 구현하세요.
+
+```
+@Repository
+public class SseEmitterRepository {
+  private final ConcurrentMap<UUID, List<SseEmitter>> data = new ConcurrentHashMap<>();
+    ...
+}
+```
+
+ConcurrentMap: 스레드 세이프한 자료구조를 사용합니다.
+List<SseEmitter>: 사용자 당 N개의 연결을 허용할 수 있도록 합니다. (예: 다중 탭)
+
+이벤트 유실 복원을 위해 SSE 메시지를 저장하는 컴포넌트를 구현하세요.
+
+```
+@Repository
+public class SseMessageRepository {
+
+  private final ConcurrentLinkedDeque<UUID> eventIdQueue = new ConcurrentLinkedDeque<>();
+  private final Map<UUID, SseMessage> messages = new ConcurrentHashMap<>();
+    ...
+}
+```
+
+각 메시지 별로 고유한 ID를 부여합니다.
+클라이언트에서 LastEventId를 전송해 이벤트 유실 복원이 가능하도록 해야 합니다.
+
+- [x]  기존에 클라이언트에서 폴링 방식으로 주기적으로 요청하던 데이터를 SSE를 이용해 서버에서 실시간으로 전달하는 방식으로 리팩토링하세요.
+
+- [x] 새로운 알림 이벤트 전송
+      
+- [x] 파일 업로드 상태 변경 이벤트 전송
+      
+- [x] 채널 갱신 이벤트 전송
+
+- [x] 사용자 갱신 이벤트 전송
+      
 ---
 
 ## 배포 아키텍처 구성하기
@@ -126,5 +193,3 @@ Backend 컨테이너가 접근 가능한 다음의 인프라 컨테이너들을 
 
 각 컨테이너는 Docker Compose 네트워크를 통해 백엔드에서 통신할 수 있어야 합니다.
 외부 네트워크와 단절되어야 합니다.
-
----
