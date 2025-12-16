@@ -2,10 +2,14 @@ package com.sprint.mission.discodeit.event.listener;
 
 import com.sprint.mission.discodeit.dto.data.UserDTO;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.event.BinaryContentUpdatedEvent;
 import com.sprint.mission.discodeit.event.ChannelUpdatedEvent;
 import com.sprint.mission.discodeit.event.NotificationCreatedEvent;
+import com.sprint.mission.discodeit.event.UserLogInOutEvent;
 import com.sprint.mission.discodeit.event.UserUpdatedEvent;
+import com.sprint.mission.discodeit.mapper.UserMapper;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.sse.SseService;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +28,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class SseEventListener {
 
+  private final UserRepository userRepository;
+  private final UserMapper userMapper;
   private final SseService sseService;
 
   @Async(value = "taskExecutor")
@@ -38,7 +44,7 @@ public class SseEventListener {
     sseService.broadcast("binaryContents.updated", event.binaryContentDTO());
   }
 
-  @Async
+  @Async(value = "taskExecutor")
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onChannelUpdated(ChannelUpdatedEvent event) {
     if (event.channelDTO().type().equals(ChannelType.PUBLIC)) {
@@ -52,9 +58,17 @@ public class SseEventListener {
 
   }
 
-  @Async
+  @Async(value = "taskExecutor")
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onUserUpdated(UserUpdatedEvent event) {
     sseService.broadcast(event.name(), event.userDTO());
+  }
+
+  @Async(value = "taskExecutor")
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void onUserLogInOutEvent(UserLogInOutEvent event) {
+    User user = userRepository.findById(event.userId()).orElse(null);
+    UserDTO userDTO = userMapper.toDto(user);
+    sseService.broadcast("users.updated", userDTO);
   }
 }
