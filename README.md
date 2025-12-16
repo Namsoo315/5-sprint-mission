@@ -194,9 +194,6 @@ Backend 컨테이너가 접근 가능한 다음의 인프라 컨테이너들을 
 각 컨테이너는 Docker Compose 네트워크를 통해 백엔드에서 통신할 수 있어야 합니다.
 외부 네트워크와 단절되어야 합니다.
 
-<img width="1608" height="775" alt="{588FEC85-B449-4790-8A9C-2F6EED28B91B}" src="https://github.com/user-attachments/assets/d35bcb6f-c771-4669-bd78-09b40e043ff9" />
-배포 완료 하였고 통신, l됨
-
 ---
 
 ## 웹소켓 인증/인가 처리하기
@@ -264,11 +261,23 @@ authorizationChannelInterceptor()
             - IP Hash
             - Weight
     - $upstream_addr 변수를 활용해 실제 요청을 처리하는 서버의 IP를 헤더에 추가하고 브라우저 개발자 도구를 활용해 비교해보세요.
+<img width="949" height="297" alt="{E716DE8A-BCB2-4BCC-92C3-2768A924DC2F}" src="https://github.com/user-attachments/assets/c7ba7f7c-97ab-48d8-843b-37a5d503dfe1" />
+
+<img width="630" height="521" alt="{99E044EB-31F4-40C6-824B-ACD93F95CDE7}" src="https://github.com/user-attachments/assets/3bef2558-92f1-403c-b021-d46867e83526" />
+
 
 - [x]  분산환경에 따른 InMemoryJwtRegistry의 한계점을 식별하고 Redis를 활용해 리팩토링하세요.
 - 어떤 한계가 있는지 식별하고 PR에 남겨주세요.
+    - 분산환경에서는 하나의 백엔드 인스턴스가 아닌 여러개의 백엔드 인스턴스가 있기에 InmemoryRegistry를 사용하게 되면 인스턴스간 상태 공유가 불가능 해집니다.
+    각 서버가 자체 메모리를 사용하기에 JWT 상태가 서버마다 분리가 됩니다. 지금 구조는 서비스가 분리된것은 아니지만 Ngnix가 3개의 백엔드 서버에 
+    분산 처리가 되기 때문에 상태가 하나의 InmemoryCache에 남을 수 밖에 없다.
+    그래서 Redis를 사용하면 독립적인 인프라 컴포넌트로 되기 때문에 모든 인스턴스가 동일한 Cache 즉 동일한 JWT상태를 조회 및 갱신이 가능하게 된다.
+    
 - RedisJwtRegistry 구현체를 활용하세요.
 
-- [x] 분산환경에 따른 웹소켓과 SSE의 한계점을 식별하고 Kafka를 활용해 리팩토링하세요.
-    - 어떤 한계가 있는지 식별하고 PR에 남겨주세요.
+- [ ] 분산환경에 따른 웹소켓과 SSE의 한계점을 식별하고 Kafka를 활용해 리팩토링하세요.
+    - 웹소켓은 지속적인 연결을 유지하는 구조로, 분산 환경에서는 연결 상태가 특정 서버에 종속되어 서버 간 메시지 전달 및 확장에 한계가 있다.
+    - SSE 또한 특정 서버에서 발생한 이벤트를 다른 서버의 연결로 전달하기 어려워, 이벤트 누락 또는 중복이 발생할 수 있다.
+      
+     한계가 있는지 식별하고 PR에 남겨주세요.
     - 일반적인 카프카 이벤트와 다르게 각 서버 인스턴스마다 이벤트를 받을 수 있어야 합니다. 따라서 컨슈머 group id를 적절히 설정하세요.
