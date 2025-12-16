@@ -80,7 +80,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/discodeit?sessionTimezone=UTC
       SPRING_DATASOURCE_USERNAME: discodeit_user
