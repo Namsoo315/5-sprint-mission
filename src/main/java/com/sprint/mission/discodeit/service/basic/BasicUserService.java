@@ -124,7 +124,8 @@ public class BasicUserService implements UserService {
             : user.getUsername())
         .email(
             userUpdateRequest.newEmail() != null ? userUpdateRequest.newEmail() : user.getEmail())
-        .password(userUpdateRequest.newPassword() != null ? userUpdateRequest.newPassword()
+        .password(userUpdateRequest.newPassword() != null ? passwordEncoder.encode(
+            userUpdateRequest.newPassword())
             : user.getPassword())
         .build();
 
