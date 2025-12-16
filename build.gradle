@@ -85,6 +85,9 @@ dependencies {
     // websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    // Security Messaging (WebSocket 보안)
+    implementation 'org.springframework.security:spring-security-messaging'
+
     // aws
     implementation 'software.amazon.awssdk:s3:2.31.7'
 }
