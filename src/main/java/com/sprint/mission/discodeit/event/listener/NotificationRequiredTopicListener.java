@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.event.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.data.BinaryContentDTO;
 import com.sprint.mission.discodeit.dto.data.NotificationDTO;
@@ -74,8 +73,8 @@ public class NotificationRequiredTopicListener {
           "권한이 변경되었습니다.",
           event.oldRole() + " -> " + event.newRole()
       ));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      log.error("RoleUpdatedEvent 처리 실패: {}", kafkaEvent, e);
     }
   }
 
@@ -101,7 +100,8 @@ public class NotificationRequiredTopicListener {
       applicationEventPublisher.publishEvent(
           new BinaryContentUpdatedEvent(binaryContentDTO));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      log.error("S3UploadFailedEvent 처리 실패: {}", kafkaEvent, e);
     }
   }
+
 }
